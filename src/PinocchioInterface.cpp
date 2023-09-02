@@ -13,6 +13,7 @@
 
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
+
 using namespace pinocchio;
 
 #ifndef PINOCCHIO_MODEL_DIR
@@ -96,30 +97,6 @@ bool PinocchioInterface::IsInCollision(const Eigen::VectorXd& q) {
 Eigen::VectorXd PinocchioInterface::GetRandomConfiguration() {
   return randomConfiguration(model_);
 }
-
-#include <osgGA/GUIEventHandler>
-
-class MyKeyboardEventHandler : public osgGA::GUIEventHandler {
-public:
-  virtual bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter&) {
-    if (ea.getEventType() == osgGA::GUIEventAdapter::KEYDOWN) {
-      switch (ea.getKey()) {
-        case 'a':
-          std::cout << "A key pressed" << std::endl;
-          break;
-        case 'b':
-          break;
-        default:
-          break;
-      }
-    }
-    return false;
-  }
-};
-
-// std::vector<osg::Matrix> ConfigToFrames(const Eigen::VectorXd& q) {
-
-// }
 
 int PinocchioInterface::Visualize(const Eigen::VectorXd& q) {
   forwardKinematics(model_, data_, q);
@@ -266,9 +243,6 @@ int PinocchioInterface::Visualize(const Eigen::VectorXd& q) {
   // Create a window and render the scene graph.
   osgViewer::Viewer viewer;
   viewer.setSceneData(root);
-
-  MyKeyboardEventHandler* handler = new MyKeyboardEventHandler();
-  viewer.addEventHandler(handler);
 
   return viewer.run();
 }

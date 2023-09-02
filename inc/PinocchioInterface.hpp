@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 
 #include <pinocchio/parsers/urdf.hpp>
@@ -5,7 +6,6 @@
 #include <pinocchio/algorithm/kinematics.hpp>
 #include <pinocchio/algorithm/geometry.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
-
 
 class PinocchioInterface {
   public:
@@ -18,8 +18,6 @@ class PinocchioInterface {
     bool IsInCollision(const Eigen::VectorXd& q);
 
     int Visualize(const Eigen::VectorXd& q);
-
-    //std::vector<osg::Matrix> ConfigToFrames(const Eigen::VectorXd& q);
 
   private:
     pinocchio::Model model_;
