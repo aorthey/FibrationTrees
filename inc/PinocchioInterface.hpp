@@ -15,9 +15,16 @@ class PinocchioInterface {
 
     Eigen::VectorXd GetRandomConfiguration();
 
+    Eigen::VectorXd ComputeInverseKinematics(const Eigen::VectorXd& seed, const pinocchio::SE3& pose, const pinocchio::GeomIndex& index);
+
     bool IsInCollision(const Eigen::VectorXd& q);
 
-    int Visualize(const Eigen::VectorXd& q);
+    void UpdateModel(const Eigen::VectorXd& q);
+
+    const pinocchio::GeometryModel& GetCollisionModel() const;
+    const pinocchio::GeometryData& GetCollisionData() const;
+
+    std::vector<pinocchio::GeomIndex> GetContactLinkIndices();
 
   private:
     pinocchio::Model model_;
