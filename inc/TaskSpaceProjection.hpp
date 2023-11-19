@@ -15,7 +15,6 @@ public:
     {
         double *xBundleValues = xBundle->as<ompl::base::RealVectorStateSpace::StateType>()->values;
         Eigen::VectorXd config = Eigen::VectorXd::Zero(getBundle()->getDimension());
-        OMPL_INFORM("Bundle: ", getBundle()->getDimension());
         for(size_t dim = 0; dim < getBundle()->getDimension(); dim++)
         {
           config[dim] = xBundleValues[dim];
@@ -29,10 +28,6 @@ public:
         angles[0] = frame[0];
         angles[1] = frame[1];
         angles[2] = frame[2];
-
-        OMPL_INFORM("Project state");
-        getBundle()->printState(xBundle);
-        getBase()->printState(xBase);
     }
 
     void lift(const ompl::base::State *xBase, ompl::base::State *xBundle) const
@@ -64,22 +59,12 @@ public:
         {
           std::cout << "Found ik solution" << std::endl;
         }
-
-        // const auto& current_translation = skeleton_->getBodyNode(endeffector)->getTransform().translation();
-        // std::cout << "Old translation     : " << old_translation << std::endl;
-        // std::cout << "Desired Translation : " << translation << std::endl;
-        // std::cout << "New Translation     : " << current_translation << std::endl;
-        // std::cout << "IK Error            : " << (translation - current_translation).norm() << std::endl;
-
         auto result = ik->getPositions();
         double *angles = xBundle->as<ompl::base::RealVectorStateSpace::StateType>()->values;
         for (uint k = 0; k < getBundle()->getDimension(); k++)
         {
             angles[k] = result[k];
         }
-        OMPL_INFORM("Lift state");
-        getBase()->printState(xBase);
-        getBundle()->printState(xBundle);
     }
 
 private:

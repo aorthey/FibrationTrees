@@ -23,3 +23,16 @@ Eigen::Vector3d ProjectStateToEigenVector3d(const ompl::multilevel::ProjectionPt
   return v;
 }
 
+Eigen::VectorXd LiftStateToEigenVectorXd(const ompl::multilevel::ProjectionPtr& projection, const ompl::base::State* base_state) {
+  ompl::base::State *projected_state = projection->getBundle()->allocState();
+  projection->lift(base_state, projected_state);
+  double *state_R = projected_state->as<ompl::base::RealVectorStateSpace::StateType>()->values;
+  int N = projection->getBundle()->getDimension();
+  Eigen::VectorXd v = Eigen::VectorXd::Zero(N);
+  for(size_t k = 0; k < N; k++) {
+    v[k] = state_R[k];
+  }
+  projection->getBase()->freeState(projected_state);
+  return v;
+}
+
