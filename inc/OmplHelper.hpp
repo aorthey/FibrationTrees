@@ -1,6 +1,17 @@
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/State.h>
+#include <ompl/base/SpaceInformation.h>
 #include <ompl/multilevel/datastructures/Projection.h>
+
+Eigen::VectorXd StateToEigenVectorXd(const ompl::base::SpaceInformationPtr& si, const ompl::base::State* state) {
+  double *state_R = state->as<ompl::base::RealVectorStateSpace::StateType>()->values;
+  int N = si->getStateDimension();
+  Eigen::VectorXd v(N);
+  for(size_t k = 0; k < N; k++) {
+    v[k] = state_R[k];
+  }
+  return v;
+}
 
 Eigen::Vector3d ProjectStateToEigenVector3d(const ompl::multilevel::ProjectionPtr& projection, const ompl::base::State* state) {
   ompl::base::State *projected_state = projection->getBase()->allocState();
@@ -11,3 +22,4 @@ Eigen::Vector3d ProjectStateToEigenVector3d(const ompl::multilevel::ProjectionPt
   projection->getBase()->freeState(projected_state);
   return v;
 }
+

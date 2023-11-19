@@ -15,6 +15,184 @@
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 #include <ompl/multilevel/planners/factor/FactorRRT.h>
 
+void AddOmplPathToWorld(const ompl::base::PathPtr& path, const ompl::multilevel::ProjectionPtr& projection, const dart::simulation::WorldPtr& world) {
+  ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
+  OMPL_INFORM("Solution path has %d states", pgeo.getStateCount());
+  auto states = pgeo.getStates();
+  for(size_t k =1; k < states.size(); k++) {
+    auto s1 = states.at(k-1);
+    auto s2 = states.at(k);
+    auto v1 = ProjectStateToEigenVector3d(projection, s1);
+    auto v2 = ProjectStateToEigenVector3d(projection, s2);
+    world->addSimpleFrame(createSphereFrame(v1));
+    world->addSimpleFrame(createLineSegmentFrame(v1, v2));
+  }
+}
+
+class PathReplayWorldNode : public dart::gui::osg::RealTimeWorldNode
+{
+public:
+  PathReplayWorldNode(
+      dart::simulation::WorldPtr world,
+      const dart::dynamics::SkeletonPtr& manipulator,
+      const ompl::base::PathPtr& path)
+    : dart::gui::osg::RealTimeWorldNode(std::move(world)),
+      manipulator_(std::move(manipulator)), 
+      path_(path)
+  {
+    const auto& si = path_->getSpaceInformation();
+
+    ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
+    OMPL_INFORM("Solution path has %d states", pgeo.getStateCount());
+    auto states = pgeo.getStates();
+    lengths_.clear();
+    for(size_t k = 1; k < states.size(); k++) {
+      auto s1 = states.at(k-1);
+      auto s2 = states.at(k);
+      lengths_.push_back(si->distance(s1, s2));
+    }
+    current_index_ = 0;
+    current_position_ = 0.0f;
+    step_size_ = 0.005;
+
+    tmpState_ = si->allocState();
+    pause_ = true;
+    reverse_ = false;
+
+  }
+
+  ~PathReplayWorldNode() {
+    const auto& si = path_->getSpaceInformation();
+    si->freeState(tmpState_);
+  }
+
+  void customPreRefresh()
+  {
+  }
+
+  void customPostRefresh()
+  {
+  }
+
+  void customPreStep()
+  {
+    ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path_.get());
+    auto states = pgeo.getStates();
+
+    const auto& si = path_->getSpaceInformation();
+
+    if(current_index_ < 0) {
+      auto s1 = states.front();
+      Eigen::VectorXd config = StateToEigenVectorXd(si, s1);
+      manipulator_->setConfiguration(config);
+      return;
+    }
+    if(current_index_ > lengths_.size() - 1) {
+      auto s1 = states.back();
+      Eigen::VectorXd config = StateToEigenVectorXd(si, s1);
+      manipulator_->setConfiguration(config);
+      return;
+    }
+
+    const auto current_length = lengths_.at(current_index_);
+
+    auto s1 = states.at(current_index_);
+    auto s2 = states.at(current_index_+1);
+    si->getStateSpace()->interpolate(s1, s2, current_position_ / current_length, tmpState_);
+    Eigen::VectorXd config = StateToEigenVectorXd(si, tmpState_);
+    manipulator_->setConfiguration(config);
+  }
+
+  void customPostStep()
+  {
+    if(pause_) {
+      return;
+    }
+    if(current_index_ < 0) {
+      current_index_ = 0;
+      current_position_ = 0.0f;
+      reverse_ = false;
+    }
+    if(current_index_ > lengths_.size() - 1) {
+      reverse_ = true;
+      current_index_ = lengths_.size() - 1;
+      current_position_ = lengths_.at(current_index_);
+    }
+
+    const auto current_length = lengths_.at(current_index_);
+    //std::cout << "Current pos : " << current_index_ << "/" << lengths_.size() - 1 << ", " << current_position_ << "/" << current_length << std::endl;
+    current_position_ += (reverse_ ? -step_size_ : +step_size_);
+
+    if(current_position_ > current_length) {
+      current_position_ = 0.0f;
+      current_index_++;
+    }
+    if(current_position_ < 0.0f) {
+      current_index_--;
+      if(current_index_ >= 0) {
+        current_position_ = lengths_.at(current_index_);
+      }
+    }
+  }
+
+  void toggleStartStop() {
+    pause_ = !pause_;
+  }
+  void toggleReverse() {
+    reverse_ = !reverse_;
+  }
+
+protected:
+  dart::dynamics::SkeletonPtr manipulator_;
+  ompl::base::PathPtr path_;
+
+  std::vector<float> lengths_;
+  int current_index_;
+  float current_position_;
+  float step_size_;
+  ompl::base::State* tmpState_;
+
+  bool pause_;
+  bool reverse_;
+
+
+};
+
+//==============================================================================
+class PathReplayEventHandler : public osgGA::GUIEventHandler
+{
+public:
+  PathReplayEventHandler(PathReplayWorldNode* worldNode)
+  {
+    mWorldNode = worldNode;
+  }
+
+  bool handle(
+      const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter&) override
+  {
+    if (ea.getEventType() == osgGA::GUIEventAdapter::KEYDOWN)
+    {
+      if (ea.getKey() == 's')
+      {
+        std::cout << "Pressed s key" << std::endl;
+        mWorldNode->toggleStartStop();
+        return true;
+      }
+      if (ea.getKey() == 'r')
+      {
+        std::cout << "Pressed r key" << std::endl;
+        mWorldNode->toggleReverse();
+        return true;
+      }
+    }
+    return true;
+  }
+
+private:
+  PathReplayWorldNode* mWorldNode;
+};
+
+
 dart::dynamics::SkeletonPtr createFloor() {
     dart::dynamics::SkeletonPtr floor = dart::dynamics::Skeleton::create("floor");
     dart::dynamics::BodyNodePtr body =
@@ -182,22 +360,7 @@ int main(int argc, char* argv[]) {
   float timeout = 0.1;
   ompl::base::PlannerStatus status = planner->Planner::solve(timeout);
 
-  if (status == ompl::base::PlannerStatus::EXACT_SOLUTION ||
-      status == ompl::base::PlannerStatus::APPROXIMATE_SOLUTION)
-  {
-      ompl::base::PathPtr path = pdef->getSolutionPath();
-      ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
-      OMPL_INFORM("Solution path has %d states", pgeo.getStateCount());
-      auto states = pgeo.getStates();
-      for(size_t k =1; k < states.size(); k++) {
-        auto s1 = states.at(k-1);
-        auto s2 = states.at(k);
-        auto v1 = ProjectStateToEigenVector3d(projAB, s1);
-        auto v2 = ProjectStateToEigenVector3d(projAB, s2);
-        world->addSimpleFrame(createLineSegmentFrame(v1, v2));
-      }
-
-  }
+  //TODO: Add Collision Checker
 
   ////////////////////////////////////////////////////////////////////////////////
   ////Collision checking
@@ -205,13 +368,30 @@ int main(int argc, char* argv[]) {
   if(IsInCollision(manipulator, floor, world)) {
     std::cout << "Manipulator " << manipulator->getName() << " is in collision at config " << manipulator->getConfiguration().mPositions << std::endl;
   }
+
   ////////////////////////////////////////////////////////////////////////////////
   ////Visualize
   ////////////////////////////////////////////////////////////////////////////////
-  osg::ref_ptr<dart::gui::osg::WorldNode> node = new dart::gui::osg::RealTimeWorldNode(world);
+
+  if (!(status == ompl::base::PlannerStatus::EXACT_SOLUTION ||
+      status == ompl::base::PlannerStatus::APPROXIMATE_SOLUTION))
+  {
+      return 1;
+  }
 
   dart::gui::osg::Viewer viewer;
+
+  ompl::base::PathPtr path = pdef->getSolutionPath();
+  osg::ref_ptr<PathReplayWorldNode> node = new PathReplayWorldNode(world, manipulator, path);
+
   viewer.addWorldNode(node);
+
+  //TODO: Visualize endeffector path
+  AddOmplPathToWorld(path, projAB, world);
+
+  viewer.addInstructionText("Press space to play planned path.\n");
+  viewer.addEventHandler(new PathReplayEventHandler(node.get()));
+
   viewer.setUpViewInWindow(0, 0, 640, 480);
   viewer.simulate(true);
 
@@ -220,8 +400,9 @@ int main(int argc, char* argv[]) {
   const auto& up = ::osg::Vec3(0, 0, 1);
 
   viewer.getCameraManipulator()->setHomePosition(eye, center, up);
-  viewer.setCameraManipulator(viewer.getCameraManipulator()); //update
+  viewer.setCameraManipulator(viewer.getCameraManipulator()); //update 
+
   viewer.run();
 
-
+  return 0;
 }

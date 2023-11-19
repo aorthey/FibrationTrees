@@ -4,6 +4,8 @@
 #include "dart/math/Random.hpp"
 
 const Eigen::Vector3d kPathColor = Eigen::Vector3d(0.3, 0.8, 0.3);
+const float kPathSphereSize = 0.01;
+const float kPathLineWidth = 5.0;
 
 void PrintSkeletonInfo(const dart::dynamics::SkeletonPtr& skeleton) {
 
@@ -42,7 +44,7 @@ dart::dynamics::SimpleFramePtr createSphereFrame(const Eigen::Vector3d& position
   tf.translation() = position;
 
   auto target = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "target", tf);
-  dart::dynamics::ShapePtr ball(new dart::dynamics::SphereShape(0.025));
+  dart::dynamics::ShapePtr ball(new dart::dynamics::SphereShape(kPathSphereSize));
   target->setShape(ball);
   target->getVisualAspect(true)->setColor(kPathColor);
   return target;
@@ -53,7 +55,7 @@ dart::dynamics::SimpleFramePtr createLineSegmentFrame(const Eigen::Vector3d& s1,
   tf.translation() = s1;
 
   auto lineFrame = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "line", tf);
-  auto line = std::make_shared<dart::dynamics::LineSegmentShape>(Eigen::Vector3d::Zero(3), (s2-s1), 5.0);
+  auto line = std::make_shared<dart::dynamics::LineSegmentShape>(Eigen::Vector3d::Zero(3), (s2-s1), kPathLineWidth);
   lineFrame->setShape(line);
   lineFrame->createVisualAspect();
   lineFrame->getVisualAspect(true)->setColor(kPathColor);
