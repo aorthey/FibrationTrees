@@ -1,38 +1,28 @@
-#include <ompl/base/spaces/RealVectorStateSpace.h>
+#pragma once
+
 #include <ompl/base/State.h>
 #include <ompl/base/SpaceInformation.h>
+#include <ompl/geometric/PathGeometric.h>
 #include <ompl/multilevel/datastructures/Projection.h>
 
-Eigen::VectorXd StateToEigenVectorXd(const ompl::base::SpaceInformationPtr& si, const ompl::base::State* state) {
-  double *state_R = state->as<ompl::base::RealVectorStateSpace::StateType>()->values;
-  int N = si->getStateDimension();
-  Eigen::VectorXd v(N);
-  for(size_t k = 0; k < N; k++) {
-    v[k] = state_R[k];
-  }
-  return v;
-}
+////////////////////////////////////////////////////////////////////////////////
+// ompl::base::State* to Eigen::Vector
+////////////////////////////////////////////////////////////////////////////////
+Eigen::Vector3d StateToEigenVector3d(const ompl::base::State* state);
+Eigen::VectorXd StateToEigenVectorXd(const int Ndimension, const ompl::base::State* state);
+Eigen::VectorXd StateToEigenVectorXd(const ompl::base::SpaceInformation* si, const ompl::base::State* state);
+Eigen::VectorXd StateToEigenVectorXd(const ompl::base::SpaceInformationPtr& si, const ompl::base::State* state);
+Eigen::Vector3d ProjectStateToEigenVector3d(const ompl::multilevel::ProjectionPtr& projection, const ompl::base::State* state);
+Eigen::VectorXd LiftStateToEigenVectorXd(const ompl::multilevel::ProjectionPtr& projection, const ompl::base::State* base_state);
 
-Eigen::Vector3d ProjectStateToEigenVector3d(const ompl::multilevel::ProjectionPtr& projection, const ompl::base::State* state) {
-  ompl::base::State *projected_state = projection->getBase()->allocState();
-  projection->project(state, projected_state);
-  double *state_R3 = projected_state->as<ompl::base::RealVectorStateSpace::StateType>()->values;
-  Eigen::Vector3d v;
-  v << state_R3[0], state_R3[1], state_R3[2];
-  projection->getBase()->freeState(projected_state);
-  return v;
-}
+////////////////////////////////////////////////////////////////////////////////
+// Eigen::Vector to ompl::base::State*
+////////////////////////////////////////////////////////////////////////////////
+void EigenVector3dToState(const Eigen::Vector3d& v, ompl::base::State* state);
+void EigenVectorXdToState(const Eigen::VectorXd& v, ompl::base::State* state);
 
-Eigen::VectorXd LiftStateToEigenVectorXd(const ompl::multilevel::ProjectionPtr& projection, const ompl::base::State* base_state) {
-  ompl::base::State *projected_state = projection->getBundle()->allocState();
-  projection->lift(base_state, projected_state);
-  double *state_R = projected_state->as<ompl::base::RealVectorStateSpace::StateType>()->values;
-  int N = projection->getBundle()->getDimension();
-  Eigen::VectorXd v = Eigen::VectorXd::Zero(N);
-  for(size_t k = 0; k < N; k++) {
-    v[k] = state_R[k];
-  }
-  projection->getBase()->freeState(projected_state);
-  return v;
-}
-
+////////////////////////////////////////////////////////////////////////////////
+// Misc
+////////////////////////////////////////////////////////////////////////////////
+bool SampleValidLift(const ompl::multilevel::ProjectionPtr& projection, const ompl::base::SpaceInformationPtr& si, size_t max_iterations, const ompl::base::State *xBase, ompl::base::State *xBundle);
+ompl::geometric::PathGeometricPtr PathFromEigenVectors(const std::vector<Eigen::VectorXd>& configs, const ompl::base::SpaceInformationPtr& si);

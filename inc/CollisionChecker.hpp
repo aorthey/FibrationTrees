@@ -1,44 +1,58 @@
+#pragma once
+
 #include "dart/dart.hpp"
 
 #include "ompl/util/ClassForward.h"
+#include "ompl/base/StateValidityChecker.h"
 
 OMPL_CLASS_FORWARD(CollisionChecker);
+
+const Eigen::Vector3d kCollisionColor = Eigen::Vector3d(0.8, 0.3, 0.3);
 
 class CollisionChecker {
 
  public:
-  explicit CollisionChecker(const std::vector<dart::dynamics::SkeletonPtr>& group1, const std::vector<dart::dynamics::SkeletonPtr>& group2) :
-    group1_(group1),
-    group2_(group2) {
-  }
+  explicit CollisionChecker(const dart::simulation::WorldPtr& world, 
+      const std::vector<dart::dynamics::SkeletonPtr>& group1, 
+      const std::vector<dart::dynamics::SkeletonPtr>& group2);
 
-  bool IsInCollision(const dart::simulation::WorldPtr& world) {
-    auto collisionEngine
-        = world->getConstraintSolver()->getCollisionDetector();
+  bool IsInCollision(const dart::simulation::WorldPtr& world);
 
-    for(const auto& rhs : group1_) {
-      for(const auto& lhs : group2_) {
-        auto rhsGroup = collisionEngine->createCollisionGroup(rhs.get());
-        auto lhsGroup = collisionEngine->createCollisionGroup(lhs.get());
+  void ColorAllCollisionBodies(dart::simulation::WorldPtr world);
 
-        dart::collision::CollisionOption option;
-        dart::collision::CollisionResult result;
-        bool collision = collisionEngine->collide(rhsGroup.get(), lhsGroup.get(), option, &result);
+  void ResetColors(const dart::simulation::WorldPtr& world);
 
-        for(const auto& body_node : result.getCollidingBodyNodes()) {
-          std::cout << "Colliding body: " << body_node->getName() << std::endl;
-        }
-        if(collision) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-
-  private:
-    std::vector<dart::dynamics::SkeletonPtr> group1_;
-    std::vector<dart::dynamics::SkeletonPtr> group2_;
+ private:
+  std::vector<dart::dynamics::SkeletonPtr> group1_;
+  std::vector<dart::dynamics::SkeletonPtr> group2_;
+  std::unordered_map<const dart::dynamics::ShapeNode*, Eigen::Vector3d> default_colors_;
 };
 
+class DartWorldCollisionChecker : public ompl::base::StateValidityChecker
+{
+ public:
+    DartWorldCollisionChecker(const ompl::base::SpaceInformationPtr si, 
+        const dart::simulation::WorldPtr& world,
+        const dart::dynamics::SkeletonPtr& skeleton,
+        const CollisionCheckerPtr& collision_checker);
+
+    ~DartWorldCollisionChecker() = default;
+
+    bool isValid(const ompl::base::State *state) const override;
+
+ protected:
+  dart::dynamics::SkeletonPtr skeleton_;
+  dart::simulation::WorldPtr world_;
+  CollisionCheckerPtr collision_checker_;
+};
+
+class DartTransformCollisionChecker : public DartWorldCollisionChecker
+{
+ public:
+    DartTransformCollisionChecker(const ompl::base::SpaceInformationPtr si, 
+        const dart::simulation::WorldPtr& world,
+        const dart::dynamics::SkeletonPtr& skeleton,
+        const CollisionCheckerPtr& collision_checker);
+
+    bool isValid(const ompl::base::State *state) const override;
+};
