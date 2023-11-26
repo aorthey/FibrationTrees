@@ -1,6 +1,8 @@
 #include "KinematicsSolver.hpp"
 #include "Common.hpp"
 
+const float kStepSize = 0.001;
+
 KinematicsSolver::KinematicsSolver(const dart::dynamics::SkeletonPtr& skeleton) 
   : skeleton_(skeleton) 
 {
@@ -38,6 +40,18 @@ std::optional<Eigen::VectorXd> KinematicsSolver::solve_ik(const Eigen::Vector3d&
   return std::nullopt;
 }
 
+// std::optional<Eigen::VectorXd> KinematicsSolver::solve_seed_ik(const Eigen::Vector3d& frame, const Eigen::VectorXd& seed) {
+//   skeleton_->setConfiguration(config);
+//   auto ik = skeleton_->getBodyNode(endeffector_)->getOrCreateIK();
+//   ik->getTarget()->setTranslation(frame);
+
+//   if(ik->solveAndApply(seed, true))
+//   {
+//     return ik->getPositions();
+//   }
+//   return std::nullopt;
+// }
+
 std::optional<Eigen::Vector3d> KinematicsSolver::solve_fk(const Eigen::VectorXd& config) {
   auto lb = skeleton_->getPositionLowerLimits();
   auto ub = skeleton_->getPositionUpperLimits();
@@ -50,8 +64,6 @@ std::optional<Eigen::Vector3d> KinematicsSolver::solve_fk(const Eigen::VectorXd&
   skeleton_->setConfiguration(config);
   return skeleton_->getBodyNode(endeffector_)->getTransform().translation();
 }
-
-const float kStepSize = 0.001;
 
 //Avoid duplicates, add additional configs during joint flips
 void AddConfig(const Eigen::VectorXd& config, std::vector<Eigen::VectorXd>& configs) {
@@ -66,22 +78,18 @@ void AddConfig(const Eigen::VectorXd& config, std::vector<Eigen::VectorXd>& conf
     //avoid duplicates
     return;
   }
-  if(dist < M_PI) {
-    configs.push_back(config);
-    return;
-  }
 
-  const float kAddStepSize = 0.01;
+  const float kAddStepSize = 0.1;
   int num_steps = dist / kAddStepSize;
   for(size_t k =0; k<num_steps;k++) {
     configs.push_back(last_config + num_steps*kAddStepSize * (config - last_config));
   }
-  // for(float d = kAddStepSize; d < dist; d+=kAddStepSize) {
-  //   configs.push_back(last_config + d * (config - last_config));
-  // }
-  // if((config - configs.back()).norm() > Epsilon) {
-  //   configs.push_back(config);
-  // }
+  for(float d = kAddStepSize; d < dist; d+=kAddStepSize) {
+    configs.push_back(last_config + d * (config - last_config));
+  }
+  if((config - configs.back()).norm() > Epsilon) {
+    configs.push_back(config);
+  }
   configs.push_back(config);
 }
 
@@ -100,18 +108,9 @@ std::vector<Eigen::VectorXd> KinematicsSolver::solve_edge_ik(const Eigen::Vector
   if(!maybe_tcp_start.has_value()) {
     return configs;
   }
-  // configs.push_back(start_config);
-  AddConfig(start_config, configs);
 
   const auto tcp_start = maybe_tcp_start.value();
   auto direction = (tcp_target - tcp_start);
-
-  ////////////////////////////////////////////////////////////////////////////////
-  //generate force into direction of target
-  ////////////////////////////////////////////////////////////////////////////////
-
-  size_t non_improvement_iterations = 0;
-  const size_t kMaxNonImprovementIterations = 5;
 
   ////////////////////////////////////////////////////////////////////////////////
   //generate force into direction of target
@@ -121,12 +120,13 @@ std::vector<Eigen::VectorXd> KinematicsSolver::solve_edge_ik(const Eigen::Vector
   auto config_current(start_config);
   auto tcp_current(tcp_start);
 
+  // std::cout << "SOLVE EDGE IK with initial error " << current_error << std::endl;
   if(current_error <= Epsilon) {
     return configs;
   }
+  AddConfig(start_config, configs);
 
-  // std::cout << "SOLVE EDGE IK with initial error " << current_error << std::endl;
-  // std::cout << "Start frame " << tcp_start << std::endl;
+  // std::cout << "From config " << start_config << " (frame " << tcp_start << " to frame " << tcp_target << ")" << std::endl;
   Eigen::MatrixXd M = skeleton_->getMassMatrix();
   M.setIdentity();
   for(size_t k = 0; k<6; k++) {

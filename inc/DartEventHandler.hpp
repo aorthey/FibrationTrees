@@ -6,8 +6,10 @@
 #include <ompl/base/Path.h>
 
 #include "CollisionChecker.hpp"
+#include "EigenPath.hpp"
+#include "OmplPath.hpp"
 
-const float kStepSize = 0.01;
+const float kStepSize = 0.0001;
 class PathReplayWorldNode : public dart::gui::osg::RealTimeWorldNode
 {
 public:
@@ -27,17 +29,22 @@ public:
   void toggleReverse();
 
   float getCurrentPosition() const;
+  std::string getCurrentJointConfiguration() const;
 
 protected:
   dart::dynamics::SkeletonPtr manipulator_;
-  ompl::base::PathPtr path_;
   CollisionCheckerPtr collision_checker_;
 
-  std::vector<float> lengths_;
-  int current_index_;
-  float current_position_;
-  float step_size_;
-  ompl::base::State* tmpState_;
+  // EigenPathPtr eigen_path_;
+  OmplPathPtr ompl_path_;
+  float path_position_;
+
+  // ompl::base::PathPtr path_;
+  // std::vector<float> lengths_;
+  // int current_index_;
+  // float current_position_;
+  // float step_size_;
+  // ompl::base::State* tmpState_;
 
   bool pause_;
   bool reverse_;

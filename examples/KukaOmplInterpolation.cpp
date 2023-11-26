@@ -24,8 +24,10 @@ const Eigen::Vector3d kPathColorProjected = Eigen::Vector3d(0.8, 0.2, 0.8);
 
 bool AddFKPathToWorld(const ompl::base::PathPtr& path, const KinematicsSolverPtr& kinematics_solver, const dart::simulation::WorldPtr& world) {
   ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
-  //pgeo.interpolate(20);
   OMPL_INFORM("Solution path has %d states", pgeo.getStateCount());
+  pgeo.interpolate(1000);
+  OMPL_INFORM("Solution path has %d states", pgeo.getStateCount());
+  // exit(0);
   auto states = pgeo.getStates();
   int N = path->getSpaceInformation()->getStateDimension();
   for(size_t k =1; k < states.size(); k++) {
@@ -109,7 +111,7 @@ int main(int argc, char* argv[]) {
 
   dart::math::Random::setSeed(0);
   Eigen::Vector3d start_frame = {0.6, 0.1, 0.3};
-  Eigen::Vector3d goal_frame = {0.4, -0.5, 0.3};
+  Eigen::Vector3d goal_frame = {0.1, -0.5, 0.6};
   auto maybe_start_config = kinematics_solver->solve_ik(start_frame, 100);
   if(!maybe_start_config.has_value()) {
     std::cout << "Could not solve IK." <<std::endl;
@@ -121,7 +123,7 @@ int main(int argc, char* argv[]) {
   auto configs = kinematics_solver->solve_edge_ik(start_config, goal_frame);
   if(!kinematics_solver->lastSolveWasSuccessful()) {
     std::cout << "Found only " << configs.size() << std::endl;
-    return 1;
+    // return 1;
   }
   world->addSimpleFrame(createSphereFrame(start_frame));
   world->addSimpleFrame(createSphereFrame(goal_frame));

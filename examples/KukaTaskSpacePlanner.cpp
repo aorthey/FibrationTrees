@@ -24,6 +24,7 @@ const Eigen::Vector3d kPathColorProjected = Eigen::Vector3d(0.8, 0.2, 0.8);
 
 void AddOmplPathToWorld(const ompl::base::PathPtr& path, const ompl::multilevel::ProjectionPtr& projection, const dart::simulation::WorldPtr& world) {
   ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
+  pgeo.interpolate(100);
   OMPL_INFORM("Solution path has %d states", pgeo.getStateCount());
   auto states = pgeo.getStates();
   for(size_t k =1; k < states.size(); k++) {
@@ -56,6 +57,7 @@ int main(int argc, char* argv[]) {
   dart::dynamics::SkeletonPtr manipulator = createKukaSkeleton();
 
   PrintSkeletonInfo(manipulator);
+  dart::math::Random::setSeed(0);
 
   ////////////////////////////////////////////////////////////////////////////////
   ////World creation

@@ -1,5 +1,7 @@
 #include "TaskStateSpace.hpp"
 
+#include "EigenPath.hpp"
+
 TaskStateSpace::TaskStateSpace(unsigned int dim, const KinematicsSolverPtr& kinematics_solver) 
   : ompl::base::RealVectorStateSpace(dim), kinematics_solver_(kinematics_solver) {
 }
@@ -10,25 +12,30 @@ TaskStateSpace::~TaskStateSpace() {
 void TaskStateSpace::interpolate(const ompl::base::State *from, const ompl::base::State *to, double t, ompl::base::State *state) const {
   const auto from_vector = StateToEigenVectorXd(getDimension(), from);
   const auto to_vector = StateToEigenVectorXd(getDimension(), to);
-  const auto maybe_v1 = kinematics_solver_->solve_fk(from_vector);
+  // const auto maybe_v1 = kinematics_solver_->solve_fk(from_vector);
   const auto maybe_v2 = kinematics_solver_->solve_fk(to_vector);
 
-  if(!maybe_v1.has_value() || !maybe_v2.has_value()) {
+  if(!maybe_v2.has_value()) {
     copyState(state, from);
     return;
   }
-  const auto v1 = maybe_v1.value();
+  // const auto v1 = maybe_v1.value();
   const auto v2 = maybe_v2.value();
 
-  const auto vt = v1 + t*(v2 - v1);
+  // const auto vt = v1 + t*(v2 - v1);
 
-  const auto configs = kinematics_solver_->solve_edge_ik(from_vector, vt);
+  // std::cout << "SOVLE FROM " << from_vector << " TO " << to_vector << std::endl;
+  // std::cout << "SOVLE FROM " << v1 << " TO " << v2 << std::endl;
+  const auto configs = kinematics_solver_->solve_edge_ik(from_vector, v2);
+
   if(!kinematics_solver_->lastSolveWasSuccessful() || configs.empty()) {
+    // std::cout << "Empty towards " << v2 << std::endl;
     copyState(state, from);
     return;
   }
-
-  EigenVectorXdToState(configs.back(), state);
+  EigenPath path(configs);
+  // std::cout << "Found path at " << t << " :" << path.GetConfigAt(t) << " config size is " << configs.size() << std::endl;
+  EigenVectorXdToState(path.GetConfigAt(t), state);
 }
 
 bool TaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
@@ -48,12 +55,20 @@ bool TaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const om
     return false;
   }
 
-  for(const auto& config : configs) {
-    EigenVectorXdToState(config, tmpState_);
+  EigenPath path(configs);
+  for(float d = 0; d < 1.0; d+= 0.01) {
+    EigenVectorXdToState(path.GetConfigAt(d), tmpState_);
     if(!si_->isValid(tmpState_)) {
       return false;
     }
   }
+
+  // for(const auto& config : configs) {
+  //   EigenVectorXdToState(config, tmpState_);
+  //   if(!si_->isValid(tmpState_)) {
+  //     return false;
+  //   }
+  // }
   return true;
 }
 
@@ -77,14 +92,14 @@ bool TaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const om
   if(!kinematics_solver_->lastSolveWasSuccessful()) {
     return false;
   }
-
-  const float d_all = si_->distance(s1, s2);
-  for(const auto& config : configs) {
-    EigenVectorXdToState(config, tmpState_);
+  EigenPath path(configs);
+  float L = path.GetLength();
+  for(float d = 0; d < L; d+= 0.01) {
+    EigenVectorXdToState(path.GetConfigAt(d/L), tmpState_);
     if(!si_->isValid(tmpState_)) {
       if(lastValid.first != nullptr) {
         si_->copyState(lastValid.first, lastValidState_);
-        lastValid.second = si_->distance(s1, lastValidState_) / d_all;
+        lastValid.second = d/L;
       }
       si_->freeState(lastValidState_);
       return false;
@@ -92,4 +107,19 @@ bool TaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const om
     si_->copyState(lastValidState_, tmpState_);
   }
   return true;
+
+  // const float d_all = si_->distance(s1, s2);
+  // for(const auto& config : configs) {
+  //   EigenVectorXdToState(config, tmpState_);
+  //   if(!si_->isValid(tmpState_)) {
+  //     if(lastValid.first != nullptr) {
+  //       si_->copyState(lastValid.first, lastValidState_);
+  //       lastValid.second = si_->distance(s1, lastValidState_) / d_all;
+  //     }
+  //     si_->freeState(lastValidState_);
+  //     return false;
+  //   }
+  //   si_->copyState(lastValidState_, tmpState_);
+  // }
+  // return true;
 }
