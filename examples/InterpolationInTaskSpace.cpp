@@ -3,13 +3,13 @@
 #include <dart/utils/urdf/urdf.hpp>
 
 #include "TaskSpaceProjection.hpp"
-#include "TaskStateSpace.hpp"
+#include "TaskSpace.hpp"
 #include "Common.hpp"
 #include "CollisionChecker.hpp"
 #include "DartHelper.hpp"
-#include "DartEventHandler.hpp"
 #include "OmplHelper.hpp"
 #include "KinematicsSolver.hpp"
+#include "gui/Visualizer.hpp"
 #include "robots/KukaSkeleton.hpp"
 
 #include <ompl/base/SpaceInformation.h>
@@ -20,43 +20,7 @@
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 #include <ompl/multilevel/planners/factor/FibrationRRT.h>
 
-const Eigen::Vector3d kPathColorProjected = Eigen::Vector3d(0.8, 0.2, 0.8);
-
-bool AddFKPathToWorld(const ompl::base::PathPtr& path, const KinematicsSolverPtr& kinematics_solver, const dart::simulation::WorldPtr& world) {
-  ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
-  OMPL_INFORM("Solution path has %d states", pgeo.getStateCount());
-  pgeo.interpolate(1000);
-  OMPL_INFORM("Solution path has %d states", pgeo.getStateCount());
-  // exit(0);
-  auto states = pgeo.getStates();
-  int N = path->getSpaceInformation()->getStateDimension();
-  for(size_t k =1; k < states.size(); k++) {
-    auto s1 = states.at(k-1);
-    auto s2 = states.at(k);
-    auto v_s1 = StateToEigenVectorXd(N, s1);
-    auto v_s2 = StateToEigenVectorXd(N, s2);
-    auto maybe_v1 = kinematics_solver->solve_fk(v_s1);
-    if(!maybe_v1.has_value()) {
-      std::cout << "Could not solve FK." <<std::endl;
-      return false;
-    }
-    auto maybe_v2 = kinematics_solver->solve_fk(v_s2);
-    if(!maybe_v2.has_value()) {
-      std::cout << "Could not solve FK." <<std::endl;
-      return false;
-    }
-    auto v1 = maybe_v1.value();
-    auto v2 = maybe_v2.value();
-    world->addSimpleFrame(createLineSegmentFrame(v1, v2, kPathColorProjected));
-    std::cout << "Edge " << v1 << " to " << v2 << "(length: " << (v2-v1).norm() << std::endl;
-    auto length = (v2-v1).norm();
-    if(length < 0.003) {
-      world->addSimpleFrame(createSphereFrame(v2, 0.005, kPathColorProjected));
-    }
-
-  }
-  return true;
-}
+const float kTableHeight = 0.5;
 
 int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
@@ -74,6 +38,7 @@ int main(int argc, char* argv[]) {
   dart::simulation::WorldPtr world(new dart::simulation::World);
   world->addSkeleton(manipulator);
   world->addSkeleton(floor);
+  addCoordinateFrameToWorld(world);
   world->setGravity(Eigen::Vector3d::Zero());
 
   KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
@@ -89,7 +54,7 @@ int main(int argc, char* argv[]) {
   ////OMPL Setup
   ////////////////////////////////////////////////////////////////////////////////
   auto numDofs = manipulator->getNumDofs();
-  ompl::base::StateSpacePtr space(new TaskStateSpace(numDofs, kinematics_solver));
+  ompl::base::StateSpacePtr space(new TaskSpace(numDofs, kinematics_solver));
   ompl::base::RealVectorBounds bounds(numDofs);
   auto lb = manipulator->getPositionLowerLimits();
   auto ub = manipulator->getPositionUpperLimits();
@@ -100,7 +65,8 @@ int main(int argc, char* argv[]) {
   space->as<ompl::base::RealVectorStateSpace>()->setBounds(bounds);
 
   auto factor(std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space));
-  factor->setStateValidityChecker(std::make_shared<DartWorldCollisionChecker>(factor, world, manipulator, collision_checker));
+  auto validity_checker = std::make_shared<DartWorldCollisionChecker>(factor, world, manipulator, collision_checker);
+  factor->setStateValidityChecker(validity_checker);
   factor->setStateValidityCheckingResolution(0.001);
   ompl::base::MotionValidatorPtr motion_validator = std::make_shared<TaskSpaceMotionValidator>(factor, kinematics_solver);
   factor->setMotionValidator(motion_validator);
@@ -110,48 +76,77 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
 
   dart::math::Random::setSeed(0);
-  Eigen::Vector3d start_frame = {0.6, 0.1, 0.3};
-  Eigen::Vector3d goal_frame = {0.1, -0.5, 0.6};
-  auto maybe_start_config = kinematics_solver->solve_ik(start_frame, 100);
-  if(!maybe_start_config.has_value()) {
-    std::cout << "Could not solve IK." <<std::endl;
-    return 1;
+  Eigen::Vector3d start_frame = {0.6, 0.1, kTableHeight};
+  Eigen::Vector3d goal_frame = {0.7, +0.4, kTableHeight};
+  ompl::base::State* state = factor->allocState();
+
+  Eigen::VectorXd start_config;
+
+  const size_t max_repeats = 100;
+  size_t counter = 0;
+  while(true) {
+    if(counter++ > max_repeats) {
+      std::cout << "Could not find IK solution for " << start_frame << " after " << counter << " iterations." << std::endl;
+      return 1;
+    }
+    auto maybe_start_config = kinematics_solver->solve_ik(start_frame, 100);
+    if(!maybe_start_config.has_value()) {
+      continue;
+    }
+    start_config = maybe_start_config.value();
+    EigenVectorXdToState(start_config, state);
+    if(!validity_checker->isValid(state)) {
+      continue;
+    }
+    std::cout << start_config <<std::endl;
+    break;
   }
-  auto start_config = maybe_start_config.value();
-  std::cout << start_config <<std::endl;
 
   auto configs = kinematics_solver->solve_edge_ik(start_config, goal_frame);
   if(!kinematics_solver->lastSolveWasSuccessful()) {
     std::cout << "Found only " << configs.size() << std::endl;
-    // return 1;
   }
   world->addSimpleFrame(createSphereFrame(start_frame));
   world->addSimpleFrame(createSphereFrame(goal_frame));
 
   auto path = PathFromEigenVectors(configs, factor);
-  AddFKPathToWorld(path, kinematics_solver, world);
+
+  ompl::geometric::PathGeometric &p1 = *static_cast<ompl::geometric::PathGeometric *>(path.get());
+
+  ////////////////////////////////////////////////////////////////////////////////
+  //Create second interpolated path
+  ////////////////////////////////////////////////////////////////////////////////
+  Eigen::Vector3d mid_frame = {0.7, -0.1, kTableHeight};
+  configs = kinematics_solver->solve_edge_ik(configs.back(), mid_frame);
+  world->addSimpleFrame(createSphereFrame(mid_frame));
+
+  auto path2 = PathFromEigenVectors(configs, factor);
+
+  ompl::geometric::PathGeometric &p2 = *static_cast<ompl::geometric::PathGeometric *>(path2.get());
+  p1.append(p2);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  //Create second interpolated path
+  ////////////////////////////////////////////////////////////////////////////////
+  Eigen::Vector3d end_frame = {+0.6, -0.2, kTableHeight};
+  configs = kinematics_solver->solve_edge_ik(configs.back(), end_frame);
+  world->addSimpleFrame(createSphereFrame(end_frame));
+
+  auto path3 = PathFromEigenVectors(configs, factor);
+
+  ompl::geometric::PathGeometric &p3 = *static_cast<ompl::geometric::PathGeometric *>(path3.get());
+  p1.append(p3);
+  p1.interpolate(700);
+  p1.interpolate(800);
+  p1.interpolate(900);
+  p1.interpolate(1000);
 
   ////////////////////////////////////////////////////////////////////////////////
   ////Visualize
   ////////////////////////////////////////////////////////////////////////////////
-  dart::gui::osg::Viewer viewer;
-
-  osg::ref_ptr<PathReplayWorldNode> node = new PathReplayWorldNode(world, manipulator, path, collision_checker);
-  viewer.addInstructionText("Press [s] to play planned path.\n");
-  viewer.addEventHandler(new PathReplayEventHandler(node.get()));
-  viewer.addWorldNode(node);
-
-  viewer.setUpViewInWindow(0, 0, 640, 480);
-
-  const auto& eye = ::osg::Vec3(3, 0, 2);
-  const auto& center = ::osg::Vec3(0, 0, 0.5);
-  const auto& up = ::osg::Vec3(0, 0, 1);
-
-  viewer.getCameraManipulator()->setHomePosition(eye, center, up);
-  viewer.setCameraManipulator(viewer.getCameraManipulator()); //update 
-
-  viewer.simulate(true);
-  viewer.run();
+  Visualizer visualizer(world);
+  visualizer.AddPath(manipulator, path);
+  visualizer.Run();
 
   return 0;
 }

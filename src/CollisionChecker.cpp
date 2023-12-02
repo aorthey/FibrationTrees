@@ -1,5 +1,7 @@
 #include "CollisionChecker.hpp"
 
+#include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
+
 #include "OmplHelper.hpp"
 
 CollisionChecker::CollisionChecker(const dart::simulation::WorldPtr& world, 
@@ -130,5 +132,70 @@ bool DartTransformCollisionChecker::isValid(const ompl::base::State *state) cons
   for(const auto& body_node : skeleton_->getBodyNodes()) {
     body_node->getParentJoint()->setTransformFromParentBodyNode(tf);
   }
+  return !collision_checker_->IsInCollision(world_);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// DartMultiRobotCollisionChecker
+////////////////////////////////////////////////////////////////////////////////
+
+DartMultiRobotCollisionChecker::DartMultiRobotCollisionChecker(const ompl::base::SpaceInformationPtr& si, 
+  const dart::simulation::WorldPtr& world,
+  const std::unordered_map<std::string, dart::dynamics::SkeletonPtr>& skeletons,
+  const CollisionCheckerPtr& collision_checker) 
+  : ompl::base::StateValidityChecker(si), world_(world), skeletons_(skeletons), collision_checker_(collision_checker)
+{
+  auto children = static_pointer_cast<ompl::multilevel::FactoredSpaceInformation>(si)->getChildren();
+  for(const auto& child : children) {
+    tmp_skeleton_states_.insert({child->getName(), child->allocState()});
+  }
+}
+
+DartMultiRobotCollisionChecker::~DartMultiRobotCollisionChecker() {
+  auto children = static_cast<ompl::multilevel::FactoredSpaceInformation*>(si_)->getChildren();
+  for(const auto& child : children) {
+    const auto& name = child->getName();
+    auto it = tmp_skeleton_states_.find(name);
+    if(it == tmp_skeleton_states_.end()) {
+      continue;
+    }
+    child->freeState(it->second);
+  }
+}
+
+bool DartMultiRobotCollisionChecker::isValid(const ompl::base::State *state) const {
+
+  auto factor = static_cast<ompl::multilevel::FactoredSpaceInformation*>(si_);
+  factor->printState(state);
+  factor->project(state, tmp_skeleton_states_);
+
+  for(const auto& child : factor->getChildren()) {
+    const auto& name = child->getName();
+    const auto it = tmp_skeleton_states_.find(name);
+    if(it == tmp_skeleton_states_.end()) {
+      OMPL_ERROR("Could not find factor %s", name.c_str());
+      throw "FactorNotExisting";
+    }
+    const auto config = StateToEigenVectorXd(child, it->second);
+    const auto sit = skeletons_.find(name);
+    if(sit == skeletons_.end()) {
+      OMPL_ERROR("Could not find factor %s in skeletons.", name.c_str());
+      throw "FactorNotExisting";
+    }
+    const auto& skeleton = sit->second;
+    const auto lb = skeleton->getPositionLowerLimits();
+    const auto ub = skeleton->getPositionUpperLimits();
+    for(size_t k = 0; k < config.size(); k++) {
+      if(config[k] < lb[k] || config[k] > ub[k] || config[k] != config[k]) {
+        std::cout <<"Out of bounds: " << config[k] << " not in ["<< lb[k] << "," << ub[k] <<"]" << std::endl;
+
+        return false;
+      }
+    }
+    std::cout <<"Set config for " << name << " to "<< config << std::endl;
+    skeleton->setConfiguration(config);
+  }
+
+
   return !collision_checker_->IsInCollision(world_);
 }

@@ -7,12 +7,23 @@
 
 const Eigen::Vector3d kPathColor = Eigen::Vector3d(0.3, 0.8, 0.3);
 const float kPathSphereSize = 0.01;
-const float kPathLineWidth = 5.0;
+const float kDefaultLineWidth = 5.0;
 
 void PrintSkeletonInfo(const dart::dynamics::SkeletonPtr& skeleton);
 Eigen::VectorXd GetRandomPosition(const dart::dynamics::SkeletonPtr& skeleton);
-dart::dynamics::SimpleFramePtr createSphereFrame(const Eigen::Vector3d& position, const float radius = kPathSphereSize, const Eigen::Vector3d& color = kPathColor);
-dart::dynamics::SimpleFramePtr createLineSegmentFrame(const Eigen::Vector3d& s1, const Eigen::Vector3d& s2, const Eigen::Vector3d& color = kPathColor, float line_width= kPathLineWidth);
+
+////////////////////////////////////////////////////////////////////////////////
+// Skeleton constructors
+////////////////////////////////////////////////////////////////////////////////
 dart::dynamics::SkeletonPtr createFloor();
 dart::dynamics::SkeletonPtr createCylinder(const Eigen::Vector3d& position, float radius, float height);
 dart::dynamics::SkeletonPtr createSphere(const Eigen::Vector3d& position, float radius);
+dart::dynamics::SkeletonPtr createBox(const Eigen::Vector3d& position, float length_x, float length_y, float length_z);
+
+////////////////////////////////////////////////////////////////////////////////
+// Simple frame constructors
+////////////////////////////////////////////////////////////////////////////////
+dart::dynamics::SimpleFramePtr createSphereFrame(const Eigen::Vector3d& position, const float radius = kPathSphereSize, const Eigen::Vector3d& color = kPathColor);
+dart::dynamics::SimpleFramePtr createLineSegmentFrame(const Eigen::Vector3d& s1, const Eigen::Vector3d& s2, const Eigen::Vector3d& color = kPathColor, float line_width= kDefaultLineWidth);
+dart::dynamics::SimpleFramePtr createLineSegmentFrame(const std::vector<Eigen::Vector3d>& vertices, const Eigen::Vector3d& color = kPathColor, float line_width= kDefaultLineWidth);
+void addCoordinateFrameToWorld(const dart::simulation::WorldPtr& world);

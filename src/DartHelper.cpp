@@ -36,10 +36,12 @@ dart::dynamics::SimpleFramePtr createSphereFrame(const Eigen::Vector3d& position
   Eigen::Isometry3d tf = Eigen::Isometry3d::Identity();
   tf.translation() = position;
 
-  auto target = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "target", tf);
+  static int counter = 0;
+  auto target = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "target"+std::to_string(counter++), tf);
   dart::dynamics::ShapePtr ball(new dart::dynamics::SphereShape(radius));
   target->setShape(ball);
   target->getVisualAspect(true)->setColor(color);
+  target->getVisualAspect(true)->show();
   return target;
 }
 
@@ -50,6 +52,19 @@ dart::dynamics::SimpleFramePtr createLineSegmentFrame(const Eigen::Vector3d& s1,
   static int counter = 0;
   auto lineFrame = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "line"+std::to_string(counter++), tf);
   auto line = std::make_shared<dart::dynamics::LineSegmentShape>(Eigen::Vector3d::Zero(3), (s2-s1), line_width);
+  lineFrame->setShape(line);
+  lineFrame->createVisualAspect();
+  lineFrame->getVisualAspect(true)->setColor(color);
+  return lineFrame;
+}
+
+dart::dynamics::SimpleFramePtr createLineSegmentFrame(const std::vector<Eigen::Vector3d>& vertices, const Eigen::Vector3d& color, float line_width) {
+  static int counter = 0;
+  auto lineFrame = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "line"+std::to_string(counter++));
+  auto line = std::make_shared<dart::dynamics::LineSegmentShape>(line_width);
+  for(const auto& vertex : vertices) {
+    line->addVertex(vertex);
+  }
   lineFrame->setShape(line);
   lineFrame->createVisualAspect();
   lineFrame->getVisualAspect(true)->setColor(color);
@@ -75,6 +90,25 @@ dart::dynamics::SkeletonPtr createFloor() {
     body->setName("floor");
 
     return floor;
+}
+
+dart::dynamics::SkeletonPtr createBox(const Eigen::Vector3d& position, float length_x, float length_y, float length_z) {
+    static int counter = 0;
+    std::string name = "box_"+std::to_string(counter++);
+    dart::dynamics::SkeletonPtr box = dart::dynamics::Skeleton::create(name);
+    dart::dynamics::BodyNodePtr body =
+        box->createJointAndBodyNodePair<dart::dynamics::WeldJoint>(nullptr).second;
+
+    auto box_shape = std::make_shared<dart::dynamics::BoxShape>(
+        Eigen::Vector3d{length_x, length_y, length_z});
+    auto shapeNode = body->createShapeNodeWith<dart::dynamics::VisualAspect, dart::dynamics::CollisionAspect, dart::dynamics::DynamicsAspect>(box_shape);
+    shapeNode->getVisualAspect()->setColor(Eigen::Vector3d(0.9, 0.9, 0.9));
+
+    Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
+    tf.translation() = position;
+    body->getParentJoint()->setTransformFromParentBodyNode(tf);
+    body->setName(name);
+    return box;
 }
 
 dart::dynamics::SkeletonPtr createCylinder(const Eigen::Vector3d& position, float radius, float height) {
@@ -115,4 +149,41 @@ dart::dynamics::SkeletonPtr createSphere(const Eigen::Vector3d& position, float 
     body->setName(name);
 
     return sphere;
+}
+
+void addCoordinateFrameToWorld(const dart::simulation::WorldPtr& world) {
+  auto frame_x = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "coordinate_frame_x");
+  auto frame_y = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "coordinate_frame_y");
+  auto frame_z = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "coordinate_frame_z");
+
+  const float kCoordinateFrameLength = 0.5;
+  Eigen::Vector3d origin(-0.2, -0.2, 0.1);
+  Eigen::Vector3d ex(kCoordinateFrameLength, 0, 0);
+  Eigen::Vector3d ey(0, kCoordinateFrameLength, 0);
+  Eigen::Vector3d ez(0, 0, kCoordinateFrameLength);
+
+  Eigen::Vector3d color_ex(1, 0, 0);
+  Eigen::Vector3d color_ey(0, 1, 0);
+  Eigen::Vector3d color_ez(0, 0, 1);
+
+  const float line_width = 5.0;
+
+  auto line_x = std::make_shared<dart::dynamics::LineSegmentShape>(origin, (ex + origin), line_width);
+  frame_x->setShape(line_x);
+  frame_x->createVisualAspect();
+  frame_x->getVisualAspect(true)->setColor(color_ex);
+
+  auto line_y = std::make_shared<dart::dynamics::LineSegmentShape>(origin, (ey + origin), line_width);
+  frame_y->setShape(line_y);
+  frame_y->createVisualAspect();
+  frame_y->getVisualAspect(true)->setColor(color_ey);
+
+  auto line_z = std::make_shared<dart::dynamics::LineSegmentShape>(origin, (ez + origin), line_width);
+  frame_z->setShape(line_z);
+  frame_z->createVisualAspect();
+  frame_z->getVisualAspect(true)->setColor(color_ez);
+
+  world->addSimpleFrame(frame_x);
+  world->addSimpleFrame(frame_y);
+  world->addSimpleFrame(frame_z);
 }

@@ -1,8 +1,27 @@
 #include "EigenPath.hpp"
+
 #include <iostream>
 #include <numeric>
 
+#include "OmplHelper.hpp"
+
+EigenPath::EigenPath(const ompl::base::PathPtr& path) {
+  const auto& si = path->getSpaceInformation();
+  ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
+  auto states = pgeo.getStates();
+  configs_.clear();
+  for(size_t k = 0; k < states.size(); k++) {
+    Eigen::VectorXd config = StateToEigenVectorXd(si, states.at(k));
+    configs_.push_back(config);
+  }
+  InitLengthFromConfigs(configs_);
+}
+
 EigenPath::EigenPath(const std::vector<Eigen::VectorXd>& configs) : configs_(configs) {
+  InitLengthFromConfigs(configs_);
+}
+
+void EigenPath::InitLengthFromConfigs(const std::vector<Eigen::VectorXd>& configs) {
   for(size_t k = 1; k < configs.size(); k++) {
     auto v1 = configs.at(k-1);
     auto v2 = configs.at(k);

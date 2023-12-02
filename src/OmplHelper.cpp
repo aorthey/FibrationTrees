@@ -87,3 +87,37 @@ ompl::geometric::PathGeometricPtr PathFromEigenVectors(const std::vector<Eigen::
   }
   return std::make_shared<ompl::geometric::PathGeometric>(si, states);
 }
+
+const int kMaxResampleIteration = 1000;
+std::optional<ompl::base::State*> ComputeValidIKState(const ompl::base::SpaceInformationPtr& si, 
+    const ompl::multilevel::ProjectionPtr& projection, const Eigen::Vector3d& point) {
+
+  ompl::base::State *task_state = projection->getBase()->allocState();
+  double *angles = task_state->as<ompl::base::RealVectorStateSpace::StateType>()->values;
+  angles[0] = point[0];
+  angles[1] = point[1];
+  angles[2] = point[2];
+
+  ompl::base::State *state = si->allocState();
+  if(!SampleValidLift(projection, si, kMaxResampleIteration, task_state, state)) {
+    return std::nullopt;
+  }
+
+  return state;
+}
+
+std::optional<ompl::base::State*> ComputeValidTotalState(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const std::unordered_map<std::string, ompl::base::State*>& leaf_node_states) {
+  ompl::base::State *state = factor->allocState();
+
+  size_t samples = 0;
+  while(samples++ < kMaxResampleIteration) {
+    factor->liftLeafStates(leaf_node_states, state);
+    if(factor->isValid(state)) {
+      return state;
+    }
+  }
+
+  OMPL_ERROR("Invalid total state after %d iterations.", samples);
+  factor->freeState(state);
+  return std::nullopt;
+}

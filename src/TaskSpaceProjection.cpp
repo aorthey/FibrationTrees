@@ -14,14 +14,22 @@ ProjectionJointSpaceToR3::ProjectionJointSpaceToR3(const ompl::base::StateSpaceP
     }
 
     defaultBundleReturnState_ = getBundle()->allocState();
-    double *values = defaultBundleReturnState_->as<ompl::base::RealVectorStateSpace::StateType>()->values;
+    double *bundle_values = defaultBundleReturnState_->as<ompl::base::RealVectorStateSpace::StateType>()->values;
     for (uint k = 0; k < getBundle()->getDimension(); k++)
     {
-        values[k] = std::numeric_limits<double>::quiet_NaN();
+        bundle_values[k] = std::numeric_limits<double>::quiet_NaN();
+    }
+
+    defaultBaseReturnState_ = getBase()->allocState();
+    double *base_values = defaultBaseReturnState_->as<ompl::base::RealVectorStateSpace::StateType>()->values;
+    for (uint k = 0; k < getBase()->getDimension(); k++)
+    {
+        base_values[k] = std::numeric_limits<double>::quiet_NaN();
     }
 }
 ProjectionJointSpaceToR3::~ProjectionJointSpaceToR3() {
   getBundle()->freeState(defaultBundleReturnState_);
+  getBase()->freeState(defaultBaseReturnState_);
 }
 
 void ProjectionJointSpaceToR3::project(const ompl::base::State *xBundle, ompl::base::State *xBase) const

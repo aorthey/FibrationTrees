@@ -11,12 +11,15 @@ OmplPath::OmplPath(const ompl::base::PathPtr& path) : path_(path) {
   ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
   auto states = pgeo.getStates();
   const auto& si = path_->getSpaceInformation();
+  std::cout << "Path lengths: ";
   for(size_t k = 1; k < states.size(); k++) {
     auto s1 = states.at(k-1);
     auto s2 = states.at(k);
     auto d = si->distance(s1, s2);
     lengths_.push_back(d);
+    std::cout << d << ", ";
   }
+  std::cout << std::endl;
   total_length_ = std::accumulate(lengths_.begin(), lengths_.end(), 0.0f);
   tmpState_ = si->allocState();
 }
@@ -47,9 +50,9 @@ Eigen::VectorXd OmplPath::GetConfigAt(float s) {
   while(index < lengths_.size()) {
     current_position+= lengths_.at(index);
     if(position < current_position) {
-      auto s1 = states.at(index);
-      auto s2 = states.at(index+1);
-      auto s = (position - (current_position - lengths_.at(index))) / lengths_.at(index);
+      const auto s1 = states.at(index);
+      const auto s2 = states.at(index+1);
+      const auto s = (position - (current_position - lengths_.at(index))) / lengths_.at(index);
       si->getStateSpace()->interpolate(s1, s2, s, tmpState_);
       return StateToEigenVectorXd(si, tmpState_);
     }

@@ -56,3 +56,23 @@ class DartTransformCollisionChecker : public DartWorldCollisionChecker
 
     bool isValid(const ompl::base::State *state) const override;
 };
+
+class DartMultiRobotCollisionChecker : public ompl::base::StateValidityChecker
+{
+ public:
+    DartMultiRobotCollisionChecker(const ompl::base::SpaceInformationPtr& si, 
+      const dart::simulation::WorldPtr& world,
+      const std::unordered_map<std::string, dart::dynamics::SkeletonPtr>& manipulators,
+      const CollisionCheckerPtr& collision_checker);
+
+    ~DartMultiRobotCollisionChecker();
+
+    bool isValid(const ompl::base::State *state) const override;
+
+ protected:
+    std::unordered_map<std::string, dart::dynamics::SkeletonPtr> skeletons_;
+    std::unordered_map<std::string, ompl::base::State*> tmp_skeleton_states_;
+
+    dart::simulation::WorldPtr world_;
+    CollisionCheckerPtr collision_checker_;
+};

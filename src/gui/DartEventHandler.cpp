@@ -1,0 +1,237 @@
+#include "gui/DartEventHandler.hpp"
+
+#include <ompl/geometric/PathGeometric.h>
+
+#include "OmplHelper.hpp"
+#include "DartHelper.hpp"
+
+Eigen::Vector3d GetFK(const dart::dynamics::SkeletonPtr& skeleton, const Eigen::VectorXd& config) {
+  auto endeffector = skeleton->getBodyNode(skeleton->getNumBodyNodes() - 1)->getName();
+  skeleton->setConfiguration(config);
+  return skeleton->getBodyNode(endeffector)->getTransform().translation();
+}
+
+PathReplayWorldNode::PathReplayWorldNode(dart::simulation::WorldPtr world)
+  : dart::gui::osg::RealTimeWorldNode(std::move(world))
+{
+  pause_ = true;
+  reverse_ = false;
+  path_position_ = 0.0f;
+  CreateKeyPressEvents();
+}
+
+const float kVisualizationStepSize = 0.01;
+
+void PathReplayWorldNode::AddSolutionPath(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PathPtr& ompl_path) {
+  if(ompl_path == nullptr) {
+    return;
+  }
+  auto path = std::make_shared<PathType>(ompl_path);
+
+  const float L = path->GetLength();
+  std::vector<Eigen::Vector3d> vertices;
+  for(float d = 0; d < L+kVisualizationStepSize; d+=kVisualizationStepSize) {
+    const auto s1 = path->GetConfigAt(d / L);
+    const auto v1 = GetFK(skeleton, s1);
+    vertices.push_back(v1);
+  }
+  auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices, kPathColorProjected, kPathLineWidth));
+  solution_path_frames_.push_back(frame_line);
+
+  skeleton_and_path_.push_back(std::make_pair(skeleton, path));
+}
+
+void PathReplayWorldNode::AddPlannerData(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PlannerData& data) {
+  const auto& si = data.getSpaceInformation();
+  const auto Nvertices = data.numVertices();
+  unsigned int counter = 0;
+  auto sout = si->allocState();
+  for(unsigned int vindex = 0; vindex < Nvertices; vindex++) {
+    for(unsigned int windex = 0; windex < Nvertices; windex++) {
+      if(!data.edgeExists(vindex, windex)) {
+        continue;
+      }
+      counter++;
+      const auto s1 = data.getVertex(vindex).getState();
+      const auto s2 = data.getVertex(windex).getState();
+
+      const auto step_size = 0.01f;
+      const auto L = si->distance(s1, s2);
+
+      std::vector<Eigen::Vector3d> vertices;
+      for(double d = 0.0; d < L + step_size; d+= step_size) {
+        si->getStateSpace()->interpolate(s1, s2, d/L, sout);
+        const auto config = StateToEigenVectorXd(si, sout);
+        const auto v = GetFK(skeleton, config);
+        vertices.push_back(v);
+      }
+      auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices, kRoadmapColorVertex, kRoadmapLineWidth));
+      planner_data_frames_.push_back(frame_line);
+    }
+  }
+  OMPL_INFORM("Added %d vertices and %d(%d) edges.", Nvertices, counter, data.numEdges());
+  togglePlannerDataVisibility();
+}
+
+void PathReplayWorldNode::toggleSolutionPathVisibility() {
+  return toggleFrameVisibility(solution_path_frames_);
+}
+void PathReplayWorldNode::togglePlannerDataVisibility() {
+  return toggleFrameVisibility(planner_data_frames_);
+}
+
+void PathReplayWorldNode::toggleFrameVisibility(const std::vector<std::string>& frame_names) {
+  for(const auto& name : frame_names) {
+    auto frame = getWorld()->getSimpleFrame(name);
+    if(frame == nullptr) {
+      continue;
+    }
+    if(!frame->hasVisualAspect()) {
+      continue;
+    }
+    if(frame->getVisualAspect()->isHidden()) {
+      frame->getVisualAspect()->show();
+    } else {
+      frame->getVisualAspect()->hide();
+    }
+  }
+}
+
+PathReplayWorldNode::~PathReplayWorldNode() {
+}
+
+void PathReplayWorldNode::customPreRefresh()
+{
+}
+
+void PathReplayWorldNode::customPostRefresh()
+{
+}
+
+void PathReplayWorldNode::customPreStep()
+{
+  for(const auto& pair : skeleton_and_path_) {
+    const auto& manipulator = pair.first;
+    const auto& path = pair.second;
+    auto config = path->GetConfigAt(path_position_);
+    manipulator->setConfiguration(config);
+  }
+}
+
+void PathReplayWorldNode::customPostStep()
+{
+  if(skeleton_and_path_.empty()) {
+    return;
+  }
+  if(pause_) {
+    return;
+  }
+  path_position_ += (reverse_ ? -step_size_ : +step_size_);
+  if(path_position_ > 1.0f) {
+    reverse_ = true;
+    path_position_ = 1.0f;
+  }
+  if(path_position_ < 0.0f) {
+    reverse_ = false;
+    path_position_ = 0.0f;
+  }
+}
+
+void PathReplayWorldNode::toggleStartStop() {
+  pause_ = !pause_;
+}
+void PathReplayWorldNode::toggleReverse() {
+  reverse_ = !reverse_;
+}
+
+std::string PathReplayWorldNode::getCurrentJointConfiguration() const {
+  std::string s;
+  std::string delim = "";
+  for(const auto& pair : skeleton_and_path_) {
+    const auto& manipulator = pair.first;
+    const auto& path = pair.second;
+    auto config = path->GetConfigAt(path_position_);
+
+    for(size_t k =0; k < config.size();k++) {
+      s+= delim + std::to_string(config[k]);
+      delim = ", \n";
+    }
+  }
+  return s;
+}
+
+float PathReplayWorldNode::getCurrentPosition() const {
+  return path_position_;
+}
+
+bool PathReplayWorldNode::isRunning() const {
+  return !pause_;
+}
+
+void PathReplayWorldNode::setupViewer() {
+  if (mViewer)
+  {
+    for(const auto& event : events_) {
+      mViewer->addInstructionText(std::string{event.key} + ": " +event.description + ".\n");
+    }
+  }
+}
+
+std::vector<KeyPressEvent> PathReplayWorldNode::GetKeyPressEvents() const {
+  return events_;
+}
+
+void PathReplayWorldNode::CreateKeyPressEvents() {
+  events_.push_back({'s', "play/pause planned path", [&](){toggleStartStop();}});
+  events_.push_back({'r', "reverse execution direction", [&](){toggleReverse();}});
+  events_.push_back({'1', "show/hide solution path", [&](){toggleSolutionPathVisibility();}});
+  events_.push_back({'2', "show/hide planner data", [&](){togglePlannerDataVisibility();}});
+}
+
+PathReplayEventHandler::PathReplayEventHandler(PathReplayWorldNode* world_node)
+{
+  world_node_ = world_node;
+}
+
+bool PathReplayEventHandler::handle(
+    const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter&) 
+{
+  if (ea.getEventType() == osgGA::GUIEventAdapter::KEYDOWN)
+  {
+    auto events = world_node_->GetKeyPressEvents();
+    for(const auto& event : events) {
+      if(ea.getKey() != event.key) {
+        continue;
+      }
+      event.function();
+    }
+  }
+  return false;
+}
+
+TextWidget::TextWidget(
+      dart::gui::osg::ImGuiViewer* viewer, PathReplayWorldNode* world_node)
+    : viewer_(viewer),
+      world_node_(world_node)
+{
+}
+
+void TextWidget::render()
+{
+  ImGui::SetNextWindowPos(ImVec2(10, 20));
+  ImGui::SetNextWindowSize(ImVec2(240, 320));
+  ImGui::SetNextWindowBgAlpha(0.5f);
+  if (!ImGui::Begin(
+          "Tinkertoy Control",
+          nullptr,
+          ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar
+              | ImGuiWindowFlags_HorizontalScrollbar))
+  {
+    ImGui::End();
+    return;
+  }
+  ImGui::Text("%s", viewer_->getInstructions().c_str());
+  ImGui::Text("%.2f (%s)", world_node_->getCurrentPosition(), (world_node_->isRunning() ? "running" : "pause"));
+  ImGui::Text("Config : %s", world_node_->getCurrentJointConfiguration().c_str());
+  ImGui::End();
+}
