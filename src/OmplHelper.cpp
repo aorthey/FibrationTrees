@@ -88,7 +88,7 @@ ompl::geometric::PathGeometricPtr PathFromEigenVectors(const std::vector<Eigen::
   return std::make_shared<ompl::geometric::PathGeometric>(si, states);
 }
 
-const int kMaxResampleIteration = 1000;
+const int kMaxResampleIteration = 100;
 std::optional<ompl::base::State*> ComputeValidIKState(const ompl::base::SpaceInformationPtr& si, 
     const ompl::multilevel::ProjectionPtr& projection, const Eigen::Vector3d& point) {
 
@@ -112,6 +112,7 @@ std::optional<ompl::base::State*> ComputeValidTotalState(const ompl::multilevel:
   size_t samples = 0;
   while(samples++ < kMaxResampleIteration) {
     factor->liftLeafStates(leaf_node_states, state);
+    factor->printState(state);
     if(factor->isValid(state)) {
       return state;
     }

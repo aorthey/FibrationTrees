@@ -6,7 +6,9 @@
 #include <ompl/base/PlannerData.h>
 #include <ompl/base/Path.h>
 
-#include "gui/DartEventHandler.hpp"
+#include "gui/PathReplayWorldNode.hpp"
+
+const Eigen::Vector3d kDefaultPathColor = Eigen::Vector3d(0.8, 0.2, 0.8);
 
 class Visualizer {
   public:
@@ -14,8 +16,13 @@ class Visualizer {
 
     explicit Visualizer(const dart::simulation::WorldPtr& world);
 
+    void AddPath(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PathPtr& path, const Eigen::Vector3d& color = kDefaultPathColor);
     void AddPlanner(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PlannerPtr& planner);
-    void AddPath(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PathPtr& path);
+
+    void AddMultiRobotPath(const std::unordered_map<std::string, dart::dynamics::SkeletonPtr>& skeletons, const ompl::base::PathPtr& path);
+    void AddMultiRobotPlanner(const std::unordered_map<std::string, dart::dynamics::SkeletonPtr>& skeletons, const ompl::base::PlannerPtr& planner);
+
+    void SetCollisionChecker(const CollisionCheckerPtr& collision_checker);
 
     void Run();
 

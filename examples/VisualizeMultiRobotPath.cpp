@@ -45,7 +45,6 @@ int main(int argc, char* argv[]) {
   manipulator2->getRootBodyNode()->getParentJoint()->setTransformFromParentBodyNode(transform2);
 
   dart::math::Random::setSeed(0);
-
   ////////////////////////////////////////////////////////////////////////////////
   ////World creation
   ////////////////////////////////////////////////////////////////////////////////
@@ -70,6 +69,7 @@ int main(int argc, char* argv[]) {
   KinematicsSolverPtr kinematics_solver2 = std::make_shared<KinematicsSolver>(manipulator2);
 
   std::vector<dart::dynamics::SkeletonPtr> collision_environment = {floor, wall};
+  std::vector<dart::dynamics::SkeletonPtr> collision_robots = {manipulator1, manipulator2};
   std::vector<dart::dynamics::SkeletonPtr> collision_robot1 = {manipulator1};
   std::vector<dart::dynamics::SkeletonPtr> collision_robot2 = {manipulator2};
   std::vector<dart::dynamics::SkeletonPtr> collision_point1 = {point1};
@@ -77,26 +77,18 @@ int main(int argc, char* argv[]) {
 
   CollisionCheckerPtr collision_checker1 = std::make_shared<CollisionChecker>(world, collision_robot1, collision_environment);
   CollisionCheckerPtr collision_checker2 = std::make_shared<CollisionChecker>(world, collision_robot2, collision_environment);
+  CollisionCheckerPtr collision_checker_robots_environment = std::make_shared<CollisionChecker>(world, collision_robots, collision_environment);
   CollisionCheckerPtr collision_checker_robot_robot = std::make_shared<CollisionChecker>(world, collision_robot1, collision_robot2);
 
   CollisionCheckerPtr collision_checker_multi_robot = std::make_shared<MultiCollisionChecker>(world, 
-      std::vector<CollisionCheckerPtr>({collision_checker_robot_robot, collision_checker1, collision_checker2}));
+      std::vector<CollisionCheckerPtr>({collision_checker_robot_robot, collision_checker_robots_environment}));
 
   CollisionCheckerPtr collision_checker_point1 = std::make_shared<CollisionChecker>(world, collision_point1, collision_environment);
   CollisionCheckerPtr collision_checker_point2 = std::make_shared<CollisionChecker>(world, collision_point2, collision_environment);
 
   ////////////////////////////////////////////////////////////////////////////////
-  ////OMPL Setup
-  //
-  //       factor (both robots)
-  //         /            \
-  //       /                \
-  //   factor1 (robot1)   factor2 (robot2)
-  //      |                  |
-  //   child1 (point1)    child2 (point2)
-  //
+  ////Factor spaces
   ////////////////////////////////////////////////////////////////////////////////
-
   auto factor1 = MakeTaskSpaceInformation(manipulator1, world, kinematics_solver1, collision_checker1);
   auto factor2 = MakeTaskSpaceInformation(manipulator2, world, kinematics_solver2, collision_checker2);
 
@@ -109,8 +101,12 @@ int main(int argc, char* argv[]) {
   ompl::multilevel::ProjectionPtr projection_child2 = std::make_shared<ProjectionJointSpaceToR3>(factor2->getStateSpace(), child2->getStateSpace(), kinematics_solver2);
   factor2->addChild(child2, projection_child2);
 
+  std::vector<dart::dynamics::SkeletonPtr> robots = {manipulator1, manipulator2};
+  std::vector<KinematicsSolverPtr> kinematics_solvers = {kinematics_solver1, kinematics_solver2};
+
   const std::vector<ompl::base::StateSpacePtr> task_spaces = {factor1->getStateSpace(), factor2->getStateSpace()};
-  auto factor = MakeMultiRobotSpaceInformation(task_spaces);
+
+  auto factor = MakeMultiRobotSpaceInformation(task_spaces, robots, collision_checker_multi_robot);
 
   auto projection1 = std::make_shared<ompl::multilevel::Projection_Subspace>(factor->getStateSpace(), factor1->getStateSpace(), 0);
   auto projection2 = std::make_shared<ompl::multilevel::Projection_Subspace>(factor->getStateSpace(), factor2->getStateSpace(), 1);
@@ -124,7 +120,7 @@ int main(int argc, char* argv[]) {
   manipulators[factor2->getName()] = manipulator2;
 
   factor->setStateValidityChecker(std::make_shared<DartMultiRobotCollisionChecker>(factor, world, manipulators, collision_checker_multi_robot));
-  // factor->setStateValidityCheckingResolution(0.001);
+  factor->setStateValidityCheckingResolution(0.001);
 
   auto motion_validator = std::make_shared<TaskSpaceMultiRobotMotionValidator>(factor);
   factor->setMotionValidator(motion_validator);
@@ -191,7 +187,7 @@ int main(int argc, char* argv[]) {
   auto goal_region1 = std::make_shared<TaskSpaceGoal>(factor1, goal1, projection_child1);
   goal_region1->setThreshold(0.1);
   auto goal_region2 = std::make_shared<TaskSpaceGoal>(factor2, goal2, projection_child2);
-  goal_region2->setThreshold(0.2);
+  goal_region2->setThreshold(0.1);
 
   std::unordered_map<std::string, ompl::base::GoalSampleableRegionPtr> goal_regions;
   goal_regions[factor1->getName()] = goal_region1;
@@ -203,34 +199,21 @@ int main(int argc, char* argv[]) {
   pdef->setGoal(goal_region);
 
   //////////////////////////////////////////////////////////////////////////////////
-  //////Planning
+  //////Create path
   //////////////////////////////////////////////////////////////////////////////////
-  auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
-  planner->setProblemDefinition(pdef);
-  planner->setup();
-  planner->setRange(Inf);
 
-  float timeout = 100.0;
-  ompl::base::PlannerStatus status = planner->Planner::solve(timeout);
-
-  // if(pdef->hasApproximateSolution() ||
-  //    pdef->hasExactSolution())
-  // {
-  //   auto simplifier = std::make_shared<ompl::geometric::PathSimplifier>(factor, pdef->getGoal());
-  //   auto path = pdef->getSolutionPath();
-  //   ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
-  //   simplifier->simplifyMax(pgeo);
-  // }
+  auto path = std::make_shared<ompl::geometric::PathGeometric>(factor, start, goal);
+  ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
+  pgeo.interpolate(100);
 
   //////////////////////////////////////////////////////////////////////////////////
   //////Visualize
   //////////////////////////////////////////////////////////////////////////////////
   Visualizer visualizer(world);
 
+  visualizer.AddMultiRobotPath(manipulators, path);
   visualizer.SetCollisionChecker(collision_checker_multi_robot);
-
-  visualizer.AddMultiRobotPlanner(manipulators, planner);
-
   visualizer.Run();
   return 0;
 }
+

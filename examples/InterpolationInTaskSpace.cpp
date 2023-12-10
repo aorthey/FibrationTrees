@@ -2,8 +2,10 @@
 #include <dart/gui/osg/osg.hpp>
 #include <dart/utils/urdf/urdf.hpp>
 
-#include "TaskSpaceProjection.hpp"
 #include "TaskSpace.hpp"
+#include "TaskSpaceGoal.hpp"
+#include "TaskSpaceProjection.hpp"
+#include "TaskSpaceMotionValidator.hpp"
 #include "Common.hpp"
 #include "CollisionChecker.hpp"
 #include "DartHelper.hpp"
@@ -146,6 +148,7 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
   Visualizer visualizer(world);
   visualizer.AddPath(manipulator, path);
+  visualizer.SetCollisionChecker(collision_checker);
   visualizer.Run();
 
   return 0;

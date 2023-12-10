@@ -12,12 +12,14 @@ ENABLE_TESTING()
 ## DEBUG BUILD
 SET(CMAKE_CXX_FLAGS "-g")
 ################################################################################
-FIND_PACKAGE(ompl 1.6.0 REQUIRED)
-FIND_PACKAGE(DART 6.12.1 REQUIRED COMPONENTS gui-osg utils utils-urdf collision-bullet)
 INCLUDE(GoogleTest)
 
+FIND_PACKAGE(ompl 1.6.0 REQUIRED)
 SET(DEPENDENCIES ${DEPENDENCIES} OMPL)
+
+FIND_PACKAGE(DART 6.12.1 REQUIRED COMPONENTS gui-osg utils utils-urdf collision-bullet)
 SET(DEPENDENCIES ${DEPENDENCIES} DART)
+
 
 MESSAGE("INCLUDE_DIR: ${OMPL_INCLUDE_DIRS}")
 

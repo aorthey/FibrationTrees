@@ -1,8 +1,7 @@
-#include <dart/dart.hpp>
-
-#include "TaskSpaceProjection.hpp"
 #include "TaskSpace.hpp"
 #include "TaskSpaceGoal.hpp"
+#include "TaskSpaceProjection.hpp"
+#include "TaskSpaceMotionValidator.hpp"
 #include "Common.hpp"
 #include "CollisionChecker.hpp"
 #include "DartHelper.hpp"
@@ -11,6 +10,8 @@
 #include "MakeSpaceInformation.hpp"
 #include "gui/Visualizer.hpp"
 #include "robots/KukaSkeleton.hpp"
+
+#include <dart/dart.hpp>
 
 #include <ompl/base/SpaceInformation.h>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
@@ -26,20 +27,24 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
   dart::dynamics::SkeletonPtr manipulator = createKukaSkeleton();
 
+  std::vector<dart::dynamics::SkeletonPtr> obstacles;
+  obstacles.push_back(createFromURDF("/home/aorthey/git/FibrationTrees/data/objects/maze.urdf", Eigen::Vector3d(+0.55, +0.1, 0.85)));
+  obstacles.push_back(createFloor());
+  obstacles.push_back(createBox(Eigen::Vector3d(+0.5, +0.0, 0.75), 0.16, 2.0, 1.5));
+
   PrintSkeletonInfo(manipulator);
   dart::math::Random::setSeed(0);
 
   ////////////////////////////////////////////////////////////////////////////////
   ////World creation
   ////////////////////////////////////////////////////////////////////////////////
-  dart::dynamics::SkeletonPtr floor = createFloor();
-  dart::dynamics::SkeletonPtr wall = createBox(Eigen::Vector3d(+0.5, +0.0, 0.75), 0.16, 2.0, 1.5);
-  dart::dynamics::SkeletonPtr point = createSphere(Eigen::Vector3d(-0.5, -0.5, -0.5), 0.01);
+  dart::dynamics::SkeletonPtr point = createSphere(Eigen::Vector3d(0, 0, 0), 0.01);
 
   dart::simulation::WorldPtr world(new dart::simulation::World);
   world->addSkeleton(manipulator);
-  world->addSkeleton(floor);
-  world->addSkeleton(wall);
+  for(const auto& obstacle : obstacles) {
+    world->addSkeleton(obstacle);
+  }
   world->addSkeleton(point);
   world->setGravity(Eigen::Vector3d::Zero());
 
@@ -49,10 +54,9 @@ int main(int argc, char* argv[]) {
   ////Collision checking
   ////////////////////////////////////////////////////////////////////////////////
   std::vector<dart::dynamics::SkeletonPtr> g1 = {manipulator};
-  std::vector<dart::dynamics::SkeletonPtr> g2 = {floor, wall};
-  CollisionCheckerPtr collision_checker = std::make_shared<CollisionChecker>(world, g1, g2);
+  CollisionCheckerPtr collision_checker = std::make_shared<CollisionChecker>(world, g1, obstacles);
   std::vector<dart::dynamics::SkeletonPtr> g3 = {point};
-  CollisionCheckerPtr collision_checker_point_robot = std::make_shared<CollisionChecker>(world, g3, g2);
+  CollisionCheckerPtr collision_checker_point_robot = std::make_shared<CollisionChecker>(world, g3, obstacles);
 
   ////////////////////////////////////////////////////////////////////////////////
   ////OMPL Setup
@@ -69,59 +73,58 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
   ompl::base::State *task_start = child->allocState();
   ompl::base::State *task_goal = child->allocState();
-  double *start_angles = task_start->as<ompl::base::RealVectorStateSpace::StateType>()->values;
-  double *goal_angles = task_goal->as<ompl::base::RealVectorStateSpace::StateType>()->values;
 
-  start_angles[0] = +0.4;
-  start_angles[1] = +0.5;
-  start_angles[2] = 0.5;
-  goal_angles[0] = +0.4; //0.4, 0.5, 0.8
-  goal_angles[1] = -0.3;
-  goal_angles[2] = 0.9;
+  EigenVector3dToState({0.4, 0.35, 0.95}, task_start);
+  EigenVector3dToState({0.4, -0.25, 0.95}, task_goal);
 
   ompl::base::State *start = factor->allocState();
   ompl::base::State *goal = factor->allocState();
 
   const int kMaxResampleIteration = 100;
+  bool has_solution = true;
+
+  Visualizer visualizer(world);
+
   if(!SampleValidLift(projection, factor, kMaxResampleIteration, task_start, start)) {
     OMPL_ERROR("Could not find valid start state after %d samples.", kMaxResampleIteration);
-    return 1;
+    child->printState(task_start);
+    has_solution = false;
   }
-  std::cout << "Found start state." << std::endl;
-  factor->printState(start);
-  if(!SampleValidLift(projection, factor, kMaxResampleIteration, task_goal, goal)) {
+  if(has_solution && !SampleValidLift(projection, factor, kMaxResampleIteration, task_goal, goal)) {
     OMPL_ERROR("Could not find valid goal state after %d samples.", kMaxResampleIteration);
-    return 1;
+    child->printState(task_goal);
+    has_solution = false;
   }
-  std::cout << "Found goal state." << std::endl;
-  auto goal_region = std::make_shared<TaskSpaceGoal>(factor, goal, projection);
-  goal_region->setThreshold(0.1);
 
-  ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(factor);
-  pdef->addStartState(start);
-  pdef->setGoal(goal_region);
+  if(has_solution) {
+    auto goal_region = std::make_shared<TaskSpaceGoal>(factor, goal, projection);
+    goal_region->setThreshold(0.05);
 
-  auto start_vector = ProjectStateToEigenVector3d(projection, start);
-  auto goal_vector = StateToEigenVector3d(task_goal);
-  world->addSimpleFrame(createSphereFrame(start_vector, 0.02));
-  world->addSimpleFrame(createSphereFrame(goal_vector, 0.02));
+    ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(factor);
+    pdef->addStartState(start);
+    pdef->setGoal(goal_region);
 
-  ////////////////////////////////////////////////////////////////////////////////
-  ////Planning
-  ////////////////////////////////////////////////////////////////////////////////
-  auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
-  planner->setProblemDefinition(pdef);
-  planner->setup();
-  planner->setRange(Inf);
+    auto start_vector = ProjectStateToEigenVector3d(projection, start);
+    auto goal_vector = StateToEigenVector3d(task_goal);
+    world->addSimpleFrame(createSphereFrame(start_vector, 0.02));
+    world->addSimpleFrame(createSphereFrame(goal_vector, 0.02));
 
-  float timeout = 10.0;
-  ompl::base::PlannerStatus status = planner->Planner::solve(timeout);
+    ////////////////////////////////////////////////////////////////////////////////
+    ////Planning
+    ////////////////////////////////////////////////////////////////////////////////
+    auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
+    planner->setProblemDefinition(pdef);
+    planner->setup();
+
+    float timeout = 100.0;
+    ompl::base::PlannerStatus status = planner->Planner::solve(timeout);
+    visualizer.AddPlanner(manipulator, planner);
+    visualizer.AddPath(point, planner->getProblemDefinition(child->getName())->getSolutionPath(), Eigen::Vector3d(1, 1, 0));
+  }
 
   ////////////////////////////////////////////////////////////////////////////////
   ////Visualize
   ////////////////////////////////////////////////////////////////////////////////
-  Visualizer visualizer(world);
-  visualizer.AddPlanner(manipulator, planner);
   visualizer.Run();
   return 0;
 }

@@ -11,11 +11,13 @@
 #include "OmplPath.hpp"
 
 const Eigen::Vector3d kRoadmapColorVertex = Eigen::Vector3d(0.2, 0.8, 0.2);
-const Eigen::Vector3d kPathColorProjected = Eigen::Vector3d(0.8, 0.2, 0.8);
 const float kRoadmapLineWidth = 3.0;
 const float kPathLineWidth = 5.0;
 
 const float kStepSize = 0.001;
+
+const float kMaxStepSize = 0.1;
+const float kMinStepSize = 0.00001;
 typedef EigenPath PathType;
 
 struct KeyPressEvent {
@@ -39,21 +41,28 @@ public:
   void toggleStartStop();
   void toggleReverse();
 
+  void decreaseSpeed();
+  void increaseSpeed();
+
   void togglePlannerDataVisibility();
   void toggleSolutionPathVisibility();
   void toggleFrameVisibility(const std::vector<std::string>& frame_names);
 
   float getCurrentPosition() const;
+  float getStepSize() const;
   bool isRunning() const;
   std::string getCurrentJointConfiguration() const;
 
   void AddPlannerData (const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PlannerData& data);
-  void AddSolutionPath(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PathPtr& path);
+  void AddPath(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PathPtr& path, const Eigen::Vector3d& color);
+
+  void SetCollisionChecker(const CollisionCheckerPtr& collision_checker);
 
   void setupViewer() override;
 
   std::vector<KeyPressEvent> GetKeyPressEvents() const;
   void CreateKeyPressEvents();
+  void AddMultiRobotPlannerData(const std::unordered_map<std::string, dart::dynamics::SkeletonPtr>& skeletons, const ompl::base::PlannerData& data);
 
 protected:
   std::vector<KeyPressEvent> events_;
@@ -62,6 +71,7 @@ protected:
   std::vector<std::string> solution_path_frames_;
 
   std::vector<std::pair<dart::dynamics::SkeletonPtr, std::shared_ptr<PathType>>> skeleton_and_path_;
+  CollisionCheckerPtr collision_checker_;
 
   float step_size_{kStepSize};
   float path_position_;

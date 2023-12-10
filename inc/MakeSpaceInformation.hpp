@@ -47,46 +47,24 @@ ompl::multilevel::FactoredSpaceInformationPtr Make3DPointSpaceInformation(
   ompl::base::RealVectorBounds boundsWorkspace(numDofsPoint);
   boundsWorkspace.setLow(0, +0.38);
   boundsWorkspace.setHigh(0, +0.42);
-  boundsWorkspace.setLow(1, -2);
-  boundsWorkspace.setHigh(1, +2);
+  boundsWorkspace.setLow(1, -5);
+  boundsWorkspace.setHigh(1, +5);
   boundsWorkspace.setLow(2, 0.0);
   boundsWorkspace.setHigh(2, 2.0);
   spaceR3->as<ompl::base::RealVectorStateSpace>()->setBounds(boundsWorkspace);
 
   auto child(std::make_shared<ompl::multilevel::FactoredSpaceInformation>(spaceR3));
-  child->setStateValidityChecker(std::make_shared<DartTransformCollisionChecker>(child, world, point, collision_checker));
+  child->setStateValidityChecker(std::make_shared<DartWorldCollisionChecker>(child, world, point, collision_checker));
   child->setStateValidityCheckingResolution(0.001);
   return child;
 }
 
 ompl::multilevel::FactoredSpaceInformationPtr MakeMultiRobotSpaceInformation(
-  const dart::simulation::WorldPtr& world,
-  const std::vector<dart::dynamics::SkeletonPtr>& manipulators,
-  const std::vector<KinematicsSolverPtr>& kinematics_solvers,
-  const CollisionCheckerPtr& collision_checkers) {
-
-  auto numDofs = std::accumulate(manipulators.begin(), manipulators.end(), 0u, 
-      [](size_t dofs, const auto& manipulator){
-        return dofs + manipulator->getNumDofs();
-      });
-
-  ompl::base::StateSpacePtr space(new ompl::base::RealVectorStateSpace(numDofs));
-  ompl::base::RealVectorBounds bounds(numDofs);
-
-  auto dofs = 0u;
-  for(const auto& manipulator : manipulators) {
-    auto lb = manipulator->getPositionLowerLimits();
-    auto ub = manipulator->getPositionUpperLimits();
-    for(size_t k = 0; k < lb.size(); k++) {
-      bounds.setLow(k + dofs, lb[k]);
-      bounds.setHigh(k + dofs, ub[k]);
-    }
-    dofs += lb.size();
-  }
-  space->as<ompl::base::RealVectorStateSpace>()->setBounds(bounds);
+  const std::vector<ompl::base::StateSpacePtr>& task_spaces) {
+  auto space = std::make_shared<ompl::base::CompoundStateSpace>(task_spaces, std::vector<double>(task_spaces.size(), 1.0f));
 
   auto factor(std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space));
-
   return factor;
 }
+
 

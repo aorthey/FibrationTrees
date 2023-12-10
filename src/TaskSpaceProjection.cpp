@@ -78,9 +78,9 @@ void ProjectionJointSpaceToR3::lift(const ompl::base::State *xBase, ompl::base::
 
     auto tmpState = getBase()->allocState();
     project(xBundle, tmpState);
-    OMPL_WARN("Base -> Bundle -> Base");
-    getBase()->printState(xBase);
-    getBundle()->printState(xBundle);
-    getBase()->printState(tmpState);
+    // OMPL_WARN("Base -> Bundle -> Base");
+    // getBase()->printState(xBase);
+    // getBundle()->printState(xBundle);
+    // getBase()->printState(tmpState);
     getBase()->freeState(tmpState);
 }

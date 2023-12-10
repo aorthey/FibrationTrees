@@ -42,11 +42,12 @@ std::optional<Eigen::VectorXd> KinematicsSolver::solve_ik(const Eigen::Vector3d&
   return std::nullopt;
 }
 
+const float kLimitPadding = 1e-2;
 std::optional<Eigen::Vector3d> KinematicsSolver::solve_fk(const Eigen::VectorXd& config) {
   auto lb = skeleton_->getPositionLowerLimits();
   auto ub = skeleton_->getPositionUpperLimits();
   for(size_t k = 0; k < config.size(); k++) {
-    if(config[k] < lb[k] || config[k] > ub[k] || config[k] != config[k]) {
+    if(config[k] < (lb[k] - kLimitPadding) || config[k] > (ub[k] + kLimitPadding) || config[k] != config[k]) {
       // std::cout << "Out of limits of " << k << "-th dof : " << lb[k] << "<" << config[k] << "<" << ub[k] << std::endl;
       return std::nullopt;
     }

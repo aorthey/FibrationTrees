@@ -4,11 +4,12 @@
 #include "TaskSpaceProjection.hpp"
 #include "OmplHelper.hpp"
 
-class TaskSpace : public ompl::base::RealVectorStateSpace {
+OMPL_CLASS_FORWARD(TaskSpace);
 
+class TaskSpace : public ompl::base::RealVectorStateSpace {
  public:
 
-  TaskSpace(unsigned int dim, const KinematicsSolverPtr& kinematics_solver);
+  explicit TaskSpace(unsigned int dim, const KinematicsSolverPtr& kinematics_solver);
 
   ~TaskSpace();
 
@@ -18,22 +19,21 @@ class TaskSpace : public ompl::base::RealVectorStateSpace {
   KinematicsSolverPtr kinematics_solver_;
 };
 
-class TaskSpaceMotionValidator : public ompl::base::MotionValidator
-{
-public:
-    TaskSpaceMotionValidator() = delete;
-    explicit TaskSpaceMotionValidator(ompl::base::SpaceInformation *si, const KinematicsSolverPtr& kinematics_solver);
-    explicit TaskSpaceMotionValidator(const ompl::base::SpaceInformationPtr &si, const KinematicsSolverPtr& kinematics_solver);
-    ~TaskSpaceMotionValidator() override;
+// class TaskSpaceMultiRobot : public ompl::base::RealVectorStateSpace {
+//  public:
 
-    bool checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const override;
-    bool checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const override;
+//   TaskSpaceMultiRobot() = delete;
 
-    bool FillLastStateOnNoProgressAndReturn(const ompl::base::State *state, std::pair<ompl::base::State *, double> &lastValid) const;
+//   TaskSpaceMultiRobot(unsigned int dim, const std::vector<TaskSpacePtr>& task_spaces, 
+//     const std::vector<dart::dynamics::SkeletonPtr>& manipulators);
 
-private:
-  KinematicsSolverPtr kinematics_solver_;
-  ompl::base::State* tmpState_;
-  ompl::base::State* lastValidState_;
-};
+//   ~TaskSpaceMultiRobot();
 
+//   void interpolate(const ompl::base::State *from, const ompl::base::State *to, double t, ompl::base::State *state) const override;
+
+//  private:
+//   std::vector<TaskSpacePtr> task_spaces_;
+//   std::vector<ompl::base::State*> component_from_;
+//   std::vector<ompl::base::State*> component_to_;
+//   std::vector<ompl::base::State*> component_state_;
+// };

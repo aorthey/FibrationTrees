@@ -1,5 +1,7 @@
 #include "DartHelper.hpp"
 
+#include <dart/dynamics/TranslationalJoint.hpp>
+
 void PrintSkeletonInfo(const dart::dynamics::SkeletonPtr& skeleton) {
 
   std::cout << "Skeleton: " << skeleton->getName() << std::endl;
@@ -137,7 +139,7 @@ dart::dynamics::SkeletonPtr createSphere(const Eigen::Vector3d& position, float 
     dart::dynamics::SkeletonPtr sphere = dart::dynamics::Skeleton::create(name);
 
     dart::dynamics::BodyNodePtr body =
-        sphere->createJointAndBodyNodePair<dart::dynamics::WeldJoint>(nullptr).second;
+        sphere->createJointAndBodyNodePair<dart::dynamics::TranslationalJoint>(nullptr).second;
     dart::dynamics::ShapePtr shape = std::make_shared<dart::dynamics::SphereShape>(radius);
 
     auto shapeNode = body->createShapeNodeWith<dart::dynamics::VisualAspect, dart::dynamics::CollisionAspect, dart::dynamics::DynamicsAspect>(shape);
@@ -149,6 +151,41 @@ dart::dynamics::SkeletonPtr createSphere(const Eigen::Vector3d& position, float 
     body->setName(name);
 
     return sphere;
+}
+
+dart::dynamics::SkeletonPtr createFromURDF(const std::string& urdf_name, const Eigen::Vector3d& position)
+{
+    dart::utils::DartLoader loader;
+    dart::utils::DartLoader::Options options;
+    options.mDefaultRootJointType = dart::utils::DartLoader::RootJointType::FIXED;
+    loader.setOptions(options);
+
+    dart::dynamics::SkeletonPtr object
+      = loader.parseSkeleton(urdf_name);
+
+    static int count = 0;
+    // manipulator->setName("manipulator_"+std::to_string(count++));
+    object->setMobile(false);
+    // manipulator->setSelfCollisionCheck(true);
+    // manipulator->setAdjacentBodyCheck(true);
+    // static int counter = 0;
+    // std::string name = "obstacle_"+std::to_string(counter++);
+    // dart::dynamics::SkeletonPtr sphere = dart::dynamics::Skeleton::create(name);
+
+    // dart::dynamics::BodyNodePtr body =
+    //     sphere->createJointAndBodyNodePair<dart::dynamics::WeldJoint>(nullptr).second;
+    // dart::dynamics::ShapePtr shape = std::make_shared<dart::dynamics::SphereShape>(radius);
+
+    // auto shapeNode = body->createShapeNodeWith<dart::dynamics::VisualAspect, dart::dynamics::CollisionAspect, dart::dynamics::DynamicsAspect>(shape);
+    // shapeNode->getVisualAspect()->setColor(Eigen::Vector3d(0.5, 0.0, 0.5));
+
+    auto body = object->getRootBodyNode();
+
+    Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
+    tf.translation() = position;
+    body->getParentJoint()->setTransformFromParentBodyNode(tf);
+
+    return object;
 }
 
 void addCoordinateFrameToWorld(const dart::simulation::WorldPtr& world) {

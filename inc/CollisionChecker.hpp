@@ -16,16 +16,31 @@ class CollisionChecker {
       const std::vector<dart::dynamics::SkeletonPtr>& group1, 
       const std::vector<dart::dynamics::SkeletonPtr>& group2);
 
-  bool IsInCollision(const dart::simulation::WorldPtr& world);
+  virtual bool IsInCollision(const dart::simulation::WorldPtr& world);
 
-  void ColorAllCollisionBodies(dart::simulation::WorldPtr world);
+  virtual void ColorAllCollisionBodies(dart::simulation::WorldPtr world);
 
-  void ResetColors(const dart::simulation::WorldPtr& world);
+  virtual void ResetColors(const dart::simulation::WorldPtr& world);
 
  private:
   std::vector<dart::dynamics::SkeletonPtr> group1_;
   std::vector<dart::dynamics::SkeletonPtr> group2_;
   std::unordered_map<const dart::dynamics::ShapeNode*, Eigen::Vector3d> default_colors_;
+};
+
+class MultiCollisionChecker : public CollisionChecker {
+ public:
+  explicit MultiCollisionChecker(const dart::simulation::WorldPtr& world, 
+      const std::vector<CollisionCheckerPtr>& collision_checkers);
+
+  bool IsInCollision(const dart::simulation::WorldPtr& world);
+
+  void ColorAllCollisionBodies(dart::simulation::WorldPtr world) override;
+
+  void ResetColors(const dart::simulation::WorldPtr& world) override;
+
+ private:
+  std::vector<CollisionCheckerPtr> collision_checkers_;
 };
 
 class DartWorldCollisionChecker : public ompl::base::StateValidityChecker
@@ -46,16 +61,16 @@ class DartWorldCollisionChecker : public ompl::base::StateValidityChecker
   CollisionCheckerPtr collision_checker_;
 };
 
-class DartTransformCollisionChecker : public DartWorldCollisionChecker
-{
- public:
-    DartTransformCollisionChecker(const ompl::base::SpaceInformationPtr si, 
-        const dart::simulation::WorldPtr& world,
-        const dart::dynamics::SkeletonPtr& skeleton,
-        const CollisionCheckerPtr& collision_checker);
+// class DartTransformCollisionChecker : public DartWorldCollisionChecker
+// {
+//  public:
+//     DartTransformCollisionChecker(const ompl::base::SpaceInformationPtr si, 
+//         const dart::simulation::WorldPtr& world,
+//         const dart::dynamics::SkeletonPtr& skeleton,
+//         const CollisionCheckerPtr& collision_checker);
 
-    bool isValid(const ompl::base::State *state) const override;
-};
+//     bool isValid(const ompl::base::State *state) const override;
+// };
 
 class DartMultiRobotCollisionChecker : public ompl::base::StateValidityChecker
 {
