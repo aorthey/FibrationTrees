@@ -224,3 +224,10 @@ void addCoordinateFrameToWorld(const dart::simulation::WorldPtr& world) {
   world->addSimpleFrame(frame_y);
   world->addSimpleFrame(frame_z);
 }
+
+Eigen::Vector3d GetFK(const dart::dynamics::SkeletonPtr& skeleton, const Eigen::VectorXd& config) {
+  auto endeffector = skeleton->getBodyNode(skeleton->getNumBodyNodes() - 1)->getName();
+  skeleton->setConfiguration(config);
+  return skeleton->getBodyNode(endeffector)->getTransform().translation();
+}
+

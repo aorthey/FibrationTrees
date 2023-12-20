@@ -9,6 +9,7 @@
 
 #include "CollisionChecker.hpp"
 #include "TaskSpace.hpp"
+#include "TaskSpaceMotionValidator.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 // SpaceInformation Makers
@@ -41,16 +42,18 @@ ompl::multilevel::FactoredSpaceInformationPtr MakeTaskSpaceInformation(
 ompl::multilevel::FactoredSpaceInformationPtr Make3DPointSpaceInformation(
   const dart::dynamics::SkeletonPtr& point,
   const dart::simulation::WorldPtr& world,
-  const CollisionCheckerPtr& collision_checker) {
+  const CollisionCheckerPtr& collision_checker,
+  const std::pair<Eigen::Vector3d, Eigen::Vector3d>& limits) {
   auto numDofsPoint = 3;
   ompl::base::StateSpacePtr spaceR3(new ompl::base::RealVectorStateSpace(numDofsPoint));
   ompl::base::RealVectorBounds boundsWorkspace(numDofsPoint);
-  boundsWorkspace.setLow(0, +0.38);
-  boundsWorkspace.setHigh(0, +0.42);
-  boundsWorkspace.setLow(1, -5);
-  boundsWorkspace.setHigh(1, +5);
-  boundsWorkspace.setLow(2, 0.0);
-  boundsWorkspace.setHigh(2, 2.0);
+
+  const auto lb = limits.first;
+  const auto ub = limits.second;
+  for(size_t k = 0; k < 3; k++) {
+    boundsWorkspace.setLow(k, lb[k]);
+    boundsWorkspace.setHigh(k, ub[k]);
+  }
   spaceR3->as<ompl::base::RealVectorStateSpace>()->setBounds(boundsWorkspace);
 
   auto child(std::make_shared<ompl::multilevel::FactoredSpaceInformation>(spaceR3));

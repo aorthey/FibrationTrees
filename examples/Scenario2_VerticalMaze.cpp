@@ -1,7 +1,4 @@
-#include "TaskSpace.hpp"
 #include "TaskSpaceGoal.hpp"
-#include "TaskSpaceProjection.hpp"
-#include "TaskSpaceMotionValidator.hpp"
 #include "Common.hpp"
 #include "CollisionChecker.hpp"
 #include "DartHelper.hpp"
@@ -30,7 +27,7 @@ int main(int argc, char* argv[]) {
   std::vector<dart::dynamics::SkeletonPtr> obstacles;
   obstacles.push_back(createFromURDF("/home/aorthey/git/FibrationTrees/data/objects/maze.urdf", Eigen::Vector3d(+0.55, +0.1, 0.85)));
   obstacles.push_back(createFloor());
-  obstacles.push_back(createBox(Eigen::Vector3d(+0.5, +0.0, 0.75), 0.16, 2.0, 1.5));
+  obstacles.push_back(createBox(Eigen::Vector3d(+0.5, +0.0, 0.75), 0.15, 2.0, 1.5));
 
   PrintSkeletonInfo(manipulator);
   dart::math::Random::setSeed(0);
@@ -62,8 +59,9 @@ int main(int argc, char* argv[]) {
   ////OMPL Setup
   ////////////////////////////////////////////////////////////////////////////////
 
+  const auto limits = std::make_pair(Eigen::Vector3d(0.39, -0.4, 0), Eigen::Vector3d(0.43, +0.4, 2));
   auto factor = MakeTaskSpaceInformation(manipulator, world, kinematics_solver, collision_checker);
-  auto child = Make3DPointSpaceInformation(point, world, collision_checker_point_robot);
+  auto child = Make3DPointSpaceInformation(point, world, collision_checker_point_robot, limits);
 
   ompl::multilevel::ProjectionPtr projection = std::make_shared<ProjectionJointSpaceToR3>(factor->getStateSpace(), child->getStateSpace(), kinematics_solver);
   factor->addChild(child, projection);
@@ -74,13 +72,36 @@ int main(int argc, char* argv[]) {
   ompl::base::State *task_start = child->allocState();
   ompl::base::State *task_goal = child->allocState();
 
-  EigenVector3dToState({0.4, 0.35, 0.95}, task_start);
+  // ORIGINAL:
+  EigenVector3dToState({0.4, +0.35, 0.95}, task_start);
   EigenVector3dToState({0.4, -0.25, 0.95}, task_goal);
+  // EigenVector3dToState({0.403438, -0.0797099, 0.719266}, task_start);
+  // EigenVector3dToState({0.403438, +0.2797099, 0.719266}, task_goal);
+
+  //TODO: possible problem: when arriving at a point with a certain config, we
+  //might be stuck there, because another config would be necessary to solve it. We would need to reach around.
+
+  // INVERT:
+  // EigenVector3dToState({0.4, +0.35, 0.95}, task_goal);
+  // EigenVector3dToState({0.4, -0.25, 1.0}, task_start);
+
+  // RealVectorState [-1.60407 0.191711 -2.17888 -1.75349 2.08511 1.42073 0.242525]
+  // RealVectorState [-0.872667 0.161591 -2.29404 -1.60777 1.8331 -1.12302 -0.445128]
+
+  //Closer to goal
+  // EigenVector3dToState({0.403438, -0.0797099, 0.719266}, task_start);
+  // EigenVector3dToState({0.4, -0.25, 1.0}, task_goal);
+
+  // EigenVector3dToState({0.4, -0.15, 0.75}, task_start);
+  // EigenVector3dToState({0.4, -0.25, 1.0}, task_goal);
+
+  // EigenVector3dToState({0.4, 0.35, 0.95}, task_start);
+  // EigenVector3dToState({0.4, -0.25, 0.95}, task_goal);
 
   ompl::base::State *start = factor->allocState();
   ompl::base::State *goal = factor->allocState();
 
-  const int kMaxResampleIteration = 100;
+  const int kMaxResampleIteration = 500;
   bool has_solution = true;
 
   Visualizer visualizer(world);
@@ -98,7 +119,7 @@ int main(int argc, char* argv[]) {
 
   if(has_solution) {
     auto goal_region = std::make_shared<TaskSpaceGoal>(factor, goal, projection);
-    goal_region->setThreshold(0.05);
+    goal_region->setThreshold(0.1);
 
     ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(factor);
     pdef->addStartState(start);
@@ -106,8 +127,8 @@ int main(int argc, char* argv[]) {
 
     auto start_vector = ProjectStateToEigenVector3d(projection, start);
     auto goal_vector = StateToEigenVector3d(task_goal);
-    world->addSimpleFrame(createSphereFrame(start_vector, 0.02));
-    world->addSimpleFrame(createSphereFrame(goal_vector, 0.02));
+    world->addSimpleFrame(createSphereFrame(start_vector, 0.01));
+    world->addSimpleFrame(createSphereFrame(goal_vector, 0.01));
 
     ////////////////////////////////////////////////////////////////////////////////
     ////Planning
@@ -115,10 +136,22 @@ int main(int argc, char* argv[]) {
     auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
     planner->setProblemDefinition(pdef);
     planner->setup();
+    planner->setRange(+Inf);
 
-    float timeout = 100.0;
-    ompl::base::PlannerStatus status = planner->Planner::solve(timeout);
+    float timeout = 10.0;
+
+    auto ptc = ompl::base::plannerOrTerminationCondition(
+            ompl::base::exactSolnPlannerTerminationCondition(pdef),
+            ompl::base::timedPlannerTerminationCondition(timeout)
+        );
+
+    ompl::base::PlannerStatus status = planner->solve(ptc);
+
+    std::cout << "Add planner to visualizer..." << std::endl;
     visualizer.AddPlanner(manipulator, planner);
+    std::cout << "Set collision checker..." << std::endl;
+    visualizer.SetCollisionChecker(collision_checker);
+    std::cout << "Add path to visualizer..." << std::endl;
     visualizer.AddPath(point, planner->getProblemDefinition(child->getName())->getSolutionPath(), Eigen::Vector3d(1, 1, 0));
   }
 

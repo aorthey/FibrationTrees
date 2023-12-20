@@ -105,7 +105,8 @@ bool TaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const om
   //Solve edge ik
   ////////////////////////////////////////////////////////////////////////////////
   //Use interpolate here
-  const auto configs = kinematics_solver_->solve_edge_ik(from_vector, goal_frame);
+  //const auto configs = kinematics_solver_->solve_edge_ik(from_vector, goal_frame);
+  const auto configs = kinematics_solver_->solve_edge_ik_with_config(from_vector, to_vector);
   if(configs.empty()) {
     return FillLastStateOnNoProgressAndReturn(s1, lastValid);
   }
@@ -130,6 +131,9 @@ bool TaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const om
   }
 
   if((configs.back() - to_vector).norm() < 1e-3) {
+    std::cout << "#####################################################" << std::endl;
+    std::cout << "SUCCESS SOLVE EDGE IK WITH CONFIG" << std::endl;
+    std::cout << "#####################################################" << std::endl;
     return true;
   }
 

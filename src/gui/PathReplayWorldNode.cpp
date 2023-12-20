@@ -5,12 +5,6 @@
 #include "OmplHelper.hpp"
 #include "DartHelper.hpp"
 
-Eigen::Vector3d GetFK(const dart::dynamics::SkeletonPtr& skeleton, const Eigen::VectorXd& config) {
-  auto endeffector = skeleton->getBodyNode(skeleton->getNumBodyNodes() - 1)->getName();
-  skeleton->setConfiguration(config);
-  return skeleton->getBodyNode(endeffector)->getTransform().translation();
-}
-
 PathReplayWorldNode::PathReplayWorldNode(dart::simulation::WorldPtr world)
   : dart::gui::osg::RealTimeWorldNode(std::move(world))
 {
@@ -59,7 +53,7 @@ void PathReplayWorldNode::AddPlannerData(const dart::dynamics::SkeletonPtr& skel
       const auto s1 = data.getVertex(vindex).getState();
       const auto s2 = data.getVertex(windex).getState();
 
-      const auto step_size = 0.01f;
+      const auto step_size = 0.2f;
       const auto L = si->distance(s1, s2);
 
       std::vector<Eigen::Vector3d> vertices;

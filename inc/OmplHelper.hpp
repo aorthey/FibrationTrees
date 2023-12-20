@@ -15,6 +15,7 @@ Eigen::Vector3d StateToEigenVector3d(const ompl::base::State* state);
 Eigen::VectorXd StateToEigenVectorXd(const int Ndimension, const ompl::base::State* state);
 Eigen::VectorXd StateToEigenVectorXd(const ompl::base::SpaceInformation* si, const ompl::base::State* state);
 Eigen::VectorXd StateToEigenVectorXd(const ompl::base::SpaceInformationPtr& si, const ompl::base::State* state);
+
 Eigen::Vector3d ProjectStateToEigenVector3d(const ompl::multilevel::ProjectionPtr& projection, const ompl::base::State* state);
 Eigen::VectorXd LiftStateToEigenVectorXd(const ompl::multilevel::ProjectionPtr& projection, const ompl::base::State* base_state);
 

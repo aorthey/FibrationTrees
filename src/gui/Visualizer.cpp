@@ -2,6 +2,9 @@
 
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 
+#include "DartHelper.hpp"
+#include "OmplHelper.hpp"
+
 Visualizer::Visualizer(const dart::simulation::WorldPtr& world) {
 
   viewer = new dart::gui::osg::ImGuiViewer();
@@ -46,8 +49,12 @@ void Visualizer::AddPlanner(const dart::dynamics::SkeletonPtr& skeleton, const o
   {
     auto path = pdef->getSolutionPath();
     ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
+    OMPL_INFORM("Found path with %d states.", pgeo.getStateCount());
     for(const auto& state : pgeo.getStates()) {
       path->getSpaceInformation()->printState(state);
+      const auto config = StateToEigenVectorXd(path->getSpaceInformation(), state);
+      const auto v = GetFK(skeleton, config);
+      std::cout << "EndEffector position is " << v[0] << ", " << v[1] << ", " << v[2] << std::endl;
     }
     pgeo.interpolate(100);
     AddPath(skeleton, path);
