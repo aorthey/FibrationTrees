@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
     planner->setup();
     planner->setRange(+Inf);
 
-    float timeout = 10.0;
+    float timeout = 100.0;
 
     auto ptc = ompl::base::plannerOrTerminationCondition(
             ompl::base::exactSolnPlannerTerminationCondition(pdef),

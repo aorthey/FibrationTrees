@@ -1,9 +1,11 @@
 #include "KinematicsSolver.hpp"
 #include "Common.hpp"
 
-const float kStepSize = 0.5;
+const float kStepSize = 0.05;
 // const bool kDebugInfo = false;
 const bool kDebugInfo = false;
+const float kIntermediateStatesStepSize = 0.05; //was 0.01
+const size_t kMaxNonIncreasingIterations = 10;
 
 struct State {
   Eigen::VectorXd config;
@@ -84,19 +86,23 @@ void AddConfig(const Eigen::VectorXd& config, std::vector<Eigen::VectorXd>& conf
     //avoid duplicates
     return;
   }
+  if(dist > M_PI) {
+    std::cout << "ERROR: " << config.format(CommaFmt) << std::endl;
+    throw "JointFlip";
+  }
 
-  const float kAddStepSize = 0.01;
-  int num_steps = dist / kAddStepSize;
-  for(size_t k =0; k<num_steps;k++) {
-    configs.push_back(last_config + num_steps*kAddStepSize * (config - last_config));
+  int num_steps = dist / kIntermediateStatesStepSize;
+  for(size_t k = 1; k<num_steps;k++) {
+    configs.push_back(last_config + k * kIntermediateStatesStepSize * (config - last_config));
   }
-  for(float d = kAddStepSize; d < dist; d+=kAddStepSize) {
-    configs.push_back(last_config + d * (config - last_config));
-  }
+  // for(float d = kIntermediateStatesStepSize; d < dist;
+  // d+=kIntermediateStatesStepSize) {
+  //   configs.push_back(last_config + d * (config - last_config));
+  // }
   if((config - configs.back()).norm() > Epsilon) {
     configs.push_back(config);
   }
-  configs.push_back(config);
+  // configs.push_back(config);
 }
 
 
@@ -246,7 +252,6 @@ std::vector<Eigen::VectorXd> KinematicsSolver::solve_edge_ik_with_config(const E
   const auto body_tcp = skeleton_->getBodyNode(endeffector_);
   skeleton_->setConfiguration(current.config);
 
-  const size_t kMaxNonIncreasingIterations = 100;
   size_t non_increasing_iteration = 0;
   while(true) {
     ////////////////////////////////////////////////////////////////////////////////
@@ -263,7 +268,7 @@ std::vector<Eigen::VectorXd> KinematicsSolver::solve_edge_ik_with_config(const E
     //Add joint config force in nullspace
     const auto direction_joint_space = (goal.config - current.config);
     const auto I = Eigen::MatrixXd::Identity(J.cols(), J.cols());
-    auto dx = (J_PI * direction_task_space + (I - J_T * J_PI.transpose()) * direction_joint_space);
+    auto dx = J_PI * direction_task_space + (I - J_T * J_PI.transpose()) * direction_joint_space;
 
     ////////////////////////////////////////////////////////////////////////////////
     //Move along cspace direction and create a new state
@@ -273,7 +278,7 @@ std::vector<Eigen::VectorXd> KinematicsSolver::solve_edge_ik_with_config(const E
 
     auto maybe_fk = solve_fk(next.config);
     if(!maybe_fk.has_value()) {
-      if(kDebugInfo) std::cout << "Could not solve FK for " << current.config.format(CommaFmt) << std::endl;
+      if(kDebugInfo) std::cout << "Could not solve FK for " << next.config.format(CommaFmt) << std::endl;
       return configs;
     }
     next.tcp = maybe_fk.value();
