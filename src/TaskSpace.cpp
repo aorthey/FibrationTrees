@@ -13,14 +13,6 @@ TaskSpace::~TaskSpace() {
 void TaskSpace::interpolate(const ompl::base::State *from, const ompl::base::State *to, double t, ompl::base::State *state) const {
   const auto from_vector = StateToEigenVectorXd(getDimension(), from);
   const auto to_vector = StateToEigenVectorXd(getDimension(), to);
-
-  // const auto maybe_to_tcp = kinematics_solver_->solve_fk(to_vector);
-  // if(!maybe_to_tcp.has_value()) {
-  //   copyState(state, from);
-  //   return;
-  // }
-  // const auto to_tcp = maybe_to_tcp.value();
-  // const auto configs = kinematics_solver_->solve_edge_ik(from_vector, to_tcp);
   const auto configs = kinematics_solver_->solve_edge_ik_with_config(from_vector, to_vector);
 
   if(!kinematics_solver_->lastSolveWasSuccessful() || configs.empty()) {
@@ -45,6 +37,5 @@ double TaskSpace::distance(const ompl::base::State *from, const ompl::base::Stat
     return Inf;
   }
   const auto to_tcp = maybe_to_tcp.value();
-
   return (from_tcp - to_tcp).norm();
 }

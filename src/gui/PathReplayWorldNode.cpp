@@ -35,7 +35,6 @@ void PathReplayWorldNode::AddPath(const dart::dynamics::SkeletonPtr& skeleton, c
   }
   auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices, color, kPathLineWidth));
   solution_path_frames_.push_back(frame_line);
-
   skeleton_and_path_.push_back(std::make_pair(skeleton, path));
 }
 
@@ -267,6 +266,28 @@ void PathReplayWorldNode::CreateKeyPressEvents() {
   events_.push_back({'m', "increase execution speed", [&](){increaseSpeed();}});
   events_.push_back({'1', "show/hide solution path", [&](){toggleSolutionPathVisibility();}});
   events_.push_back({'2', "show/hide planner data", [&](){togglePlannerDataVisibility();}});
+  events_.push_back({'4', "store planner path", 
+      [&](){
+        for(const auto& [skeleton, path] : skeleton_and_path_) {
+          auto name = "eigen_path_"+skeleton->getName();
+          path->Save(name);
+          OMPL_INFORM("Save path %s", name.c_str()); 
+        }
+      }});
+  events_.push_back({'5', "load planner path", 
+      [&](){
+        for(const auto& [skeleton, path] : skeleton_and_path_) {
+          auto name = "eigen_path_"+skeleton->getName();
+          path->Load(name);
+          OMPL_INFORM("Load path %s", name.c_str()); 
+        }
+      }});
+  events_.push_back({'p', "output current skeleton info", 
+      [&](){
+        for(const auto& [skeleton, _] : skeleton_and_path_) {
+          PrintSkeletonInfo(skeleton);
+        }
+      }});
 }
 
 PathReplayEventHandler::PathReplayEventHandler(PathReplayWorldNode* world_node)
@@ -303,7 +324,7 @@ void TextWidget::render()
   ImGui::SetNextWindowSize(ImVec2(240, 320));
   ImGui::SetNextWindowBgAlpha(0.5f);
   if (!ImGui::Begin(
-          "Tinkertoy Control",
+          "Path Control",
           nullptr,
           ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar
               | ImGuiWindowFlags_HorizontalScrollbar))

@@ -6,7 +6,7 @@
 #include "Common.hpp"
 #include "robots/KukaSkeleton.hpp"
 
-const float kAccuracy = 1e-1; //Staying along the straight line path
+const float kAccuracyStraightLine = 1e-1; //Staying along the straight line path
 const float kAccuracyGoal = 1e-1; //Reaching goal frame
 
 double LineDistance(const Eigen::Vector3d& a, const Eigen::Vector3d& b, const Eigen::Vector3d& p) {
@@ -45,7 +45,7 @@ bool CheckStraightLineAccuracy(const KinematicsSolverPtr& kinematics_solver,
   }
 
   std::cout << "Maximal error deviation from line : " << max_error << std::endl;
-  EXPECT_NEAR(max_error, 0.0f, 1e-2);
+  EXPECT_NEAR(max_error, 0.0f, kAccuracyStraightLine);
   return true;
 }
 
@@ -70,84 +70,53 @@ void CheckFrontAndBackConfigs(const KinematicsSolverPtr& kinematics_solver, cons
   EXPECT_NEAR((config2_frame - goal_frame).norm(), 0.0f, kAccuracyGoal);
 }
 
-std::vector<Eigen::VectorXd> GetEdgeIKConfigs(const KinematicsSolverPtr& kinematics_solver, 
-    const Eigen::Vector3d& start_frame, const Eigen::Vector3d& goal_frame) {
-  dart::math::Random::setSeed(0);
+void EdgeIKTest(const KinematicsSolverPtr& kinematics_solver, const Eigen::VectorXd& start, const Eigen::VectorXd& goal) {
+  const auto maybe_config1_frame = kinematics_solver->solve_fk(start);
+  EXPECT_TRUE(maybe_config1_frame.has_value());
+  const auto maybe_config2_frame = kinematics_solver->solve_fk(goal);
+  EXPECT_TRUE(maybe_config2_frame.has_value());
+  auto start_frame = maybe_config1_frame.value();
+  auto goal_frame = maybe_config2_frame.value();
 
-  const size_t kMaxResampleIterations = 100;
-  auto maybe_start_ik = kinematics_solver->solve_ik(start_frame, kMaxResampleIterations);
-  EXPECT_TRUE(maybe_start_ik.has_value());
+  auto configs = kinematics_solver->solve_edge_ik_with_config(start, goal);
+  EXPECT_GE(configs.size(), 2u);
 
-  auto start = maybe_start_ik.value();
-
-  auto configs = kinematics_solver->solve_edge_ik(start, goal_frame);
-  EXPECT_GT(configs.size(), 0u);
-  std::cout << "Found edge IK with " << configs.size() << " configs." << std::endl;
-  return configs;
-}
-
-void CheckAlignedAxisEdgeIK(const KinematicsSolverPtr& kinematics_solver, 
-    const Eigen::Vector3d& start_frame, const Eigen::Vector3d& goal_frame, const size_t axis_index) {
-
-  auto configs = GetEdgeIKConfigs(kinematics_solver, start_frame, goal_frame);
+  std::cout << "Start (Desired): " << start.format(CommaFmt) << ", Goal (Desired): " << goal.format(CommaFmt) << std::endl;
+  std::cout << "Start (Actual) : " << configs.front().format(CommaFmt) << ", Goal (Actual) : " << configs.back().format(CommaFmt) << std::endl;
+  EXPECT_NEAR((start - configs.front()).norm(), 0.0f, Epsilon);
   CheckFrontAndBackConfigs(kinematics_solver, configs, start_frame, goal_frame);
   EXPECT_TRUE(CheckStraightLineAccuracy(kinematics_solver, configs));
 }
 
-void CheckLineSegmentEdgeIK(const KinematicsSolverPtr& kinematics_solver, const Eigen::Vector3d& start_frame, const Eigen::Vector3d& goal_frame) {
-  auto configs = GetEdgeIKConfigs(kinematics_solver, start_frame, goal_frame);
+void EdgeIKTestFromFrames(const KinematicsSolverPtr& kinematics_solver, 
+    const Eigen::Vector3d& start_frame, const Eigen::Vector3d& goal_frame) {
+  dart::math::Random::setSeed(0);
 
-  CheckFrontAndBackConfigs(kinematics_solver, configs, start_frame, goal_frame);
+  const size_t kMaxResampleIterations = 100;
 
+  auto maybe_start_ik = kinematics_solver->solve_ik(start_frame, kMaxResampleIterations);
+  EXPECT_TRUE(maybe_start_ik.has_value());
+  auto start = maybe_start_ik.value();
 
-  const auto& a = start_frame;
-  const auto& b = goal_frame;
-  // const auto& n = (b-a).normalized();
+  auto maybe_goal_ik = kinematics_solver->solve_ik(goal_frame, kMaxResampleIterations);
+  EXPECT_TRUE(maybe_goal_ik.has_value());
+  auto goal = maybe_goal_ik.value();
 
-  std::cout << "Checking " << configs.size() << " configs." << std::endl;
-  for(const auto& config : configs) {
-    auto maybe_config_frame = kinematics_solver->solve_fk(config);
-    EXPECT_TRUE(maybe_config_frame.has_value());
-    //Check that points are near line segment between start and goal
-    auto p = maybe_config_frame.value();
-    auto d = LineDistance(a, b, p);
-    // auto s = (p-a).dot(n);
-    // auto d = ((p-a)-s*n).norm();
-    EXPECT_NEAR(d, 0.0f, kAccuracy);
-  }
+  EdgeIKTest(kinematics_solver, start, goal);
 }
 
-TEST(KinematicsSolverTest, EdgeIKTest) {
+TEST(KinematicsSolverTest, StraightLineTaskSpaceTest) {
   dart::dynamics::SkeletonPtr manipulator = 
     createKukaSkeleton("/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka.urdf");
   KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
 
-  CheckAlignedAxisEdgeIK(kinematics_solver, Eigen::Vector3d(0.4, 0.4, 0.3), Eigen::Vector3d(0.4, 0.4, 0.6), 2);
-  CheckAlignedAxisEdgeIK(kinematics_solver, Eigen::Vector3d(0.6, 0.1, 0.3), Eigen::Vector3d(0.6, 0.3, 0.3), 1);
-  CheckAlignedAxisEdgeIK(kinematics_solver, Eigen::Vector3d(0.7, 0.2, 0.3), Eigen::Vector3d(0.5, 0.2, 0.3), 0);
-
-  CheckAlignedAxisEdgeIK(kinematics_solver, Eigen::Vector3d(0.7, 0.2, 0.3), Eigen::Vector3d(0.5, 0.2, 0.3), 0);
-
-  CheckLineSegmentEdgeIK(kinematics_solver, Eigen::Vector3d(0.6, 0.1, 0.3), Eigen::Vector3d(0.4, 0.3, 0.3));
-  CheckLineSegmentEdgeIK(kinematics_solver, Eigen::Vector3d(0.6, 0.1, 0.2), Eigen::Vector3d(0.4, 0.4, 0.5));
-}
-
-TEST(KinematicsSolverTest, SingularityEdgeIKTest) {
-  dart::dynamics::SkeletonPtr manipulator = 
-    createKukaSkeleton("/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka.urdf");
-  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
-
-  const auto kStartFrame = Eigen::Vector3d(0.6, 0.2, 0.3);
-  const auto kGoalFrame =  Eigen::Vector3d(0.3, 0.2, 0.3);
-
-  auto configs = GetEdgeIKConfigs(kinematics_solver, kStartFrame, kGoalFrame);
-  EXPECT_GT(configs.size(), 1u);
-  EXPECT_FALSE(kinematics_solver->lastSolveWasSuccessful());
-
-  auto maybe_config1_frame = kinematics_solver->solve_fk(configs.front());
-  EXPECT_TRUE(maybe_config1_frame.has_value());
-  auto config1_frame = maybe_config1_frame.value();
-  EXPECT_NEAR((config1_frame - kStartFrame).norm(), 0.0f, kAccuracyGoal);
+  // CheckEdgeIK(kinematics_solver, Eigen::Vector3d(0.4, 0.4, 0.3), Eigen::Vector3d(0.4, 0.4, 0.6));
+  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.6, 0.1, 0.3), Eigen::Vector3d(0.6, 0.3, 0.3));
+  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.7, 0.2, 0.3), Eigen::Vector3d(0.5, 0.2, 0.3));
+  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.7, 0.2, 0.3), Eigen::Vector3d(0.5, 0.2, 0.3));
+  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.6, 0.1, 0.3), Eigen::Vector3d(0.4, 0.3, 0.3));
+  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.6, 0.1, 0.2), Eigen::Vector3d(0.4, 0.4, 0.5));
+  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.3, 0.4, 0.2), Eigen::Vector3d(0.6, 0.4, 0.7));
 }
 
 TEST(KinematicsSolverTest, ConfigEdgeIKSameConfigTest) {
@@ -203,31 +172,32 @@ TEST(KinematicsSolverTest, ConfigEdgeIKSameFrameTest) {
   std::cout << "Found " << configs.size() << " configs for edge IK." << std::endl;
 }
 
-TEST(KinematicsSolverTest, ConfigEdgeIKTest) {
+//Goal has no FK solution -> Cannot make progress
+TEST(KinematicsSolverTest, NonFKConfigTest) {
   dart::dynamics::SkeletonPtr manipulator = 
     createKukaSkeleton("/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka.urdf");
   KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
+  Eigen::VectorXd start(7);
+  Eigen::VectorXd goal(7);
+  start << -0.989524, -0.200034, -1.2738, -1.28626, 1.61383, -0.17553, -0.8159;
+  goal << 2.78314, 1.41906, -2.96706, -1.4611, -2.07017, 1.40266, 1.89722; //Does not have FK solution
+  auto configs = kinematics_solver->solve_edge_ik_with_config(start, goal);
+  EXPECT_EQ(configs.size(), 0u);
+  EXPECT_FALSE(kinematics_solver->lastSolveWasSuccessful());
+}
 
-  dart::math::Random::setSeed(0);
-
-  const auto start_frame = Eigen::Vector3d(0.3, 0.4, 0.2);
-  const auto goal_frame = Eigen::Vector3d(0.6, 0.4, 0.7);
-  const size_t kMaxResampleIterations = 100;
-
-  auto maybe_start_ik = kinematics_solver->solve_ik(start_frame, kMaxResampleIterations);
-  EXPECT_TRUE(maybe_start_ik.has_value());
-  auto start = maybe_start_ik.value();
-
-  auto maybe_goal_ik = kinematics_solver->solve_ik(goal_frame, kMaxResampleIterations);
-  EXPECT_TRUE(maybe_goal_ik.has_value());
-  auto goal = maybe_goal_ik.value();
+// Straight line moves outside joint limits
+TEST(KinematicsSolverTest, CannotReachGoalConfigTest) {
+  dart::dynamics::SkeletonPtr manipulator = 
+    createKukaSkeleton("/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka.urdf");
+  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
+  Eigen::VectorXd start(7);
+  Eigen::VectorXd goal(7);
+  start << -0.503705, -1.08742, -1.14191, -1.98434, 0.363036, -1.08686, -0.0262207;
+  goal << -1.39498, -1.55469, 2.28343, 1.95646, -1.09705, -0.305218, -1.31804;
 
   auto configs = kinematics_solver->solve_edge_ik_with_config(start, goal);
   EXPECT_GE(configs.size(), 2u);
 
-  std::cout << "Start (Desired): " << start.format(CommaFmt) << ", Goal (Desired): " << goal.format(CommaFmt) << std::endl;
-  std::cout << "Start (Actual) : " << configs.front().format(CommaFmt) << ", Goal (Actual) : " << configs.back().format(CommaFmt) << std::endl;
-  EXPECT_NEAR((start - configs.front()).norm(), 0.0f, Epsilon);
-  CheckFrontAndBackConfigs(kinematics_solver, configs, start_frame, goal_frame);
   EXPECT_TRUE(CheckStraightLineAccuracy(kinematics_solver, configs));
 }

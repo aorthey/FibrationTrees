@@ -4,6 +4,10 @@
 #include <numeric>
 
 #include "OmplHelper.hpp"
+#include "Common.hpp"
+
+EigenPath::EigenPath() {
+}
 
 EigenPath::EigenPath(const ompl::base::PathPtr& path) {
   const auto& si = path->getSpaceInformation();
@@ -62,4 +66,25 @@ Eigen::VectorXd EigenPath::GetConfigAt(float s) {
 
 float EigenPath::GetLength() const {
   return total_length_;
+}
+
+void EigenPath::Save(const std::string& filename) {
+  std::ofstream out(filename);
+  boost::archive::text_oarchive oa(out);
+  oa << *this;
+}
+
+void EigenPath::Load(const std::string& filename) {
+  std::ifstream input(filename);
+  boost::archive::text_iarchive ia(input);
+  ia >> *this;
+}
+EigenPath EigenPath::FromFile(const std::string& filename) {
+  EigenPath path;
+  {
+    std::ifstream input(filename);
+    boost::archive::text_iarchive ia(input);
+    ia >> path;
+  }
+  return path;
 }

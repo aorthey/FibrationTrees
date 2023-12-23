@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
   ompl::base::State *start = factor->allocState();
   ompl::base::State *goal = factor->allocState();
 
-  const int kMaxResampleIteration = 500;
+  const int kMaxResampleIteration = 100;
   bool has_solution = true;
 
   Visualizer visualizer(world);
@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
 
   if(has_solution) {
     auto goal_region = std::make_shared<TaskSpaceGoal>(factor, goal, projection);
-    goal_region->setThreshold(0.1);
+    goal_region->setThreshold(0.05);
 
     ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(factor);
     pdef->addStartState(start);
@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
     planner->setup();
     planner->setRange(+Inf);
 
-    float timeout = 100.0;
+    float timeout = 10.0;
 
     auto ptc = ompl::base::plannerOrTerminationCondition(
             ompl::base::exactSolnPlannerTerminationCondition(pdef),

@@ -14,7 +14,7 @@ const Eigen::Vector3d kRoadmapColorVertex = Eigen::Vector3d(0.2, 0.8, 0.2);
 const float kRoadmapLineWidth = 3.0;
 const float kPathLineWidth = 5.0;
 
-const float kStepSize = 0.001;
+const float kDefaultStepSize = 0.001;
 
 const float kMaxStepSize = 0.1;
 const float kMinStepSize = 0.00001;
@@ -73,7 +73,7 @@ protected:
   std::vector<std::pair<dart::dynamics::SkeletonPtr, std::shared_ptr<PathType>>> skeleton_and_path_;
   CollisionCheckerPtr collision_checker_;
 
-  float step_size_{kStepSize};
+  float step_size_{kDefaultStepSize};
   float path_position_;
   bool pause_;
   bool reverse_;

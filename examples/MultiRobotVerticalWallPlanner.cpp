@@ -100,8 +100,9 @@ int main(int argc, char* argv[]) {
   auto factor1 = MakeTaskSpaceInformation(manipulator1, world, kinematics_solver1, collision_checker1);
   auto factor2 = MakeTaskSpaceInformation(manipulator2, world, kinematics_solver2, collision_checker2);
 
-  auto child1 = Make3DPointSpaceInformation(point1, world, collision_checker_point1);
-  auto child2 = Make3DPointSpaceInformation(point2, world, collision_checker_point2);
+  const auto limits = std::make_pair(Eigen::Vector3d(0.39, -0.4, 0), Eigen::Vector3d(0.43, +0.4, 2));
+  auto child1 = Make3DPointSpaceInformation(point1, world, collision_checker_point1, limits);
+  auto child2 = Make3DPointSpaceInformation(point2, world, collision_checker_point2, limits);
 
   ompl::multilevel::ProjectionPtr projection_child1 = std::make_shared<ProjectionJointSpaceToR3>(factor1->getStateSpace(), child1->getStateSpace(), kinematics_solver1);
   factor1->addChild(child1, projection_child1);

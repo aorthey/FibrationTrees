@@ -2,6 +2,9 @@
 
 #include "EigenPath.hpp"
 #include "OmplHelper.hpp"
+#include "Common.hpp"
+
+const float kDeltaCollisionCheckStepSize = 0.005;
 
 TaskSpaceMotionValidator::TaskSpaceMotionValidator(
     ompl::base::SpaceInformation *si, const KinematicsSolverPtr& kinematics_solver) 
@@ -38,7 +41,7 @@ bool TaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const om
   // }
 
   // const auto goal_frame = maybe_goal_frame.value();
-  // const auto configs = kinematics_solver_->solve_edge_ik(from_vector, goal_frame);
+  // const auto configs = kinematics_solver_->(from_vector, goal_frame);
 
   // if(!kinematics_solver_->lastSolveWasSuccessful() || configs.empty()) {
   //   return false;
@@ -105,7 +108,6 @@ bool TaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const om
   //Solve edge ik
   ////////////////////////////////////////////////////////////////////////////////
   //Use interpolate here
-  //const auto configs = kinematics_solver_->solve_edge_ik(from_vector, goal_frame);
   const auto configs = kinematics_solver_->solve_edge_ik_with_config(from_vector, to_vector);
   if(configs.empty()) {
     return FillLastStateOnNoProgressAndReturn(s1, lastValid);
@@ -118,7 +120,7 @@ bool TaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const om
   si_->copyState(lastValidState_, s1);
   EigenPath path(configs);
   float L = path.GetLength();
-  for(float d = 0; d < L; d+= 0.01) {
+  for(float d = 0; d < L; d+= kDeltaCollisionCheckStepSize) {
     EigenVectorXdToState(path.GetConfigAt(d/L), tmpState_);
     if(!si_->isValid(tmpState_)) {
       if(lastValid.first != nullptr) {

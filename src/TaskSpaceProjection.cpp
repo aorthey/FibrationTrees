@@ -65,6 +65,8 @@ void ProjectionJointSpaceToR3::lift(const ompl::base::State *xBase, ompl::base::
 
     auto maybe_result = kinematics_solver_->solve_ik(frame);
     if(!maybe_result.has_value()) {
+      // OMPL_ERROR("Returning default state. Could not solve IK");
+      // std::cout << frame << std::endl;
       getBundle()->copyState(xBundle, defaultBundleReturnState_);
       return;
     }

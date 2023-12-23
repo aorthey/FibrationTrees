@@ -2,6 +2,8 @@
 
 #include <dart/dynamics/TranslationalJoint.hpp>
 
+#include "Common.hpp"
+
 void PrintSkeletonInfo(const dart::dynamics::SkeletonPtr& skeleton) {
 
   std::cout << "Skeleton: " << skeleton->getName() << std::endl;
@@ -26,6 +28,7 @@ void PrintSkeletonInfo(const dart::dynamics::SkeletonPtr& skeleton) {
   for(size_t k = 0; k < config.size(); k++) {
     std::cout << lb[k] << " <= " << config[k] << " <= " << ub[k] << std::endl;
   }
+  std::cout << config.format(CommaFmt) << std::endl;
 }
 
 Eigen::VectorXd GetRandomPosition(const dart::dynamics::SkeletonPtr& skeleton) {
@@ -48,11 +51,11 @@ dart::dynamics::SimpleFramePtr createSphereFrame(const Eigen::Vector3d& position
 }
 
 dart::dynamics::SimpleFramePtr createLineSegmentFrame(const Eigen::Vector3d& s1, const Eigen::Vector3d& s2, const Eigen::Vector3d& color, float line_width) {
+  static int counter = 0;
   Eigen::Isometry3d tf = Eigen::Isometry3d::Identity();
   tf.translation() = s1;
 
-  static int counter = 0;
-  auto lineFrame = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "line"+std::to_string(counter++), tf);
+  auto lineFrame = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "line_segment_"+std::to_string(counter++), tf);
   auto line = std::make_shared<dart::dynamics::LineSegmentShape>(Eigen::Vector3d::Zero(3), (s2-s1), line_width);
   lineFrame->setShape(line);
   lineFrame->createVisualAspect();
@@ -62,7 +65,7 @@ dart::dynamics::SimpleFramePtr createLineSegmentFrame(const Eigen::Vector3d& s1,
 
 dart::dynamics::SimpleFramePtr createLineSegmentFrame(const std::vector<Eigen::Vector3d>& vertices, const Eigen::Vector3d& color, float line_width) {
   static int counter = 0;
-  auto lineFrame = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "line"+std::to_string(counter++));
+  auto lineFrame = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "line_segments_"+std::to_string(counter++));
   auto line = std::make_shared<dart::dynamics::LineSegmentShape>(line_width);
   for(const auto& vertex : vertices) {
     line->addVertex(vertex);
@@ -231,3 +234,17 @@ Eigen::Vector3d GetFK(const dart::dynamics::SkeletonPtr& skeleton, const Eigen::
   return skeleton->getBodyNode(endeffector)->getTransform().translation();
 }
 
+void changeBodyColor(const dart::dynamics::SkeletonPtr& skeleton, const Eigen::Vector4d& color) 
+{
+  for(const auto& body_node : skeleton->getBodyNodes()) {
+    auto shapeNodes = body_node->getShapeNodesWith<dart::dynamics::VisualAspect>();
+    for(const auto& node : shapeNodes) {
+      auto properties(node->getVisualAspect()->getProperties());
+      properties.mHidden = false;
+      properties.mShadowed = true;
+      properties.mUseDefaultColor = true;
+      properties.mRGBA = color;
+      node->getVisualAspect()->setProperties(properties);
+    }
+  }
+}
