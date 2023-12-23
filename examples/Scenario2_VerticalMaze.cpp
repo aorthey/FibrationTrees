@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
   ////World creation
   ////////////////////////////////////////////////////////////////////////////////
-  dart::dynamics::SkeletonPtr point = createSphere(Eigen::Vector3d(0, 0, 0), 0.01);
+  dart::dynamics::SkeletonPtr point = createSphere(0.01);
 
   dart::simulation::WorldPtr world(new dart::simulation::World);
   world->addSkeleton(manipulator);
@@ -72,31 +72,8 @@ int main(int argc, char* argv[]) {
   ompl::base::State *task_start = child->allocState();
   ompl::base::State *task_goal = child->allocState();
 
-  // ORIGINAL:
   EigenVector3dToState({0.4, +0.35, 0.95}, task_start);
   EigenVector3dToState({0.4, -0.25, 0.95}, task_goal);
-  // EigenVector3dToState({0.403438, -0.0797099, 0.719266}, task_start);
-  // EigenVector3dToState({0.403438, +0.2797099, 0.719266}, task_goal);
-
-  //TODO: possible problem: when arriving at a point with a certain config, we
-  //might be stuck there, because another config would be necessary to solve it. We would need to reach around.
-
-  // INVERT:
-  // EigenVector3dToState({0.4, +0.35, 0.95}, task_goal);
-  // EigenVector3dToState({0.4, -0.25, 1.0}, task_start);
-
-  // RealVectorState [-1.60407 0.191711 -2.17888 -1.75349 2.08511 1.42073 0.242525]
-  // RealVectorState [-0.872667 0.161591 -2.29404 -1.60777 1.8331 -1.12302 -0.445128]
-
-  //Closer to goal
-  // EigenVector3dToState({0.403438, -0.0797099, 0.719266}, task_start);
-  // EigenVector3dToState({0.4, -0.25, 1.0}, task_goal);
-
-  // EigenVector3dToState({0.4, -0.15, 0.75}, task_start);
-  // EigenVector3dToState({0.4, -0.25, 1.0}, task_goal);
-
-  // EigenVector3dToState({0.4, 0.35, 0.95}, task_start);
-  // EigenVector3dToState({0.4, -0.25, 0.95}, task_goal);
 
   ompl::base::State *start = factor->allocState();
   ompl::base::State *goal = factor->allocState();
@@ -119,7 +96,7 @@ int main(int argc, char* argv[]) {
 
   if(has_solution) {
     auto goal_region = std::make_shared<TaskSpaceGoal>(factor, goal, projection);
-    goal_region->setThreshold(0.05);
+    goal_region->setThreshold(0.01);
 
     ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(factor);
     pdef->addStartState(start);
@@ -138,7 +115,7 @@ int main(int argc, char* argv[]) {
     planner->setup();
     planner->setRange(+Inf);
 
-    float timeout = 10.0;
+    float timeout = 100.0;
 
     auto ptc = ompl::base::plannerOrTerminationCondition(
             ompl::base::exactSolnPlannerTerminationCondition(pdef),

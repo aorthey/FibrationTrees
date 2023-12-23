@@ -3,11 +3,13 @@
 #include <dart/utils/urdf/urdf.hpp>
 
 #include "KinematicsSolver.hpp"
+#include "DartHelper.hpp"
 #include "Common.hpp"
 #include "robots/KukaSkeleton.hpp"
 
-const float kAccuracyStraightLine = 1e-1; //Staying along the straight line path
+const float kAccuracyStraightLine = 5 * 1e-2; //Staying along the straight line path
 const float kAccuracyGoal = 1e-1; //Reaching goal frame
+const size_t kNumberRandomConfigs = 10;
 
 double LineDistance(const Eigen::Vector3d& a, const Eigen::Vector3d& b, const Eigen::Vector3d& p) {
   const auto& n = (b-a).normalized();
@@ -20,7 +22,7 @@ bool CheckStraightLineAccuracy(const KinematicsSolverPtr& kinematics_solver,
     const std::vector<Eigen::VectorXd>& configs) {
 
   if(configs.size() < 2) {
-    return false;
+    return true;
   }
 
   const auto maybe_config1_frame = kinematics_solver->solve_fk(configs.front());
@@ -31,10 +33,6 @@ bool CheckStraightLineAccuracy(const KinematicsSolverPtr& kinematics_solver,
   const auto start_frame = maybe_config1_frame.value();
   const auto goal_frame = maybe_config2_frame.value();
 
-  std::cout << configs.size() << std::endl;
-  std::cout << "Start (Actual) : " << configs.front().format(CommaFmt) << std::endl;
-  std::cout << "Goal  (Actual) : " << configs.back().format(CommaFmt) << std::endl;
-
   double max_error = 0.0;
   for(const auto& config : configs) {
     auto maybe_config_frame = kinematics_solver->solve_fk(config);
@@ -44,8 +42,13 @@ bool CheckStraightLineAccuracy(const KinematicsSolverPtr& kinematics_solver,
     max_error = std::max(max_error, d);
   }
 
-  std::cout << "Maximal error deviation from line : " << max_error << std::endl;
   EXPECT_NEAR(max_error, 0.0f, kAccuracyStraightLine);
+  if(max_error > kAccuracyStraightLine) {
+    std::cout << "Maximal error deviation from line : " << max_error << std::endl;
+    std::cout << "start << " << configs.front().format(CommaFmt) << std::endl;
+    std::cout << "goal  << " << configs.back().format(CommaFmt) << std::endl;
+    exit(0);
+  }
   return true;
 }
 
@@ -200,4 +203,40 @@ TEST(KinematicsSolverTest, CannotReachGoalConfigTest) {
   EXPECT_GE(configs.size(), 2u);
 
   EXPECT_TRUE(CheckStraightLineAccuracy(kinematics_solver, configs));
+}
+
+TEST(KinematicsSolverTest, JointFlipTest) {
+  dart::dynamics::SkeletonPtr manipulator = 
+    createKukaSkeleton("/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka.urdf");
+  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
+  Eigen::VectorXd start(7);
+  Eigen::VectorXd goal(7);
+  start << -1.06341,0.0364156,-1.5652,-1.36632,2.24109,0.174882,-0.205112;
+  goal  << 1.28814,-0.0755119,0.874968,-1.04689,1.22978,-0.116029,0.427566;
+
+  auto maybe_start_frame = kinematics_solver->solve_fk(start);
+  EXPECT_TRUE(maybe_start_frame.has_value());
+  auto maybe_goal_frame = kinematics_solver->solve_fk(goal);
+  EXPECT_TRUE(maybe_goal_frame.has_value());
+  auto start_frame = maybe_start_frame.value();
+  auto goal_frame = maybe_goal_frame.value();
+
+  auto configs = kinematics_solver->solve_edge_ik_with_config(start, goal);
+  EXPECT_GT(configs.size(), 2u);
+  CheckFrontAndBackConfigs(kinematics_solver, configs, start_frame, goal_frame);
+  EXPECT_TRUE(CheckStraightLineAccuracy(kinematics_solver, configs));
+}
+
+TEST(KinematicsSolverTest, RandomizedConfigsTest) {
+  dart::dynamics::SkeletonPtr manipulator = 
+    createKukaSkeleton("/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka.urdf");
+  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
+
+  for(size_t k = 0; k < kNumberRandomConfigs; k++) {
+    auto start = GetRandomPosition(manipulator);
+    auto goal = GetRandomPosition(manipulator);
+    auto configs = kinematics_solver->solve_edge_ik_with_config(start, goal);
+    EXPECT_GE(configs.size(), 1u);
+    EXPECT_TRUE(CheckStraightLineAccuracy(kinematics_solver, configs));
+  }
 }

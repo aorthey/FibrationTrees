@@ -6,6 +6,7 @@
 #include "TaskSpaceGoal.hpp"
 #include "TaskSpaceProjection.hpp"
 #include "TaskSpaceMotionValidator.hpp"
+#include "TaskSpaceMultiRobotMotionValidator.hpp"
 #include "Common.hpp"
 #include "CollisionChecker.hpp"
 #include "DartHelper.hpp"
@@ -50,9 +51,9 @@ int main(int argc, char* argv[]) {
   ////World creation
   ////////////////////////////////////////////////////////////////////////////////
   dart::dynamics::SkeletonPtr floor = createFloor();
-  dart::dynamics::SkeletonPtr wall = createBox(Eigen::Vector3d(+0.5, +0.0, 0.75), 0.16, 2.0, 1.5); //0.16
-  dart::dynamics::SkeletonPtr point1 = createSphere(Eigen::Vector3d(-0.5, -0.5, -1), 0.01);
-  dart::dynamics::SkeletonPtr point2 = createSphere(Eigen::Vector3d(-0.5, -0.5, -2), 0.01);
+  dart::dynamics::SkeletonPtr wall = createBox(Eigen::Vector3d(+0.5, +0.0, 0.75), 0.16, 2.0, 1.5);
+  dart::dynamics::SkeletonPtr point1 = createSphere(0.01);
+  dart::dynamics::SkeletonPtr point2 = createSphere(0.01);
 
   dart::simulation::WorldPtr world(new dart::simulation::World);
   world->addSkeleton(manipulator1);
@@ -100,9 +101,10 @@ int main(int argc, char* argv[]) {
   auto factor1 = MakeTaskSpaceInformation(manipulator1, world, kinematics_solver1, collision_checker1);
   auto factor2 = MakeTaskSpaceInformation(manipulator2, world, kinematics_solver2, collision_checker2);
 
-  const auto limits = std::make_pair(Eigen::Vector3d(0.39, -0.4, 0), Eigen::Vector3d(0.43, +0.4, 2));
-  auto child1 = Make3DPointSpaceInformation(point1, world, collision_checker_point1, limits);
-  auto child2 = Make3DPointSpaceInformation(point2, world, collision_checker_point2, limits);
+  const auto limits1 = std::make_pair(Eigen::Vector3d(0.38, -0.5, 0.0), Eigen::Vector3d(0.42, +0.5, 2.0));
+  auto child1 = Make3DPointSpaceInformation(point1, world, collision_checker_point1, limits1);
+  const auto limits2 = std::make_pair(Eigen::Vector3d(0.38, -0.5, 0.0), Eigen::Vector3d(0.42, +0.5, 2.0));
+  auto child2 = Make3DPointSpaceInformation(point2, world, collision_checker_point2, limits2);
 
   ompl::multilevel::ProjectionPtr projection_child1 = std::make_shared<ProjectionJointSpaceToR3>(factor1->getStateSpace(), child1->getStateSpace(), kinematics_solver1);
   factor1->addChild(child1, projection_child1);
@@ -125,7 +127,6 @@ int main(int argc, char* argv[]) {
   manipulators[factor2->getName()] = manipulator2;
 
   factor->setStateValidityChecker(std::make_shared<DartMultiRobotCollisionChecker>(factor, world, manipulators, collision_checker_multi_robot));
-  // factor->setStateValidityCheckingResolution(0.001);
 
   auto motion_validator = std::make_shared<TaskSpaceMultiRobotMotionValidator>(factor);
   factor->setMotionValidator(motion_validator);
@@ -192,7 +193,7 @@ int main(int argc, char* argv[]) {
   auto goal_region1 = std::make_shared<TaskSpaceGoal>(factor1, goal1, projection_child1);
   goal_region1->setThreshold(0.1);
   auto goal_region2 = std::make_shared<TaskSpaceGoal>(factor2, goal2, projection_child2);
-  goal_region2->setThreshold(0.2);
+  goal_region2->setThreshold(0.1);
 
   std::unordered_map<std::string, ompl::base::GoalSampleableRegionPtr> goal_regions;
   goal_regions[factor1->getName()] = goal_region1;
@@ -213,15 +214,6 @@ int main(int argc, char* argv[]) {
 
   float timeout = 100.0;
   ompl::base::PlannerStatus status = planner->Planner::solve(timeout);
-
-  // if(pdef->hasApproximateSolution() ||
-  //    pdef->hasExactSolution())
-  // {
-  //   auto simplifier = std::make_shared<ompl::geometric::PathSimplifier>(factor, pdef->getGoal());
-  //   auto path = pdef->getSolutionPath();
-  //   ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
-  //   simplifier->simplifyMax(pgeo);
-  // }
 
   //////////////////////////////////////////////////////////////////////////////////
   //////Visualize

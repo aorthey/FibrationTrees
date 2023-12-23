@@ -6,6 +6,7 @@
 #include "TaskSpaceGoal.hpp"
 #include "TaskSpaceProjection.hpp"
 #include "TaskSpaceMotionValidator.hpp"
+#include "TaskSpaceMultiRobotMotionValidator.hpp"
 #include "Common.hpp"
 #include "CollisionChecker.hpp"
 #include "DartHelper.hpp"
@@ -50,8 +51,8 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
   dart::dynamics::SkeletonPtr floor = createFloor();
   dart::dynamics::SkeletonPtr wall = createBox(Eigen::Vector3d(+0.5, +0.0, 0.75), 0.16, 2.0, 1.5); //0.16
-  dart::dynamics::SkeletonPtr point1 = createSphere(Eigen::Vector3d(-0.5, -0.5, -1), 0.01);
-  dart::dynamics::SkeletonPtr point2 = createSphere(Eigen::Vector3d(-0.5, -0.5, -2), 0.01);
+  dart::dynamics::SkeletonPtr point1 = createSphere(0.01);
+  dart::dynamics::SkeletonPtr point2 = createSphere(0.01);
 
   dart::simulation::WorldPtr world(new dart::simulation::World);
   world->addSkeleton(manipulator1);

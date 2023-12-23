@@ -7,7 +7,7 @@
 OMPL_CLASS_FORWARD(KinematicsSolver);
 
 const bool kDebugInfo = false;
-const float kStepSize = 0.1; //was 0.1
+const float kStepSize = 0.025; //was 0.1
 const float kIntermediateStatesStepSize = 0.01; //was 0.01
 const size_t kMaxNonIncreasingIterations = 10;
 const float kOutOfBoundsJointLimitPadding = 0.0;//1e-2;

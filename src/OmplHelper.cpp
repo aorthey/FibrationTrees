@@ -112,7 +112,6 @@ std::optional<ompl::base::State*> ComputeValidTotalState(const ompl::multilevel:
   size_t samples = 0;
   while(samples++ < kMaxResampleIteration) {
     factor->liftLeafStates(leaf_node_states, state);
-    factor->printState(state);
     if(factor->isValid(state)) {
       return state;
     }

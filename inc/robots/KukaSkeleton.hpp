@@ -19,20 +19,15 @@ dart::dynamics::SkeletonPtr createKukaSkeleton(const std::string& urdf_name =
   manipulator->setSelfCollisionCheck(true);
   manipulator->setAdjacentBodyCheck(true);
 
-  //Turn manipulator grey
-  // for(const auto& body_node : manipulator->getBodyNodes()) {
-  //   auto shapeNodes = body_node->getShapeNodesWith<dart::dynamics::VisualAspect>();
-  //   for(const auto& node : shapeNodes) {
-  //     std::shared_ptr<dart::dynamics::MeshShape> mesh =
-  //         std::dynamic_pointer_cast<dart::dynamics::MeshShape>(
-  //                 node->getShape());
-  //     const Eigen::Vector4d c(0.8,0.8,0.8,1);
-  //     if(mesh) {
-  //       mesh->setColorMode(dart::dynamics::MeshShape::SHAPE_COLOR);
-  //       mesh->setAlphaMode(dart::dynamics::MeshShape::SHAPE_ALPHA);
-  //     }
-  //     node->getVisualAspect()->setColor(c);
-  //   }
-  // }
+  //Disable friction. This was causing an assert error in ContactConstraint.cpp
+  //in dartsim
+  for(const auto& body_node : manipulator->getBodyNodes()) {
+    auto nodes = body_node->getShapeNodesWith<dart::dynamics::DynamicsAspect>();
+    for(const auto& node : nodes) {
+      node->getDynamicsAspect()->setFrictionCoeff(0.0);
+      node->getDynamicsAspect()->setPrimaryFrictionCoeff(0.0);
+      node->getDynamicsAspect()->setSecondaryFrictionCoeff(0.0);
+    }
+  }
   return manipulator;
 }

@@ -34,7 +34,7 @@ bool CollisionChecker::IsInCollision(const dart::simulation::WorldPtr& world) {
 
       if(collision) {
         // for(const auto& body : result.getCollidingBodyNodes()) {
-        //   OMPL_WARN("Collision body %s", body->getName().c_str());
+        //   OMPL_WARN("Collision %s", body->getName().c_str());
         // }
         // auto N = world->getNumSkeletons();
         // for(size_t k =0; k<N; k++) {
@@ -43,7 +43,7 @@ bool CollisionChecker::IsInCollision(const dart::simulation::WorldPtr& world) {
         //     if(!result.inCollision(body_node)) {
         //       continue;
         //     }
-        //     OMPL_WARN("Collision body %s", skeleton->getName().c_str());
+        //     OMPL_WARN("Collision %s", skeleton->getName().c_str());
         //   }
         // }
         return true;

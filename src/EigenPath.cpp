@@ -16,6 +16,13 @@ EigenPath::EigenPath(const ompl::base::PathPtr& path) {
   configs_.clear();
   for(size_t k = 0; k < states.size(); k++) {
     Eigen::VectorXd config = StateToEigenVectorXd(si, states.at(k));
+    if(k > 0) {
+      if((config - configs_.back()).norm() > 0.5) {
+        OMPL_ERROR("Configs are far apart.");
+        std::cout << "Last     config: " << configs_.back().format(CommaFmt) << std::endl;
+        std::cout << "Current  config: " << config.format(CommaFmt) << std::endl;
+      }
+    }
     configs_.push_back(config);
   }
   InitLengthFromConfigs(configs_);

@@ -266,7 +266,7 @@ void PathReplayWorldNode::CreateKeyPressEvents() {
   events_.push_back({'m', "increase execution speed", [&](){increaseSpeed();}});
   events_.push_back({'1', "show/hide solution path", [&](){toggleSolutionPathVisibility();}});
   events_.push_back({'2', "show/hide planner data", [&](){togglePlannerDataVisibility();}});
-  events_.push_back({'4', "store planner path", 
+  events_.push_back({'8', "store planner path", 
       [&](){
         for(const auto& [skeleton, path] : skeleton_and_path_) {
           auto name = "eigen_path_"+skeleton->getName();
@@ -274,10 +274,10 @@ void PathReplayWorldNode::CreateKeyPressEvents() {
           OMPL_INFORM("Save path %s", name.c_str()); 
         }
       }});
-  events_.push_back({'5', "load planner path", 
+  events_.push_back({'9', "load planner path", 
       [&](){
         for(const auto& [skeleton, path] : skeleton_and_path_) {
-          auto name = "eigen_path_"+skeleton->getName();
+          auto name = "fail_eigen_path_"+skeleton->getName();
           path->Load(name);
           OMPL_INFORM("Load path %s", name.c_str()); 
         }

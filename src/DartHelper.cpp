@@ -136,7 +136,7 @@ dart::dynamics::SkeletonPtr createCylinder(const Eigen::Vector3d& position, floa
     return cylinder;
 }
 
-dart::dynamics::SkeletonPtr createSphere(const Eigen::Vector3d& position, float radius) {
+dart::dynamics::SkeletonPtr createSphere(float radius) {
     static int counter = 0;
     std::string name = "sphere_"+std::to_string(counter++);
     dart::dynamics::SkeletonPtr sphere = dart::dynamics::Skeleton::create(name);
@@ -148,9 +148,9 @@ dart::dynamics::SkeletonPtr createSphere(const Eigen::Vector3d& position, float 
     auto shapeNode = body->createShapeNodeWith<dart::dynamics::VisualAspect, dart::dynamics::CollisionAspect, dart::dynamics::DynamicsAspect>(shape);
     shapeNode->getVisualAspect()->setColor(Eigen::Vector3d(0.5, 0.0, 0.5));
 
-    Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
-    tf.translation() = position;
-    body->getParentJoint()->setTransformFromParentBodyNode(tf);
+    // Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
+    // tf.translation() = position;
+    // body->getParentJoint()->setTransformFromParentBodyNode(tf);
     body->setName(name);
 
     return sphere;

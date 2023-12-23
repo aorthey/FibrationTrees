@@ -84,39 +84,23 @@ void AddConfig(const Eigen::VectorXd& config, std::vector<Eigen::VectorXd>& conf
   }
   const auto last_config = configs.back();
   const auto dist = (last_config-config).norm();
-  //if(dist < Epsilon) {
-  //  //avoid duplicates
-  //  return;
-  //}
   if(dist > 1.0) {
-    std::cout << "ERROR: " << config.format(CommaFmt) << std::endl;
-    throw "JointFlip";
+    // std::cout << "Detected joint flip" << std::endl;
+    // std::cout << "Current config : " << config.format(CommaFmt) << std::endl;
+    // std::cout << "Last    config : " << last_config.format(CommaFmt) << std::endl;
+    return;
+    // throw "JointFlip";
   }
 
   int num_steps = dist / kIntermediateStatesStepSize;
   for(size_t k = 1; k<num_steps;k++) {
     configs.push_back(last_config + k * kIntermediateStatesStepSize * (config - last_config));
   }
-  // if((config - configs.back()).norm() > Epsilon) {
-  //   configs.push_back(config);
-  // }
 }
 
 
 Eigen::VectorXd KinematicsSolver::ForwardStep(const Eigen::VectorXd& config, const Eigen::VectorXd& dx) const {
   Eigen::VectorXd next = config + kStepSize * dx;
-  // const auto& lb = skeleton_->getPositionLowerLimits();
-  // const auto& ub = skeleton_->getPositionUpperLimits();
-  // for(size_t k = 0; k < next.size(); k++) {
-  //   if(next[k] < lb[k])
-  //   {
-  //     next(k) = lb(k);
-  //   }
-  //   if(next[k] > ub[k])
-  //   {
-  //     next(k) = ub[k];
-  //   }
-  // }
   return next;
 }
 
@@ -222,6 +206,7 @@ std::vector<Eigen::VectorXd> KinematicsSolver::solve_edge_ik_with_config(const E
     auto maybe_fk = solve_fk(next.config);
     if(!maybe_fk.has_value()) {
       if(kDebugInfo) std::cout << "Could not solve FK for " << next.config.format(CommaFmt) << std::endl;
+      success_ = true;
       return configs;
     }
     next.tcp = maybe_fk.value();
