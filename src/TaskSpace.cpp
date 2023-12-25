@@ -13,6 +13,7 @@ TaskSpace::~TaskSpace() {
 void TaskSpace::interpolate(const ompl::base::State *from, const ompl::base::State *to, double t, ompl::base::State *state) const {
   const auto from_vector = StateToEigenVectorXd(getDimension(), from);
   const auto to_vector = StateToEigenVectorXd(getDimension(), to);
+  //std::cout << "Interpolate " << t << std::endl;
   const auto configs = kinematics_solver_->solve_edge_ik_with_config(from_vector, to_vector);
 
   if(!kinematics_solver_->lastSolveWasSuccessful() || configs.empty()) {

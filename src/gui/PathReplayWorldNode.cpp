@@ -17,8 +17,52 @@ PathReplayWorldNode::PathReplayWorldNode(dart::simulation::WorldPtr world)
 PathReplayWorldNode::~PathReplayWorldNode() {
 }
 
-const float kVisualizationStepSize = 0.01;
+const float kVisualizationStepSize = 0.01; //was 0.01
 
+std::vector<Eigen::Vector3d> MakeEdgeVertices(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::SpaceInformationPtr& si, const ompl::base::State* s1, const ompl::base::State* s2, std::vector<Eigen::VectorXd>& configs) {
+  const auto L = si->distance(s1, s2);
+
+  std::vector<Eigen::Vector3d> vertices;
+  auto sout = si->allocState();
+  for(double d = 0.0; d < L + kVisualizationStepSize; d+= kVisualizationStepSize) {
+    si->getStateSpace()->interpolate(s1, s2, d/L, sout);
+    const auto config = StateToEigenVectorXd(si, sout);
+    configs.push_back(config);
+    const auto v = GetFK(skeleton, config);
+    vertices.push_back(v);
+  }
+  si->freeState(sout);
+  return vertices;
+}
+
+// void PathReplayWorldNode::AddPath(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PathPtr& ompl_path, 
+//     const Eigen::Vector3d& color) {
+//   if(ompl_path == nullptr) {
+//     return;
+//   }
+//   auto factor = std::static_pointer_cast<ompl::multilevel::FactoredSpaceInformation>(ompl_path->getSpaceInformation());
+//   ompl::geometric::PathGeometric &path = *static_cast<ompl::geometric::PathGeometric *>(ompl_path.get());
+
+//   auto states = path.getStates();
+
+//   std::vector<Eigen::VectorXd> configs;
+//   std::cout << "Path has " << states.size() << " states." << std::endl;
+//   for(size_t k = 1; k < states.size(); k++) {
+//     auto s1 = states.at(k - 1);
+//     auto s2 = states.at(k);
+
+//     std::vector<Eigen::VectorXd> edge_configs;
+//     std::cout << "Create edge " << k << "/" << states.size() - 1 << std::endl;
+//     auto vertices = MakeEdgeVertices(skeleton, factor, s1, s2, edge_configs);
+//     configs.insert(configs.end(), edge_configs.begin(), edge_configs.end());
+
+//     auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices, color, kPathLineWidth));
+//     solution_path_frames_.push_back(frame_line);
+//   }
+//   std::cout << "Found " << configs.size() << " configs for path with " << states.size() << " states." << std::endl;
+//   auto eigen_path = std::make_shared<PathType>(configs);
+//   skeleton_and_path_.push_back(std::make_pair(skeleton, eigen_path));
+// }
 void PathReplayWorldNode::AddPath(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PathPtr& ompl_path, 
     const Eigen::Vector3d& color) {
   if(ompl_path == nullptr) {
@@ -42,7 +86,6 @@ void PathReplayWorldNode::AddPlannerData(const dart::dynamics::SkeletonPtr& skel
   const auto& si = data.getSpaceInformation();
   const auto Nvertices = data.numVertices();
   unsigned int counter = 0;
-  auto sout = si->allocState();
   for(unsigned int vindex = 0; vindex < Nvertices; vindex++) {
     for(unsigned int windex = 0; windex < Nvertices; windex++) {
       if(!data.edgeExists(vindex, windex)) {
@@ -52,21 +95,12 @@ void PathReplayWorldNode::AddPlannerData(const dart::dynamics::SkeletonPtr& skel
       const auto s1 = data.getVertex(vindex).getState();
       const auto s2 = data.getVertex(windex).getState();
 
-      const auto step_size = 0.2f;
-      const auto L = si->distance(s1, s2);
-
-      std::vector<Eigen::Vector3d> vertices;
-      for(double d = 0.0; d < L + step_size; d+= step_size) {
-        si->getStateSpace()->interpolate(s1, s2, d/L, sout);
-        const auto config = StateToEigenVectorXd(si, sout);
-        const auto v = GetFK(skeleton, config);
-        vertices.push_back(v);
-      }
+      std::vector<Eigen::VectorXd> configs;
+      auto vertices = MakeEdgeVertices(skeleton, si, s1, s2, configs);
       auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices, kRoadmapColorVertex, kRoadmapLineWidth));
       planner_data_frames_.push_back(frame_line);
     }
   }
-  si->freeState(sout);
   OMPL_INFORM("Added %d vertices and %d(%d) edges.", Nvertices, counter, data.numEdges());
   togglePlannerDataVisibility();
 }

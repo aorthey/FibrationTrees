@@ -39,16 +39,16 @@ void Visualizer::AddPlanner(const dart::dynamics::SkeletonPtr& skeleton, const o
   planner->getPlannerData(planner_data);
   OMPL_INFORM("Found %d vertices.", planner_data.numVertices());
   OMPL_INFORM("Add planner data to visualizer...");
-  world_node->AddPlannerData(skeleton, planner_data);
+  // world_node->AddPlannerData(skeleton, planner_data);
 
   ////////////////////////////////////////////////////////////////////////////////
   // Maybe add solution path
   ////////////////////////////////////////////////////////////////////////////////
-  OMPL_INFORM("Add path to visualizer...");
   auto pdef = planner->getProblemDefinition();
   if(pdef->hasApproximateSolution() ||
      pdef->hasExactSolution())
   {
+    OMPL_INFORM("Print solution path...");
     auto path = pdef->getSolutionPath();
     ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
     OMPL_INFORM("Found path with %d states.", pgeo.getStateCount());
@@ -59,7 +59,8 @@ void Visualizer::AddPlanner(const dart::dynamics::SkeletonPtr& skeleton, const o
       std::cout << "EndEffector position is " << v[0] << ", " << v[1] << ", " << v[2] << std::endl;
     }
     OMPL_INFORM("Interpolate path...");
-    pgeo.interpolate(100);
+    // pgeo.interpolate();
+    OMPL_INFORM("Add path to visualizer...");
     AddPath(skeleton, path);
   }
 }
@@ -127,7 +128,7 @@ void Visualizer::AddMultiRobotPlanner(const std::unordered_map<std::string, dart
     for(const auto& state : pgeo.getStates()) {
       path->getSpaceInformation()->printState(state);
     }
-    pgeo.interpolate(100);
+    // pgeo.interpolate();
     AddMultiRobotPath(skeletons, path);
   }
 }

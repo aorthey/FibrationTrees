@@ -17,10 +17,11 @@ EigenPath::EigenPath(const ompl::base::PathPtr& path) {
   for(size_t k = 0; k < states.size(); k++) {
     Eigen::VectorXd config = StateToEigenVectorXd(si, states.at(k));
     if(k > 0) {
-      if((config - configs_.back()).norm() > 0.5) {
+      if((config - configs_.back()).norm() > M_PI) {
         OMPL_ERROR("Configs are far apart.");
         std::cout << "Last     config: " << configs_.back().format(CommaFmt) << std::endl;
         std::cout << "Current  config: " << config.format(CommaFmt) << std::endl;
+        continue;
       }
     }
     configs_.push_back(config);
@@ -33,6 +34,10 @@ EigenPath::EigenPath(const std::vector<Eigen::VectorXd>& configs) : configs_(con
 }
 
 void EigenPath::InitLengthFromConfigs(const std::vector<Eigen::VectorXd>& configs) {
+  if(configs.size() < 1) {
+    std::cout << "Error: Cannot initialize an empty path." << std::endl;
+    throw "EmptyPath";
+  }
   for(size_t k = 1; k < configs.size(); k++) {
     auto v1 = configs.at(k-1);
     auto v2 = configs.at(k);

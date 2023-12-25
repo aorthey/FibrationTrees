@@ -9,7 +9,7 @@
 
 #include "CollisionChecker.hpp"
 #include "TaskSpace.hpp"
-#include "TaskSpaceMotionValidator.hpp"
+#include "TranslationTaskSpaceMotionValidator.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 // SpaceInformation Makers
@@ -33,7 +33,7 @@ ompl::multilevel::FactoredSpaceInformationPtr MakeTaskSpaceInformation(
   auto factor(std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space));
   factor->setStateValidityChecker(std::make_shared<DartWorldCollisionChecker>(factor, world, manipulator, collision_checker));
   factor->setStateValidityCheckingResolution(0.001);
-  ompl::base::MotionValidatorPtr motion_validator = std::make_shared<TaskSpaceMotionValidator>(factor, kinematics_solver);
+  ompl::base::MotionValidatorPtr motion_validator = std::make_shared<TranslationTaskSpaceMotionValidator>(factor, kinematics_solver);
   factor->setMotionValidator(motion_validator);
 
   return factor;

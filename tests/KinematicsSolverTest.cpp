@@ -7,8 +7,8 @@
 #include "Common.hpp"
 #include "robots/KukaSkeleton.hpp"
 
-const float kAccuracyStraightLine = 5 * 1e-2; //Staying along the straight line path
-const float kAccuracyGoal = 1e-1; //Reaching goal frame
+const float kAccuracyStraightLine = 1e-2; //Staying along the straight line path
+const float kAccuracyGoal = 1e-2; //Reaching goal frame
 const size_t kNumberRandomConfigs = 10;
 
 double LineDistance(const Eigen::Vector3d& a, const Eigen::Vector3d& b, const Eigen::Vector3d& p) {

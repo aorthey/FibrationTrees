@@ -30,6 +30,8 @@ dart::dynamics::SkeletonPtr createSphere(float radius);
 dart::dynamics::SkeletonPtr createBox(const Eigen::Vector3d& position, float length_x, float length_y, float length_z);
 dart::dynamics::SkeletonPtr createFromURDF(const std::string& urdf_name, const Eigen::Vector3d& position);
 void changeBodyColor(const dart::dynamics::SkeletonPtr& skeleton, const Eigen::Vector4d& color);
+void hide(const dart::dynamics::SkeletonPtr& skeleton);
+void show(const dart::dynamics::SkeletonPtr& skeleton);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Simple frame constructors

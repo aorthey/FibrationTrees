@@ -5,7 +5,6 @@
 #include "TaskSpace.hpp"
 #include "TaskSpaceGoal.hpp"
 #include "TaskSpaceProjection.hpp"
-#include "TaskSpaceMotionValidator.hpp"
 #include "TaskSpaceMultiRobotMotionValidator.hpp"
 #include "Common.hpp"
 #include "CollisionChecker.hpp"
@@ -53,6 +52,9 @@ int main(int argc, char* argv[]) {
   dart::dynamics::SkeletonPtr wall = createBox(Eigen::Vector3d(+0.5, +0.0, 0.75), 0.16, 2.0, 1.5); //0.16
   dart::dynamics::SkeletonPtr point1 = createSphere(0.01);
   dart::dynamics::SkeletonPtr point2 = createSphere(0.01);
+
+  hide(point1);
+  hide(point2);
 
   dart::simulation::WorldPtr world(new dart::simulation::World);
   world->addSkeleton(manipulator1);
@@ -206,7 +208,17 @@ int main(int argc, char* argv[]) {
 
   auto path = std::make_shared<ompl::geometric::PathGeometric>(factor, start, goal);
   ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
-  pgeo.interpolate(100);
+
+  factor->setup();
+  factor->printSettings(std::cout);
+  std::cout << " ValidSegmentCount        : " << factor->getStateSpace()->validSegmentCount(start, goal) << std::endl;
+  std::cout << " LongestValidSegmentLength: " << factor->getStateSpace()->getLongestValidSegmentLength() << std::endl;
+  std::cout << " ValidSegmentCountFactor  : " << factor->getStateSpace()->getValidSegmentCountFactor() << std::endl;
+  std::cout << " Distance                 : " << factor->distance(start, goal) << std::endl;
+
+  std::cout << "Before interpolate: " << pgeo.getStateCount() << " states." << std::endl;
+  pgeo.interpolate();
+  std::cout << "After  interpolate: " << pgeo.getStateCount() << " states." << std::endl;
 
   //////////////////////////////////////////////////////////////////////////////////
   //////Visualize

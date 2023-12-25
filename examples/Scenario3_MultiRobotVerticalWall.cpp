@@ -5,7 +5,6 @@
 #include "TaskSpace.hpp"
 #include "TaskSpaceGoal.hpp"
 #include "TaskSpaceProjection.hpp"
-#include "TaskSpaceMotionValidator.hpp"
 #include "TaskSpaceMultiRobotMotionValidator.hpp"
 #include "Common.hpp"
 #include "CollisionChecker.hpp"
@@ -54,6 +53,9 @@ int main(int argc, char* argv[]) {
   dart::dynamics::SkeletonPtr wall = createBox(Eigen::Vector3d(+0.5, +0.0, 0.75), 0.16, 2.0, 1.5);
   dart::dynamics::SkeletonPtr point1 = createSphere(0.01);
   dart::dynamics::SkeletonPtr point2 = createSphere(0.01);
+
+  hide(point1);
+  hide(point2);
 
   dart::simulation::WorldPtr world(new dart::simulation::World);
   world->addSkeleton(manipulator1);
@@ -212,7 +214,7 @@ int main(int argc, char* argv[]) {
   planner->setup();
   planner->setRange(Inf);
 
-  float timeout = 100.0;
+  float timeout = 500.0;
   ompl::base::PlannerStatus status = planner->Planner::solve(timeout);
 
   //////////////////////////////////////////////////////////////////////////////////

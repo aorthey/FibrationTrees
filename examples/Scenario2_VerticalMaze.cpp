@@ -81,8 +81,6 @@ int main(int argc, char* argv[]) {
   const int kMaxResampleIteration = 100;
   bool has_solution = true;
 
-  Visualizer visualizer(world);
-
   if(!SampleValidLift(projection, factor, kMaxResampleIteration, task_start, start)) {
     OMPL_ERROR("Could not find valid start state after %d samples.", kMaxResampleIteration);
     child->printState(task_start);
@@ -124,17 +122,14 @@ int main(int argc, char* argv[]) {
 
     ompl::base::PlannerStatus status = planner->solve(ptc);
 
+    Visualizer visualizer(world);
     std::cout << "Add planner to visualizer..." << std::endl;
     visualizer.AddPlanner(manipulator, planner);
     std::cout << "Set collision checker..." << std::endl;
     visualizer.SetCollisionChecker(collision_checker);
     std::cout << "Add path to visualizer..." << std::endl;
     visualizer.AddPath(point, planner->getProblemDefinition(child->getName())->getSolutionPath(), Eigen::Vector3d(1, 1, 0));
+    visualizer.Run();
   }
-
-  ////////////////////////////////////////////////////////////////////////////////
-  ////Visualize
-  ////////////////////////////////////////////////////////////////////////////////
-  visualizer.Run();
   return 0;
 }

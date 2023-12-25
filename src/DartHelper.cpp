@@ -248,3 +248,23 @@ void changeBodyColor(const dart::dynamics::SkeletonPtr& skeleton, const Eigen::V
     }
   }
 }
+void hide(const dart::dynamics::SkeletonPtr& skeleton) {
+  for(const auto& body_node : skeleton->getBodyNodes()) {
+    auto shapeNodes = body_node->getShapeNodesWith<dart::dynamics::VisualAspect>();
+    for(const auto& node : shapeNodes) {
+      auto properties(node->getVisualAspect()->getProperties());
+      properties.mHidden = true;
+      node->getVisualAspect()->setProperties(properties);
+    }
+  }
+}
+void show(const dart::dynamics::SkeletonPtr& skeleton) {
+  for(const auto& body_node : skeleton->getBodyNodes()) {
+    auto shapeNodes = body_node->getShapeNodesWith<dart::dynamics::VisualAspect>();
+    for(const auto& node : shapeNodes) {
+      auto properties(node->getVisualAspect()->getProperties());
+      properties.mHidden = false;
+      node->getVisualAspect()->setProperties(properties);
+    }
+  }
+}

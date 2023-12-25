@@ -1,4 +1,4 @@
-#include "TaskSpaceMotionValidator.hpp"
+#include "TranslationTaskSpaceMotionValidator.hpp"
 
 #include "EigenPath.hpp"
 #include "OmplHelper.hpp"
@@ -6,34 +6,34 @@
 
 const float kDeltaCollisionCheckStepSize = 0.005;
 
-TaskSpaceMotionValidator::TaskSpaceMotionValidator(
+TranslationTaskSpaceMotionValidator::TranslationTaskSpaceMotionValidator(
     ompl::base::SpaceInformation *si, const KinematicsSolverPtr& kinematics_solver) 
-  : ompl::base::DiscreteMotionValidator(si), kinematics_solver_(kinematics_solver)
+  : ompl::multilevel::TaskSpaceMotionValidator(si), kinematics_solver_(kinematics_solver)
 {
   tmpState_ = si->allocState();
   lastValidState_ = si->allocState();
 }
-TaskSpaceMotionValidator::TaskSpaceMotionValidator(
+TranslationTaskSpaceMotionValidator::TranslationTaskSpaceMotionValidator(
     const ompl::base::SpaceInformationPtr &si, const KinematicsSolverPtr& kinematics_solver) 
-  : ompl::base::DiscreteMotionValidator(si), kinematics_solver_(kinematics_solver)
+  : ompl::multilevel::TaskSpaceMotionValidator(si), kinematics_solver_(kinematics_solver)
 {
   tmpState_ = si->allocState();
   lastValidState_ = si->allocState();
 }
 
-TaskSpaceMotionValidator::~TaskSpaceMotionValidator() {
+TranslationTaskSpaceMotionValidator::~TranslationTaskSpaceMotionValidator() {
   si_->freeState(tmpState_);
   si_->freeState(lastValidState_);
 }
 
-bool TaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
+bool TranslationTaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
   std::pair<ompl::base::State *, double> lastValid;
   lastValid.first = nullptr;
   lastValid.second = 0.0f;
   return checkMotion(s1, s2, lastValid);
 }
 
-bool TaskSpaceMotionValidator::FillLastStateOnNoProgressAndReturn(
+bool TranslationTaskSpaceMotionValidator::FillLastStateOnNoProgressAndReturn(
     const ompl::base::State *state, std::pair<ompl::base::State *, double> &lastValid) const {
   if(lastValid.first != nullptr) {
     si_->copyState(lastValid.first, state);
@@ -42,7 +42,7 @@ bool TaskSpaceMotionValidator::FillLastStateOnNoProgressAndReturn(
   return false;
 }
 
-bool TaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const {
+bool TranslationTaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const {
   const auto from_vector = StateToEigenVectorXd(si_->getStateDimension(), s1);
   const auto to_vector = StateToEigenVectorXd(si_->getStateDimension(), s2);
 
@@ -91,4 +91,39 @@ bool TaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const om
     lastValid.second = si_->distance(s1, lastValid.first);
   }
   return false;
+}
+
+std::vector<ompl::base::State*> TranslationTaskSpaceMotionValidator::propagateMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
+
+  std::vector<ompl::base::State*> result;
+  ////////////////////////////////////////////////////////////////////////////////
+  //Solve edge ik
+  ////////////////////////////////////////////////////////////////////////////////
+  const auto from_vector = StateToEigenVectorXd(si_->getStateDimension(), s1);
+  const auto to_vector = StateToEigenVectorXd(si_->getStateDimension(), s2);
+  const auto configs = kinematics_solver_->solve_edge_ik_with_config(from_vector, to_vector);
+  if(configs.empty()) {
+    return result;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  //Check validities
+  ////////////////////////////////////////////////////////////////////////////////
+  auto last_config = from_vector;
+  for(const auto& config : configs) {
+    EigenVectorXdToState(config, tmpState_);
+    if(!si_->isValid(tmpState_)) {
+      return result;
+    }
+    //Do not add too many states, only every X spaced
+    if((config - last_config).norm() < 0.1) {
+      continue;
+    }
+    auto state = si_->allocState();
+    si_->copyState(state, tmpState_);
+    result.push_back(state);
+
+    last_config = config;
+  }
+  return result;
 }
