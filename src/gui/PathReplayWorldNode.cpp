@@ -261,7 +261,7 @@ void PathReplayWorldNode::AddMultiRobotPlannerData(const std::vector<RobotPtr>& 
           const auto& name = childState.first;
 
           const auto config = StateToEigenVectorXd(factor->getChild(name), childState.second);
-          const auto v = GetFK(robot.at(0), config);
+          const auto v = GetFK(robots.at(0)->GetSkeleton(), config);
 
           vertices.at(name).push_back(v);
         }

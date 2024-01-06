@@ -102,15 +102,15 @@ int main(int argc, char* argv[]) {
   std::vector<RobotPtr> robots;
   for(size_t k = 0; k < Nrobots; k++) {
     auto robot = MakeRobot<ZeppelinRobot>(world, obstacles);
-    auto sphere_robot = MakeRobot<ZeppelinInnerSphereRobot>(world, obstacles);
-
-    hide(sphere_robot->GetSkeleton());
-
     auto factor = robot->GetSpaceInformation();
-    auto child = sphere_robot->GetSpaceInformation();
 
-    auto projection = std::make_shared<ompl::multilevel::Projection_RNSO2_RN>(factor->getStateSpace(), child->getStateSpace());
-    factor->addChild(child, projection);
+    //Create lower-dimensional abstraction
+    // auto sphere_robot = MakeRobot<ZeppelinInnerSphereRobot>(world, obstacles);
+    // hide(sphere_robot->GetSkeleton());
+    // auto child = sphere_robot->GetSpaceInformation();
+    // auto projection = std::make_shared<ompl::multilevel::Projection_RNSO2_RN>(factor->getStateSpace(), child->getStateSpace());
+    // factor->addChild(child, projection);
+
     factors.push_back(factor);
     robots.push_back(robot);
   }
@@ -136,7 +136,7 @@ int main(int argc, char* argv[]) {
   auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(root);
   planner->setProblemDefinition(pdef);
   planner->setup();
-  planner->setRange(0.1);
+  planner->setRange(Inf);
  
   float timeout = 10.0;
   ompl::base::PlannerStatus status = planner->Planner::solve(timeout);
