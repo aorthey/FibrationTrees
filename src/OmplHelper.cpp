@@ -1,9 +1,11 @@
 #include "OmplHelper.hpp"
 
 #include <ompl/base/spaces/RealVectorStateSpace.h>
+#include <ompl/base/goals/GoalState.h>
 
 Eigen::VectorXd StateToEigenVectorXd(const int Ndimension, const ompl::base::State* state) {
   double *state_R = state->as<ompl::base::RealVectorStateSpace::StateType>()->values;
+
   Eigen::VectorXd v(Ndimension);
   for(size_t k = 0; k < Ndimension; k++) {
     v[k] = state_R[k];
@@ -12,6 +14,10 @@ Eigen::VectorXd StateToEigenVectorXd(const int Ndimension, const ompl::base::Sta
 }
 
 Eigen::VectorXd StateToEigenVectorXd(const ompl::base::SpaceInformation* si, const ompl::base::State* state) {
+  // std::vector<double> reals(si->getStateDimension(), 0.0);
+  // si->getStateSpace()->copyToReals(reals, state);
+  // Eigen::VectorXd v = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(reals.data(), reals.size());
+  // return v;
   return StateToEigenVectorXd(si->getStateDimension(), state);
 }
 
@@ -24,6 +30,15 @@ Eigen::Vector3d StateToEigenVector3d(const ompl::base::State* state) {
   Eigen::Vector3d v;
   for(size_t k = 0; k < 3; k++) {
     v[k] = state_R[k];
+  }
+  return v;
+}
+
+Eigen::Vector3d EigenVectorXdToEigenVector3d(const Eigen::VectorXd& input) {
+  Eigen::Vector3d v;
+  auto N = std::min(size_t(3), size_t(input.size()));
+  for(size_t k = 0; k < N; k++) {
+    v[k] = input[k];
   }
   return v;
 }
@@ -120,4 +135,30 @@ std::optional<ompl::base::State*> ComputeValidTotalState(const ompl::multilevel:
   OMPL_ERROR("Invalid total state after %d iterations.", samples);
   factor->freeState(state);
   return std::nullopt;
+}
+
+ompl::base::State* AllocStateFromEigen(const RobotPtr& robot, const Eigen::VectorXd& v) {
+  auto state = robot->GetSpaceInformation()->allocState();
+  robot->EigenToState(v, state);
+  return state;
+}
+
+ompl::base::GoalPtr GoalFromEigen(const RobotPtr& robot, const Eigen::VectorXd& v, float threshold) {
+  auto goal_region = std::make_shared<ompl::base::GoalState>(robot->GetSpaceInformation());
+  auto state = AllocStateFromEigen(robot, v);
+  robot->GetSpaceInformation()->printState(state);
+  goal_region->setState(state);
+  goal_region->setThreshold(threshold);
+  return goal_region;
+}
+
+Eigen::VectorXd MakeEigen(std::initializer_list<double> const &init_values) {
+  std::vector<double> values{init_values};
+  // Eigen::VectorXd v = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(values.data(), values.size());
+  // return v;
+  return MakeEigen(values);
+}
+Eigen::VectorXd MakeEigen(std::vector<double> values) {
+  Eigen::VectorXd v = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(values.data(), values.size());
+  return v;
 }

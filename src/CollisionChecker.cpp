@@ -3,11 +3,13 @@
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 
 #include "OmplHelper.hpp"
+#include "robots/Robot.hpp"
+#include "Common.hpp"
 
 CollisionChecker::CollisionChecker(const dart::simulation::WorldPtr& world, 
     const std::vector<dart::dynamics::SkeletonPtr>& group1, 
     const std::vector<dart::dynamics::SkeletonPtr>& group2) 
-  : group1_(group1), group2_(group2) {
+  : world_(world), group1_(group1), group2_(group2) {
   auto N = world->getNumSkeletons();
   for(size_t k =0; k<N; k++) {
     const auto& skeleton = world->getSkeleton(k);
@@ -18,6 +20,10 @@ CollisionChecker::CollisionChecker(const dart::simulation::WorldPtr& world,
       }
     }
   }
+}
+
+bool CollisionChecker::IsInCollision() {
+  return IsInCollision(world_);
 }
 
 bool CollisionChecker::IsInCollision(const dart::simulation::WorldPtr& world) {
@@ -33,19 +39,6 @@ bool CollisionChecker::IsInCollision(const dart::simulation::WorldPtr& world) {
       bool collision = collisionEngine->collide(rhsGroup.get(), lhsGroup.get(), option, &result);
 
       if(collision) {
-        // for(const auto& body : result.getCollidingBodyNodes()) {
-        //   OMPL_WARN("Collision %s", body->getName().c_str());
-        // }
-        // auto N = world->getNumSkeletons();
-        // for(size_t k =0; k<N; k++) {
-        //   const auto& skeleton = world->getSkeleton(k);
-        //   for(const auto& body_node : skeleton->getBodyNodes()) {
-        //     if(!result.inCollision(body_node)) {
-        //       continue;
-        //     }
-        //     OMPL_WARN("Collision %s", skeleton->getName().c_str());
-        //   }
-        // }
         return true;
       }
     }
@@ -53,10 +46,11 @@ bool CollisionChecker::IsInCollision(const dart::simulation::WorldPtr& world) {
   return false;
 }
 
-void CollisionChecker::ColorAllCollisionBodies(dart::simulation::WorldPtr world) {
-  auto collisionEngine
-      = world->getConstraintSolver()->getCollisionDetector();
+void CollisionChecker::PrintCollisionInfo() {
+  auto collisionEngine = world_->getConstraintSolver()->getCollisionDetector();
 
+  std::string collision_info;
+  std::string delim;
   for(const auto& rhs : group1_) {
     for(const auto& lhs : group2_) {
       auto rhsGroup = collisionEngine->createCollisionGroup(rhs.get());
@@ -66,57 +60,15 @@ void CollisionChecker::ColorAllCollisionBodies(dart::simulation::WorldPtr world)
       dart::collision::CollisionResult result;
       bool collision = collisionEngine->collide(rhsGroup.get(), lhsGroup.get(), option, &result);
 
-      auto N = world->getNumSkeletons();
-
-      for(size_t k =0; k<N; k++) {
-        const auto& skeleton = world->getSkeleton(k);
-        for(const auto& body_node : skeleton->getBodyNodes()) {
-          if(!result.inCollision(body_node)) {
-            continue;
-          }
-          auto shapeNodes = body_node->getShapeNodesWith<dart::dynamics::VisualAspect>();
-
-          for(const auto& node : shapeNodes) {
-            OMPL_ERROR("In Collision: %s--%s--%s", skeleton->getName().c_str(), body_node->getName().c_str(), node->getName().c_str());
-            std::shared_ptr<dart::dynamics::MeshShape> mesh =
-                std::dynamic_pointer_cast<dart::dynamics::MeshShape>(
-                        node->getShape());
-            if(mesh) {
-              node->getVisualAspect()->setColor(kCollisionColor);
-              mesh->incrementVersion();
-              mesh->refreshData();
-            }
-            auto properties(node->getVisualAspect()->getProperties());
-            properties.mHidden = false;
-            properties.mUseDefaultColor = false;
-            // properties.mRGBA = kCollisionColor;
-            node->getVisualAspect()->setProperties(properties);
-            node->getVisualAspect()->notifyPropertiesUpdated();
-            node->getVisualAspect()->incrementVersion();
-          }
+      if(collision) {
+        for(const auto& body : result.getCollidingBodyNodes()) {
+          collision_info += delim + body->getName();
+          delim = ", ";
         }
       }
     }
   }
-}
-
-void CollisionChecker::ResetColors(const dart::simulation::WorldPtr& world) {
-  auto N = world->getNumSkeletons();
-
-  for(size_t k =0; k<N; k++) {
-    const auto& skeleton = world->getSkeleton(k);
-    for(const auto& body_node : skeleton->getBodyNodes()) {
-      auto visualShapeNodes = body_node->getShapeNodesWith<dart::dynamics::VisualAspect>();
-      for(auto& visual_node : visualShapeNodes) {
-        auto node = default_colors_.find(visual_node);
-        if(node == default_colors_.end()) {
-          continue;
-        }
-        visual_node->getVisualAspect()->setColor(node->second);
-        visual_node->getVisualAspect()->show();
-      }
-    }
-  }
+  OMPL_DEBUG("Colliding bodies: %s", collision_info.c_str());
 }
 
 MultiCollisionChecker::MultiCollisionChecker(const dart::simulation::WorldPtr& world, 
@@ -132,18 +84,6 @@ bool MultiCollisionChecker::IsInCollision(const dart::simulation::WorldPtr& worl
     }
   }
   return false;
-}
-
-void MultiCollisionChecker::ColorAllCollisionBodies(dart::simulation::WorldPtr world) {
-  for(const auto& collision_checker : collision_checkers_) {
-    collision_checker->ColorAllCollisionBodies(world);
-  }
-}
-
-void MultiCollisionChecker::ResetColors(const dart::simulation::WorldPtr& world) {
-  for(const auto& collision_checker : collision_checkers_) {
-    collision_checker->ResetColors(world);
-  }
 }
 
 DartWorldCollisionChecker::DartWorldCollisionChecker(const ompl::base::SpaceInformationPtr si, 
@@ -162,6 +102,7 @@ bool DartWorldCollisionChecker::isValid(const ompl::base::State *state) const
   auto ub = skeleton_->getPositionUpperLimits();
   for(size_t k = 0; k < config.size(); k++) {
     if(config[k] < lb[k] || config[k] > ub[k] || config[k] != config[k]) {
+      OMPL_WARN("Out of limits: %f < %f < %f (index %d).", lb[k], ub[k], config[k], k);
       return false;
     }
   }
@@ -170,25 +111,29 @@ bool DartWorldCollisionChecker::isValid(const ompl::base::State *state) const
   return !collision_checker_->IsInCollision(world_);
 }
 
-// DartTransformCollisionChecker::DartTransformCollisionChecker(const ompl::base::SpaceInformationPtr si, 
-//     const dart::simulation::WorldPtr& world,
-//     const dart::dynamics::SkeletonPtr& skeleton,
-//     const CollisionCheckerPtr& collision_checker)
-//   : DartWorldCollisionChecker(si, world, skeleton, collision_checker)
-// {
-// }
+RobotToObstaclesCollisionChecker::RobotToObstaclesCollisionChecker(
+    const dart::simulation::WorldPtr& world,
+    const RobotPtr& robot,
+    const CollisionCheckerPtr& collision_checker)
+  : ompl::base::StateValidityChecker(robot->GetSpaceInformation()), world_(world), robot_(robot), collision_checker_(collision_checker)
+{
+}
 
-// bool DartTransformCollisionChecker::isValid(const ompl::base::State *state) const
-// {
-//   auto config = StateToEigenVector3d(state);
-//   Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
-//   tf.translation() = config;
-
-//   for(const auto& body_node : skeleton_->getBodyNodes()) {
-//     body_node->getParentJoint()->setTransformFromParentBodyNode(tf);
-//   }
-//   return !collision_checker_->IsInCollision(world_);
-// }
+bool RobotToObstaclesCollisionChecker::isValid(const ompl::base::State *state) const
+{
+  auto config = robot_->StateToEigen(state);
+  auto lb = robot_->GetSkeleton()->getPositionLowerLimits();
+  auto ub = robot_->GetSkeleton()->getPositionUpperLimits();
+  for(size_t k = 0; k < config.size(); k++) {
+    if(config[k] < lb[k] || config[k] > ub[k] || config[k] != config[k]) {
+      OMPL_WARN("Out of limits: %f < %f < %f (index %d).", lb[k], ub[k], config[k], k);
+      return false;
+    }
+  }
+  //Check collisions
+  robot_->GetSkeleton()->setConfiguration(config);
+  return !collision_checker_->IsInCollision(world_);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // DartMultiRobotCollisionChecker
@@ -239,7 +184,5 @@ bool DartMultiRobotCollisionChecker::isValid(const ompl::base::State *state) con
     }
     skeleton->setConfiguration(config);
   }
-
-
   return !collision_checker_->IsInCollision(world_);
 }

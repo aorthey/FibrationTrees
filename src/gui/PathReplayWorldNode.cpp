@@ -19,16 +19,40 @@ PathReplayWorldNode::~PathReplayWorldNode() {
 
 const float kVisualizationStepSize = 0.01; //was 0.01
 
+//TODO Deprecated
 std::vector<Eigen::Vector3d> MakeEdgeVertices(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::SpaceInformationPtr& si, const ompl::base::State* s1, const ompl::base::State* s2, std::vector<Eigen::VectorXd>& configs) {
   const auto L = si->distance(s1, s2);
 
   std::vector<Eigen::Vector3d> vertices;
+  if(L < kVisualizationStepSize) {
+    return vertices;
+  }
+
   auto sout = si->allocState();
   for(double d = 0.0; d < L + kVisualizationStepSize; d+= kVisualizationStepSize) {
     si->getStateSpace()->interpolate(s1, s2, d/L, sout);
     const auto config = StateToEigenVectorXd(si, sout);
     configs.push_back(config);
     const auto v = GetFK(skeleton, config);
+    vertices.push_back(v);
+  }
+  si->freeState(sout);
+  return vertices;
+}
+std::vector<Eigen::Vector3d> MakeEdgeVertices(const RobotPtr& robot, const ompl::base::SpaceInformationPtr& si, const ompl::base::State* s1, const ompl::base::State* s2, std::vector<Eigen::VectorXd>& configs) {
+  const auto L = si->distance(s1, s2);
+
+  std::vector<Eigen::Vector3d> vertices;
+  if(L < kVisualizationStepSize) {
+    return vertices;
+  }
+
+  auto sout = si->allocState();
+  for(double d = 0.0; d < L + kVisualizationStepSize; d+= kVisualizationStepSize) {
+    si->getStateSpace()->interpolate(s1, s2, d/L, sout);
+    const auto config = robot->StateToEigen(sout);
+    configs.push_back(config);
+    const auto v = GetFK(robot->GetSkeleton(), config);
     vertices.push_back(v);
   }
   si->freeState(sout);
@@ -60,7 +84,7 @@ std::vector<Eigen::Vector3d> MakeEdgeVertices(const dart::dynamics::SkeletonPtr&
 //     solution_path_frames_.push_back(frame_line);
 //   }
 //   std::cout << "Found " << configs.size() << " configs for path with " << states.size() << " states." << std::endl;
-//   auto eigen_path = std::make_shared<PathType>(configs);
+//   auto eigen_path = std::make_shared<EigenPath>(configs);
 //   skeleton_and_path_.push_back(std::make_pair(skeleton, eigen_path));
 // }
 void PathReplayWorldNode::AddPath(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PathPtr& ompl_path, 
@@ -68,7 +92,7 @@ void PathReplayWorldNode::AddPath(const dart::dynamics::SkeletonPtr& skeleton, c
   if(ompl_path == nullptr) {
     return;
   }
-  auto path = std::make_shared<PathType>(ompl_path);
+  auto path = std::make_shared<EigenPath>(ompl_path);
 
   const float L = path->GetLength();
   std::vector<Eigen::Vector3d> vertices;
@@ -80,6 +104,25 @@ void PathReplayWorldNode::AddPath(const dart::dynamics::SkeletonPtr& skeleton, c
   auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices, color, kPathLineWidth));
   solution_path_frames_.push_back(frame_line);
   skeleton_and_path_.push_back(std::make_pair(skeleton, path));
+}
+
+void PathReplayWorldNode::AddPath(const RobotPtr& robot, const ompl::base::PathPtr& ompl_path, 
+    const Eigen::Vector3d& color) {
+  if(ompl_path == nullptr) {
+    return;
+  }
+  auto path = std::make_shared<EigenPath>(robot, ompl_path);
+
+  const float L = path->GetLength();
+  std::vector<Eigen::Vector3d> vertices;
+  for(float d = 0; d < L+kVisualizationStepSize; d+=kVisualizationStepSize) {
+    const auto s1 = path->GetConfigAt(d / L);
+    const auto v1 = GetFK(robot->GetSkeleton(), s1);
+    vertices.push_back(v1);
+  }
+  auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices, color, kPathLineWidth));
+  solution_path_frames_.push_back(frame_line);
+  skeleton_and_path_.push_back(std::make_pair(robot->GetSkeleton(), path));
 }
 
 void PathReplayWorldNode::AddPlannerData(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PlannerData& data) {
@@ -97,6 +140,28 @@ void PathReplayWorldNode::AddPlannerData(const dart::dynamics::SkeletonPtr& skel
 
       std::vector<Eigen::VectorXd> configs;
       auto vertices = MakeEdgeVertices(skeleton, si, s1, s2, configs);
+      auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices, kRoadmapColorVertex, kRoadmapLineWidth));
+      planner_data_frames_.push_back(frame_line);
+    }
+  }
+  OMPL_INFORM("Added %d vertices and %d(%d) edges.", Nvertices, counter, data.numEdges());
+  togglePlannerDataVisibility();
+}
+void PathReplayWorldNode::AddPlannerData(const RobotPtr& robot, const ompl::base::PlannerData& data) {
+  const auto& si = data.getSpaceInformation();
+  const auto Nvertices = data.numVertices();
+  unsigned int counter = 0;
+  for(unsigned int vindex = 0; vindex < Nvertices; vindex++) {
+    for(unsigned int windex = 0; windex < Nvertices; windex++) {
+      if(!data.edgeExists(vindex, windex)) {
+        continue;
+      }
+      counter++;
+      const auto s1 = data.getVertex(vindex).getState();
+      const auto s2 = data.getVertex(windex).getState();
+
+      std::vector<Eigen::VectorXd> configs;
+      auto vertices = MakeEdgeVertices(robot, si, s1, s2, configs);
       auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices, kRoadmapColorVertex, kRoadmapLineWidth));
       planner_data_frames_.push_back(frame_line);
     }
@@ -159,6 +224,60 @@ void PathReplayWorldNode::AddMultiRobotPlannerData(const std::unordered_map<std:
   togglePlannerDataVisibility();
 }
 
+void PathReplayWorldNode::AddMultiRobotPlannerData(const std::vector<RobotPtr>& robots, const ompl::base::PlannerData& data) {
+  const auto& factor = std::static_pointer_cast<ompl::multilevel::FactoredSpaceInformation>(data.getSpaceInformation());
+  const auto Nvertices = data.numVertices();
+  unsigned int counter = 0;
+  auto sout = factor->allocState();
+
+  auto childStates = factor->allocChildStates();
+
+  auto children = factor->getChildren();
+
+  for(unsigned int vindex = 0; vindex < Nvertices; vindex++) {
+    for(unsigned int windex = 0; windex < Nvertices; windex++) {
+      if(!data.edgeExists(vindex, windex)) {
+        continue;
+      }
+      counter++;
+      const auto s1 = data.getVertex(vindex).getState();
+      const auto s2 = data.getVertex(windex).getState();
+
+      const auto step_size = 0.01f;
+      const auto L = factor->distance(s1, s2);
+
+      std::unordered_map<std::string, std::vector<Eigen::Vector3d>> vertices;
+      for(const auto& childState : childStates) {
+        const auto& name = childState.first;
+        vertices[name] = std::vector<Eigen::Vector3d>{};
+      }
+
+      for(double d = 0.0; d < L + step_size; d+= step_size) {
+        factor->getStateSpace()->interpolate(s1, s2, d/L, sout);
+
+        //convert to child nodes
+        factor->project(sout, childStates);
+        for(const auto& childState : childStates) {
+          const auto& name = childState.first;
+
+          const auto config = StateToEigenVectorXd(factor->getChild(name), childState.second);
+          const auto v = GetFK(robot.at(0), config);
+
+          vertices.at(name).push_back(v);
+        }
+      }
+      for(const auto& childState : childStates) {
+        auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices.at(childState.first), kRoadmapColorVertex, kRoadmapLineWidth));
+        planner_data_frames_.push_back(frame_line);
+      }
+    }
+  }
+  factor->freeState(sout);
+  factor->freeChildStates(childStates);
+  OMPL_INFORM("Added %d vertices and %d(%d) edges.", Nvertices, counter, data.numEdges());
+  togglePlannerDataVisibility();
+}
+
 void PathReplayWorldNode::SetCollisionChecker(const CollisionCheckerPtr& collision_checker) {
   collision_checker_ = collision_checker;
 }
@@ -204,10 +323,8 @@ void PathReplayWorldNode::customPreStep()
     manipulator->setConfiguration(config);
   }
   if(collision_checker_ != nullptr) {
-    if(collision_checker_->IsInCollision(getWorld())) {
-      collision_checker_->ColorAllCollisionBodies(getWorld());
-    } else {
-      collision_checker_->ResetColors(getWorld());
+    if(collision_checker_->IsInCollision()) {
+      collision_checker_->PrintCollisionInfo();
     }
   }
 }

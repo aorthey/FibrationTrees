@@ -17,10 +17,18 @@ class Visualizer {
     explicit Visualizer(const dart::simulation::WorldPtr& world);
 
     void AddPath(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PathPtr& path, const Eigen::Vector3d& color = kDefaultPathColor);
-    void AddPlanner(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PlannerPtr& planner);
 
+    //TODO Deprecated
+    void AddPlanner(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PlannerPtr& planner);
+    void AddPlanner(const RobotPtr& robot, const ompl::base::PlannerPtr& planner);
+
+    //TODO Deprecated
     void AddMultiRobotPath(const std::unordered_map<std::string, dart::dynamics::SkeletonPtr>& skeletons, const ompl::base::PathPtr& path);
+    void AddMultiRobotPath(const std::vector<RobotPtr>& robots, const ompl::base::PathPtr& path);
+
+    //TODO Deprecated
     void AddMultiRobotPlanner(const std::unordered_map<std::string, dart::dynamics::SkeletonPtr>& skeletons, const ompl::base::PlannerPtr& planner);
+    void AddMultiRobotPlanner(const std::vector<RobotPtr>& robots, const ompl::base::PlannerPtr& planner);
 
     void SetCollisionChecker(const CollisionCheckerPtr& collision_checker);
 

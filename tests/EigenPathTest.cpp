@@ -5,8 +5,7 @@
 
 TEST(EigenPathTest, EmptyTest) {
   std::vector<Eigen::VectorXd> configs;
-  EigenPath path(configs);
-  path.GetConfigAt(0.0f);
+  EXPECT_THROW(auto path = EigenPath(configs), std::length_error);
 }
 
 TEST(EigenPathTest, StraightLineTest) {

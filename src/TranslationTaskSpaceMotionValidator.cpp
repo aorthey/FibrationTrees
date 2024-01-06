@@ -49,7 +49,6 @@ bool TranslationTaskSpaceMotionValidator::checkMotion(const ompl::base::State *s
   ////////////////////////////////////////////////////////////////////////////////
   //Solve edge ik
   ////////////////////////////////////////////////////////////////////////////////
-  //Use interpolate here
   const auto configs = kinematics_solver_->solve_edge_ik_with_config(from_vector, to_vector);
   if(configs.empty()) {
     return FillLastStateOnNoProgressAndReturn(s1, lastValid);
@@ -80,9 +79,6 @@ bool TranslationTaskSpaceMotionValidator::checkMotion(const ompl::base::State *s
   }
 
   if((configs.back() - to_vector).norm() < 1e-3) {
-    std::cout << "#####################################################" << std::endl;
-    std::cout << "SUCCESS SOLVE EDGE IK WITH CONFIG" << std::endl;
-    std::cout << "#####################################################" << std::endl;
     return true;
   }
 
@@ -116,7 +112,7 @@ std::vector<ompl::base::State*> TranslationTaskSpaceMotionValidator::propagateMo
       return result;
     }
     //Do not add too many states, only every X spaced
-    if((config - last_config).norm() < 0.1) {
+    if((config - last_config).norm() < kMinimumSpacing) {
       continue;
     }
     auto state = si_->allocState();

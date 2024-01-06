@@ -1,0 +1,3 @@
+zeppelin_inner_sphere_radius: 0.05
+sphere_robot_lower_limit: [-1.5, -1.5, -0.5]
+sphere_robot_upper_limit: [+1.5, +1.5, +1.5]

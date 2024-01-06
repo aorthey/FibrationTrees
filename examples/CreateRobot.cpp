@@ -1,0 +1,134 @@
+#include "TaskSpaceGoal.hpp"
+#include "Common.hpp"
+#include "CollisionChecker.hpp"
+#include "DartHelper.hpp"
+#include "OmplHelper.hpp"
+#include "KinematicsSolver.hpp"
+#include "MakeSpaceInformation.hpp"
+#include "gui/Visualizer.hpp"
+#include "robots/RobotFactory.hpp"
+#include "robots/KukaRobot.hpp"
+
+#include <dart/dart.hpp>
+
+#include <ompl/base/SpaceInformation.h>
+#include <ompl/base/spaces/RealVectorStateSpace.h>
+#include <ompl/base/terminationconditions/IterationTerminationCondition.h>
+#include <ompl/util/RandomNumbers.h>
+#include <ompl/geometric/PathSimplifier.h>
+#include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
+#include <ompl/multilevel/planners/factor/FibrationRRT.h>
+
+int main(int argc, char* argv[]) {
+
+  ////////////////////////////////////////////////////////////////////////////////
+  ////Create world with obstacles
+  ////////////////////////////////////////////////////////////////////////////////
+
+  dart::simulation::WorldPtr world(new dart::simulation::World);
+
+  std::vector<dart::dynamics::SkeletonPtr> obstacles;
+  obstacles.push_back(createFromURDF("/home/aorthey/git/FibrationTrees/data/objects/maze.urdf", Eigen::Vector3d(+0.55, +0.1, 0.85)));
+  obstacles.push_back(createFloor());
+  obstacles.push_back(createBox(Eigen::Vector3d(+0.5, +0.0, 0.75), 1.05, 2.0, 1.5)); //0.15, 2.0, 1.5
+  for(const auto& obstacle : obstacles) {
+    world->addSkeleton(obstacle);
+  }
+
+  dart::math::Random::setSeed(0);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  ////Creating manipulator
+  ////////////////////////////////////////////////////////////////////////////////
+  auto kuka_robot = MakeRobot<KukaRobot>(world, obstacles);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  ////World creation
+  ////////////////////////////////////////////////////////////////////////////////
+  dart::dynamics::SkeletonPtr point = createSphere(0.01);
+  world->addSkeleton(point);
+
+  world->addSkeleton(kuka_robot->GetSkeleton());
+  world->setGravity(Eigen::Vector3d::Zero());
+
+  ////////////////////////////////////////////////////////////////////////////////
+  ////Collision checking
+  ////////////////////////////////////////////////////////////////////////////////
+  // auto collision_checker = std::make_shared<RobotToObstaclesCollisionChecker>(world, robot, obstacles);
+  // robot->GetSpaceInformation()->setStateValidityChecker(collision_checker);
+  // std::vector<dart::dynamics::SkeletonPtr> collision_group_tcp = {point};
+  // CollisionCheckerPtr collision_checker_point_robot = std::make_shared<CollisionChecker>(world, collision_group_tcp, obstacles);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  ////OMPL Setup
+  ////////////////////////////////////////////////////////////////////////////////
+
+  // const auto limits = std::make_pair(Eigen::Vector3d(0.39, -0.4, 0), Eigen::Vector3d(0.43, +0.4, 2));
+  // auto factor = MakeTaskSpaceInformation(manipulator, world, kinematics_solver, collision_checker);
+  // auto child = Make3DPointSpaceInformation(point, world, collision_checker_point_robot, limits);
+
+  //ompl::multilevel::ProjectionPtr projection = std::make_shared<ProjectionJointSpaceToR3>(factor->getStateSpace(), child->getStateSpace(), kinematics_solver);
+  //factor->addChild(child, projection);
+
+  //////////////////////////////////////////////////////////////////////////////////
+  //////Create planning problem
+  //////////////////////////////////////////////////////////////////////////////////
+  //ompl::base::State *task_start = child->allocState();
+  //ompl::base::State *task_goal = child->allocState();
+
+  //EigenVector3dToState({0.4, +0.35, 0.95}, task_start);
+  //EigenVector3dToState({0.4, -0.25, 0.95}, task_goal);
+
+  //ompl::base::State *start = factor->allocState();
+  //ompl::base::State *goal = factor->allocState();
+
+  //const int kMaxResampleIteration = 100;
+  //bool has_solution = true;
+
+  //if(!SampleValidLift(projection, factor, kMaxResampleIteration, task_start, start)) {
+  //  OMPL_ERROR("Could not find valid start state after %d samples.", kMaxResampleIteration);
+  //  child->printState(task_start);
+  //  has_solution = false;
+  //}
+  //if(has_solution && !SampleValidLift(projection, factor, kMaxResampleIteration, task_goal, goal)) {
+  //  OMPL_ERROR("Could not find valid goal state after %d samples.", kMaxResampleIteration);
+  //  child->printState(task_goal);
+  //  has_solution = false;
+  //}
+
+  //if(has_solution) {
+  //  auto goal_region = std::make_shared<TaskSpaceGoal>(factor, goal, projection);
+  //  goal_region->setThreshold(0.01);
+
+  //  ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(factor);
+  //  pdef->addStartState(start);
+  //  pdef->setGoal(goal_region);
+
+  //  auto start_vector = ProjectStateToEigenVector3d(projection, start);
+  //  auto goal_vector = StateToEigenVector3d(task_goal);
+  //  world->addSimpleFrame(createSphereFrame(start_vector, 0.01));
+  //  world->addSimpleFrame(createSphereFrame(goal_vector, 0.01));
+
+  //  ////////////////////////////////////////////////////////////////////////////////
+  //  ////Planning
+  //  ////////////////////////////////////////////////////////////////////////////////
+  //  auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
+  //  planner->setProblemDefinition(pdef);
+  //  planner->setup();
+  //  planner->setRange(+Inf);
+
+  //  float timeout = 100.0;
+
+  //  auto ptc = ompl::base::plannerOrTerminationCondition(
+  //          ompl::base::exactSolnPlannerTerminationCondition(pdef),
+  //          ompl::base::timedPlannerTerminationCondition(timeout)
+  //      );
+
+  //  ompl::base::PlannerStatus status = planner->solve(ptc);
+
+  Visualizer visualizer(world);
+  visualizer.SetCollisionChecker(kuka_robot->GetCollisionChecker());
+  //visualizer.AddPath(point, planner->getProblemDefinition(child->getName())->getSolutionPath(), Eigen::Vector3d(1, 1, 0));
+  visualizer.Run();
+  return 0;
+}

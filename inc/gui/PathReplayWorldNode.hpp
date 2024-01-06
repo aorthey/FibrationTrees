@@ -18,7 +18,6 @@ const float kDefaultStepSize = 0.001;
 
 const float kMaxStepSize = 0.1;
 const float kMinStepSize = 0.00001;
-typedef EigenPath PathType;
 
 struct KeyPressEvent {
   char key;
@@ -53,8 +52,17 @@ public:
   bool isRunning() const;
   std::string getCurrentJointConfiguration() const;
 
+  //TODO Deprecated
   void AddPlannerData (const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PlannerData& data);
+  void AddPlannerData (const RobotPtr& robot, const ompl::base::PlannerData& data);
+
+  //TODO Deprecated
   void AddPath(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PathPtr& path, const Eigen::Vector3d& color);
+  void AddPath(const RobotPtr& robot, const ompl::base::PathPtr& path, const Eigen::Vector3d& color);
+
+  //TODO Deprecated
+  void AddMultiRobotPlannerData(const std::unordered_map<std::string, dart::dynamics::SkeletonPtr>& skeletons, const ompl::base::PlannerData& data);
+  void AddMultiRobotPlannerData(const std::vector<RobotPtr>& robots, const ompl::base::PlannerData& data);
 
   void SetCollisionChecker(const CollisionCheckerPtr& collision_checker);
 
@@ -62,7 +70,6 @@ public:
 
   std::vector<KeyPressEvent> GetKeyPressEvents() const;
   void CreateKeyPressEvents();
-  void AddMultiRobotPlannerData(const std::unordered_map<std::string, dart::dynamics::SkeletonPtr>& skeletons, const ompl::base::PlannerData& data);
 
 protected:
   std::vector<KeyPressEvent> events_;
@@ -70,7 +77,7 @@ protected:
   std::vector<std::string> planner_data_frames_;
   std::vector<std::string> solution_path_frames_;
 
-  std::vector<std::pair<dart::dynamics::SkeletonPtr, std::shared_ptr<PathType>>> skeleton_and_path_;
+  std::vector<std::pair<dart::dynamics::SkeletonPtr, std::shared_ptr<EigenPath>>> skeleton_and_path_;
   CollisionCheckerPtr collision_checker_;
 
   float step_size_{kDefaultStepSize};

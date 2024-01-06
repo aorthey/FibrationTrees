@@ -63,11 +63,18 @@ ompl::multilevel::FactoredSpaceInformationPtr Make3DPointSpaceInformation(
 }
 
 ompl::multilevel::FactoredSpaceInformationPtr MakeMultiRobotSpaceInformation(
-  const std::vector<ompl::base::StateSpacePtr>& task_spaces) {
-  auto space = std::make_shared<ompl::base::CompoundStateSpace>(task_spaces, std::vector<double>(task_spaces.size(), 1.0f));
-
+  const std::vector<ompl::base::StateSpacePtr>& compound_spaces) {
+  auto space = std::make_shared<ompl::base::CompoundStateSpace>(compound_spaces, std::vector<double>(compound_spaces.size(), 1.0f));
   auto factor(std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space));
   return factor;
 }
 
+ompl::multilevel::FactoredSpaceInformationPtr MakeMultiRobotSpaceInformation(
+  const std::vector<ompl::multilevel::FactoredSpaceInformationPtr>& compound_si) {
+  std::vector<ompl::base::StateSpacePtr> compound_spaces;
+  for(const auto& si : compound_si) {
+    compound_spaces.push_back(si->getStateSpace());
+  }
+  return MakeMultiRobotSpaceInformation(compound_spaces);
+}
 

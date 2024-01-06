@@ -7,6 +7,8 @@
 
 #include "KinematicsSolver.hpp"
 
+const float kMinimumSpacing = 0.25; //minimal distance between two joint configurations 
+
 class TranslationTaskSpaceMotionValidator : public ompl::multilevel::TaskSpaceMotionValidator
 {
 public:

@@ -3,12 +3,13 @@
 #include <dart/dynamics/TranslationalJoint.hpp>
 
 #include "Common.hpp"
+#include "Config.hpp"
+#include "OmplHelper.hpp"
 
 void PrintSkeletonInfo(const dart::dynamics::SkeletonPtr& skeleton) {
 
   std::cout << "Skeleton: " << skeleton->getName() << std::endl;
   std::cout << "  Num joints : " << skeleton->getNumJoints() << std::endl;
-  std::cout << "  Num dofs   : " << skeleton->getNumDofs() << std::endl;
   std::cout << "  Num EE     : " << skeleton->getNumEndEffectors() << std::endl;
 
   for(size_t k = 0; k < skeleton->getNumEndEffectors(); k++) {
@@ -17,7 +18,12 @@ void PrintSkeletonInfo(const dart::dynamics::SkeletonPtr& skeleton) {
   }
   std::cout << "  Num Links  : " << skeleton->getNumBodyNodes() << std::endl;
   for(const auto& body : skeleton->getBodyNodes()) {
-    std::cout <<  "Body: " << body->getName() << std::endl;
+    std::cout <<  "    Body: " << body->getName() << std::endl;
+  }
+
+  std::cout << "  Num dofs   : " << skeleton->getNumDofs() << std::endl;
+  for(const auto& dof : skeleton->getDofs()) {
+    std::cout <<  "    Dof: " << dof->getName() << " (index: " << dof->getIndexInSkeleton() << ")" << std::endl;
   }
 
   auto config = skeleton->getConfiguration().mPositions;
@@ -76,7 +82,7 @@ dart::dynamics::SimpleFramePtr createLineSegmentFrame(const std::vector<Eigen::V
   return lineFrame;
 }
 
-dart::dynamics::SkeletonPtr createFloor() {
+dart::dynamics::SkeletonPtr createFloor(float z_position) {
     dart::dynamics::SkeletonPtr floor = dart::dynamics::Skeleton::create("floor");
     dart::dynamics::BodyNodePtr body =
         floor->createJointAndBodyNodePair<dart::dynamics::WeldJoint>(nullptr).second;
@@ -90,7 +96,7 @@ dart::dynamics::SkeletonPtr createFloor() {
 
     /* Put the floor into position */
     Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
-    tf.translation() = Eigen::Vector3d{0.0, 0.0, -floorHeight/2.0 - floorHeight/100.0};
+    tf.translation() = Eigen::Vector3d{0.0, 0.0, z_position + (-floorHeight/2.0 - floorHeight/100.0)};
     body->getParentJoint()->setTransformFromParentBodyNode(tf);
     body->setName("floor");
 
@@ -148,9 +154,11 @@ dart::dynamics::SkeletonPtr createSphere(float radius) {
     auto shapeNode = body->createShapeNodeWith<dart::dynamics::VisualAspect, dart::dynamics::CollisionAspect, dart::dynamics::DynamicsAspect>(shape);
     shapeNode->getVisualAspect()->setColor(Eigen::Vector3d(0.5, 0.0, 0.5));
 
-    // Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
-    // tf.translation() = position;
-    // body->getParentJoint()->setTransformFromParentBodyNode(tf);
+    auto ll = MakeEigen(ReadConfigVariable<std::vector<double>>("sphere_robot_lower_limit"));
+    auto ul = MakeEigen(ReadConfigVariable<std::vector<double>>("sphere_robot_upper_limit"));
+    sphere->setPositionLowerLimits(ll);
+    sphere->setPositionUpperLimits(ul);
+
     body->setName(name);
 
     return sphere;
@@ -197,7 +205,7 @@ void addCoordinateFrameToWorld(const dart::simulation::WorldPtr& world) {
   auto frame_z = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "coordinate_frame_z");
 
   const float kCoordinateFrameLength = 0.5;
-  Eigen::Vector3d origin(-0.2, -0.2, 0.1);
+  Eigen::Vector3d origin(-0.0, -0.0, 0.0);
   Eigen::Vector3d ex(kCoordinateFrameLength, 0, 0);
   Eigen::Vector3d ey(0, kCoordinateFrameLength, 0);
   Eigen::Vector3d ez(0, 0, kCoordinateFrameLength);

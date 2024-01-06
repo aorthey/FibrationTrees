@@ -29,14 +29,36 @@ EigenPath::EigenPath(const ompl::base::PathPtr& path) {
   InitLengthFromConfigs(configs_);
 }
 
+EigenPath::EigenPath(const RobotPtr& robot, const ompl::base::PathPtr& path) {
+  const auto& si = path->getSpaceInformation();
+  ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
+  auto states = pgeo.getStates();
+  configs_.clear();
+
+  std::cout << "Create EigenPath from " << states.size() << " states." << std::endl;
+  for(size_t k = 0; k < states.size(); k++) {
+    Eigen::VectorXd config = robot->StateToEigen(states.at(k));
+    if(k > 0) {
+      auto d = robot->GetSpaceInformation()->distance(states.at(k), states.at(k-1));
+      if(d > M_PI) {
+        OMPL_ERROR("Configs are far apart.");
+        std::cout << "Last     config: " << configs_.back().format(CommaFmt) << std::endl;
+        std::cout << "Current  config: " << config.format(CommaFmt) << std::endl;
+        continue;
+      }
+    }
+    configs_.push_back(config);
+  }
+  InitLengthFromConfigs(configs_);
+}
+
 EigenPath::EigenPath(const std::vector<Eigen::VectorXd>& configs) : configs_(configs) {
   InitLengthFromConfigs(configs_);
 }
 
 void EigenPath::InitLengthFromConfigs(const std::vector<Eigen::VectorXd>& configs) {
   if(configs.size() < 1) {
-    std::cout << "Error: Cannot initialize an empty path." << std::endl;
-    throw "EmptyPath";
+    throw std::length_error("Cannot initialize an empty path.");
   }
   for(size_t k = 1; k < configs.size(); k++) {
     auto v1 = configs.at(k-1);

@@ -24,7 +24,7 @@ Eigen::VectorXd GetRandomPosition(const dart::dynamics::SkeletonPtr& skeleton);
 ////////////////////////////////////////////////////////////////////////////////
 // Skeleton constructors
 ////////////////////////////////////////////////////////////////////////////////
-dart::dynamics::SkeletonPtr createFloor();
+dart::dynamics::SkeletonPtr createFloor(float z_position = 0.0);
 dart::dynamics::SkeletonPtr createCylinder(const Eigen::Vector3d& position, float radius, float height);
 dart::dynamics::SkeletonPtr createSphere(float radius);
 dart::dynamics::SkeletonPtr createBox(const Eigen::Vector3d& position, float length_x, float length_y, float length_z);

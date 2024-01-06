@@ -50,10 +50,10 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
   ////Collision checking
   ////////////////////////////////////////////////////////////////////////////////
-  std::vector<dart::dynamics::SkeletonPtr> g1 = {manipulator};
-  CollisionCheckerPtr collision_checker = std::make_shared<CollisionChecker>(world, g1, obstacles);
-  std::vector<dart::dynamics::SkeletonPtr> g3 = {point};
-  CollisionCheckerPtr collision_checker_point_robot = std::make_shared<CollisionChecker>(world, g3, obstacles);
+  std::vector<dart::dynamics::SkeletonPtr> collision_group_robot = {manipulator};
+  CollisionCheckerPtr collision_checker = std::make_shared<CollisionChecker>(world, collision_group_robot, obstacles);
+  std::vector<dart::dynamics::SkeletonPtr> collision_group_tcp = {point};
+  CollisionCheckerPtr collision_checker_point_robot = std::make_shared<CollisionChecker>(world, collision_group_tcp, obstacles);
 
   ////////////////////////////////////////////////////////////////////////////////
   ////OMPL Setup

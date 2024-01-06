@@ -6,6 +6,7 @@
 #include "ompl/base/StateValidityChecker.h"
 
 OMPL_CLASS_FORWARD(CollisionChecker);
+OMPL_CLASS_FORWARD(Robot);
 
 const Eigen::Vector3d kCollisionColor = Eigen::Vector3d(0.8, 0.3, 0.3);
 
@@ -17,12 +18,12 @@ class CollisionChecker {
       const std::vector<dart::dynamics::SkeletonPtr>& group2);
 
   virtual bool IsInCollision(const dart::simulation::WorldPtr& world);
+  virtual bool IsInCollision();
 
-  virtual void ColorAllCollisionBodies(dart::simulation::WorldPtr world);
-
-  virtual void ResetColors(const dart::simulation::WorldPtr& world);
+  void PrintCollisionInfo();
 
  private:
+  dart::simulation::WorldPtr world_;
   std::vector<dart::dynamics::SkeletonPtr> group1_;
   std::vector<dart::dynamics::SkeletonPtr> group2_;
   std::unordered_map<const dart::dynamics::ShapeNode*, Eigen::Vector3d> default_colors_;
@@ -34,10 +35,6 @@ class MultiCollisionChecker : public CollisionChecker {
       const std::vector<CollisionCheckerPtr>& collision_checkers);
 
   bool IsInCollision(const dart::simulation::WorldPtr& world);
-
-  void ColorAllCollisionBodies(dart::simulation::WorldPtr world) override;
-
-  void ResetColors(const dart::simulation::WorldPtr& world) override;
 
  private:
   std::vector<CollisionCheckerPtr> collision_checkers_;
@@ -58,6 +55,24 @@ class DartWorldCollisionChecker : public ompl::base::StateValidityChecker
  protected:
   dart::dynamics::SkeletonPtr skeleton_;
   dart::simulation::WorldPtr world_;
+  CollisionCheckerPtr collision_checker_;
+};
+
+class RobotToObstaclesCollisionChecker : public ompl::base::StateValidityChecker
+{
+ public:
+    RobotToObstaclesCollisionChecker(
+      const dart::simulation::WorldPtr& world,
+      const RobotPtr& robot,
+      const CollisionCheckerPtr& collision_checker);
+
+    ~RobotToObstaclesCollisionChecker() = default;
+
+    bool isValid(const ompl::base::State *state) const override;
+
+ protected:
+  dart::simulation::WorldPtr world_;
+  RobotPtr robot_;
   CollisionCheckerPtr collision_checker_;
 };
 

@@ -5,7 +5,7 @@
 #include "Common.hpp"
 
 TaskSpaceMultiRobotMotionValidator::TaskSpaceMultiRobotMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor)
-  : ompl::base::DiscreteMotionValidator(factor)
+  : ompl::multilevel::TaskSpaceMotionValidator(factor)
 {
   for(const auto& child : factor->getChildren()) {
     motion_validators_.push_back(child->getMotionValidator());
@@ -86,3 +86,70 @@ bool TaskSpaceMultiRobotMotionValidator::checkMotion(const ompl::base::State *s1
   return all_subspaces_are_valid;
 }
 
+std::vector<ompl::base::State*> TaskSpaceMultiRobotMotionValidator::propagateMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
+  auto s1_compound = s1->as<ompl::base::CompoundState>();
+  auto s2_compound = s2->as<ompl::base::CompoundState>();
+  auto space = si_->getStateSpace()->as<ompl::base::CompoundStateSpace>();
+  std::vector<ompl::base::State*> result;
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // Propagate states forward on each subspace until collision or failure
+  ////////////////////////////////////////////////////////////////////////////////
+  std::vector<std::vector<ompl::base::State*>> split_states;
+
+  size_t max_number_states = 0;
+  for(size_t k = 0; k < space->getSubspaceCount(); k++) {
+    auto spacek = space->getSubspace(k);
+    auto s1_k = s1_compound->operator[](k);
+    auto s2_k = s2_compound->operator[](k);
+
+    auto motion_validator = std::static_pointer_cast<TaskSpaceMotionValidator>(motion_validators_.at(k));
+    auto states = motion_validator->propagateMotion(s1_k, s2_k);
+
+    max_number_states = std::max(max_number_states, states.size());
+    split_states.push_back(states);
+  }
+
+  //Abort when no progress was made
+  if(max_number_states == 0) {
+    return result;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // Stitch individual states together into one path
+  ////////////////////////////////////////////////////////////////////////////////
+  for(size_t i = 0; i < max_number_states; i++) {
+    auto state = space->allocState();
+
+    for(size_t space_index = 0; space_index < space->getSubspaceCount(); space_index++) {
+      auto spacek = space->getSubspace(space_index);
+      auto statesk = split_states.at(space_index);
+
+      auto N = statesk.size();
+
+      //Choose next state on this space
+      const ompl::base::State* sk;
+      if( N <= 0) {
+        sk = s1_compound->operator[](space_index);
+      } else {
+        if( i < N - 1) {
+          sk = statesk.at(i);
+        } else {
+            sk = statesk.back();
+        }
+      }
+      sk = s1_compound->operator[](space_index);
+      spacek->copyState(state->as<ompl::base::CompoundState>()->operator[](space_index), sk);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // Check that resulting states are valid 
+    ////////////////////////////////////////////////////////////////////////////////
+    if(!si_->isValid(state)) {
+      return result;
+    }
+    result.push_back(state);
+  }
+
+  return result;
+}
