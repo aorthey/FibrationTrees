@@ -6,6 +6,7 @@
 #include <ompl/multilevel/datastructures/TaskSpaceMotionValidator.h>
 
 #include "KinematicsSolver.hpp"
+#include "robots/Robot.hpp"
 
 const float kMinimumSpacing = 0.25; //minimal distance between two joint configurations 
 
@@ -13,8 +14,7 @@ class TranslationTaskSpaceMotionValidator : public ompl::multilevel::TaskSpaceMo
 {
 public:
     TranslationTaskSpaceMotionValidator() = delete;
-    explicit TranslationTaskSpaceMotionValidator(ompl::base::SpaceInformation *si, const KinematicsSolverPtr& kinematics_solver);
-    explicit TranslationTaskSpaceMotionValidator(const ompl::base::SpaceInformationPtr &si, const KinematicsSolverPtr& kinematics_solver);
+    explicit TranslationTaskSpaceMotionValidator(const ompl::base::SpaceInformationPtr &si, const RobotPtr& robot);
     virtual ~TranslationTaskSpaceMotionValidator() override;
 
     bool checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const override;
@@ -26,6 +26,7 @@ public:
 
 private:
   KinematicsSolverPtr kinematics_solver_;
+  RobotPtr robot_;
   ompl::base::State* tmpState_;
   ompl::base::State* lastValidState_;
 };

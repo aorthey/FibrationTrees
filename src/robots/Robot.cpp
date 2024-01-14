@@ -38,10 +38,6 @@ bool Robot::IsValid(const ompl::base::State* state) const {
       return false;
     }
   }
-  if(!collision_checker_) {
-    OMPL_WARN("No collision checker set.");
-    return true;
-  }
   //Check collisions
   skeleton_->setConfiguration(config);
   return !collision_checker_->IsInCollision();
@@ -54,7 +50,6 @@ CollisionCheckerPtr Robot::MakeCollisionChecker(
 
   std::vector<dart::dynamics::SkeletonPtr> collision_group_robot = {GetSkeleton()};
   auto collision_checker = std::make_shared<CollisionChecker>(world, collision_group_robot, obstacles);
-  SetCollisionChecker(collision_checker);
 
   auto func = [&](const ompl::base::State* state) -> bool
   {
@@ -63,4 +58,8 @@ CollisionCheckerPtr Robot::MakeCollisionChecker(
   factor->setStateValidityChecker(func);
   factor->setStateValidityCheckingResolution(0.001);
   return collision_checker;
+}
+
+ompl::base::MotionValidatorPtr Robot::MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& robot) {
+  return factor->getMotionValidator();
 }

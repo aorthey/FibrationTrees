@@ -5,7 +5,8 @@
 #include "KinematicsSolver.hpp"
 #include "DartHelper.hpp"
 #include "Common.hpp"
-#include "robots/KukaSkeleton.hpp"
+#include "robots/KukaRobot.hpp"
+#include "robots/RobotFactory.hpp"
 
 const float kAccuracyStraightLine = 1e-1; //Staying along the straight line path
 const float kAccuracyGoal = 1e-2; //Reaching goal frame
@@ -109,9 +110,8 @@ void EdgeIKTestFromFrames(const KinematicsSolverPtr& kinematics_solver,
 }
 
 TEST(KinematicsSolverTest, StraightLineTaskSpaceTest) {
-  dart::dynamics::SkeletonPtr manipulator = 
-    createKukaSkeleton("/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka.urdf");
-  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
+  auto robot = MakeRobot<KukaRobot>();
+  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(robot->GetSkeleton());
 
   // CheckEdgeIK(kinematics_solver, Eigen::Vector3d(0.4, 0.4, 0.3), Eigen::Vector3d(0.4, 0.4, 0.6));
   EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.6, 0.1, 0.3), Eigen::Vector3d(0.6, 0.3, 0.3));
@@ -123,8 +123,8 @@ TEST(KinematicsSolverTest, StraightLineTaskSpaceTest) {
 }
 
 TEST(KinematicsSolverTest, ConfigEdgeIKSameConfigTest) {
-  dart::dynamics::SkeletonPtr manipulator = 
-    createKukaSkeleton("/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka.urdf");
+  auto robot = MakeRobot<KukaRobot>();
+  auto manipulator = robot->GetSkeleton();
   KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
   dart::math::Random::setSeed(0);
 
@@ -137,9 +137,8 @@ TEST(KinematicsSolverTest, ConfigEdgeIKSameConfigTest) {
 }
 
 TEST(KinematicsSolverTest, ConfigEdgeIKSameFrameTest) {
-  dart::dynamics::SkeletonPtr manipulator = 
-    createKukaSkeleton("/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka.urdf");
-  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
+  auto robot = MakeRobot<KukaRobot>();
+  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(robot->GetSkeleton());
 
   dart::math::Random::setSeed(0);
 
@@ -177,9 +176,8 @@ TEST(KinematicsSolverTest, ConfigEdgeIKSameFrameTest) {
 
 //Goal has no FK solution -> Cannot make progress
 TEST(KinematicsSolverTest, NonFKConfigTest) {
-  dart::dynamics::SkeletonPtr manipulator = 
-    createKukaSkeleton("/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka.urdf");
-  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
+  auto robot = MakeRobot<KukaRobot>();
+  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(robot->GetSkeleton());
   Eigen::VectorXd start(7);
   Eigen::VectorXd goal(7);
   start << -0.989524, -0.200034, -1.2738, -1.28626, 1.61383, -0.17553, -0.8159;
@@ -191,9 +189,8 @@ TEST(KinematicsSolverTest, NonFKConfigTest) {
 
 // Straight line moves outside joint limits
 TEST(KinematicsSolverTest, CannotReachGoalConfigTest) {
-  dart::dynamics::SkeletonPtr manipulator = 
-    createKukaSkeleton("/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka.urdf");
-  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
+  auto robot = MakeRobot<KukaRobot>();
+  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(robot->GetSkeleton());
   Eigen::VectorXd start(7);
   Eigen::VectorXd goal(7);
   start << -0.503705, -1.08742, -1.14191, -1.98434, 0.363036, -1.08686, -0.0262207;
@@ -206,9 +203,8 @@ TEST(KinematicsSolverTest, CannotReachGoalConfigTest) {
 }
 
 TEST(KinematicsSolverTest, JointFlipTest) {
-  dart::dynamics::SkeletonPtr manipulator = 
-    createKukaSkeleton("/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka.urdf");
-  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
+  auto robot = MakeRobot<KukaRobot>();
+  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(robot->GetSkeleton());
   Eigen::VectorXd start(7);
   Eigen::VectorXd goal(7);
   start << -1.06341,0.0364156,-1.5652,-1.36632,2.24109,0.174882,-0.205112;
@@ -228,8 +224,8 @@ TEST(KinematicsSolverTest, JointFlipTest) {
 }
 
 TEST(KinematicsSolverTest, RandomizedConfigsTest) {
-  dart::dynamics::SkeletonPtr manipulator = 
-    createKukaSkeleton("/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka.urdf");
+  auto robot = MakeRobot<KukaRobot>();
+  auto manipulator = robot->GetSkeleton();
   KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
 
   for(size_t k = 0; k < kNumberRandomConfigs; k++) {

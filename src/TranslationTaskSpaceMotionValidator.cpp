@@ -7,16 +7,10 @@
 const float kDeltaCollisionCheckStepSize = 0.005;
 
 TranslationTaskSpaceMotionValidator::TranslationTaskSpaceMotionValidator(
-    ompl::base::SpaceInformation *si, const KinematicsSolverPtr& kinematics_solver) 
-  : ompl::multilevel::TaskSpaceMotionValidator(si), kinematics_solver_(kinematics_solver)
+    const ompl::base::SpaceInformationPtr &si, const RobotPtr& robot) 
+  : ompl::multilevel::TaskSpaceMotionValidator(si), robot_(robot)
 {
-  tmpState_ = si->allocState();
-  lastValidState_ = si->allocState();
-}
-TranslationTaskSpaceMotionValidator::TranslationTaskSpaceMotionValidator(
-    const ompl::base::SpaceInformationPtr &si, const KinematicsSolverPtr& kinematics_solver) 
-  : ompl::multilevel::TaskSpaceMotionValidator(si), kinematics_solver_(kinematics_solver)
-{
+  kinematics_solver_ = std::make_shared<KinematicsSolver>(robot->GetSkeleton());
   tmpState_ = si->allocState();
   lastValidState_ = si->allocState();
 }
@@ -43,8 +37,8 @@ bool TranslationTaskSpaceMotionValidator::FillLastStateOnNoProgressAndReturn(
 }
 
 bool TranslationTaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const {
-  const auto from_vector = StateToEigenVectorXd(si_->getStateDimension(), s1);
-  const auto to_vector = StateToEigenVectorXd(si_->getStateDimension(), s2);
+  const auto from_vector = robot_->StateToEigen(s1);
+  const auto to_vector = robot_->StateToEigen(s2);
 
   ////////////////////////////////////////////////////////////////////////////////
   //Solve edge ik
@@ -95,8 +89,8 @@ std::vector<ompl::base::State*> TranslationTaskSpaceMotionValidator::propagateMo
   ////////////////////////////////////////////////////////////////////////////////
   //Solve edge ik
   ////////////////////////////////////////////////////////////////////////////////
-  const auto from_vector = StateToEigenVectorXd(si_->getStateDimension(), s1);
-  const auto to_vector = StateToEigenVectorXd(si_->getStateDimension(), s2);
+  const auto from_vector = robot_->StateToEigen(s1);
+  const auto to_vector = robot_->StateToEigen(s2);
   const auto configs = kinematics_solver_->solve_edge_ik_with_config(from_vector, to_vector);
   if(configs.empty()) {
     return result;

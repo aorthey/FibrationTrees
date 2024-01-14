@@ -37,12 +37,12 @@ dart::dynamics::SkeletonPtr ZeppelinRobot::MakeSkeleton() {
   return manipulator;
 }
 
-ompl::multilevel::FactoredSpaceInformationPtr ZeppelinRobot::MakeSpaceInformation(const dart::dynamics::SkeletonPtr& skeleton) {
+ompl::multilevel::FactoredSpaceInformationPtr ZeppelinRobot::MakeSpaceInformation(const RobotPtr& robot) {
   //Create translational component
   ompl::base::StateSpacePtr spaceR3(new ompl::base::RealVectorStateSpace(3));
   ompl::base::RealVectorBounds bounds(3);
-  auto lb = skeleton->getPositionLowerLimits();
-  auto ub = skeleton->getPositionUpperLimits();
+  auto lb = robot->GetSkeleton()->getPositionLowerLimits();
+  auto ub = robot->GetSkeleton()->getPositionUpperLimits();
   for(size_t k = 0; k < 3; k++) {
     bounds.setLow(k, lb[k]);
     bounds.setHigh(k, ub[k]);

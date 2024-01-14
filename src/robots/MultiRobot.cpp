@@ -20,7 +20,7 @@ std::shared_ptr<MultiRobot> MultiRobot::MakeMultiRobot(const std::vector<RobotPt
   return robot;
 }
 
-ompl::multilevel::FactoredSpaceInformationPtr MultiRobot::MakeSpaceInformation(const dart::dynamics::SkeletonPtr& skeleton) {
+ompl::multilevel::FactoredSpaceInformationPtr MultiRobot::MakeSpaceInformation(const RobotPtr& robot_input) {
   std::vector<ompl::base::StateSpacePtr> compound_spaces;
   for(const auto& robot : robots_) {
     compound_spaces.push_back(robot->GetSpaceInformation()->getStateSpace());

@@ -9,11 +9,6 @@ class RobotFactory {
     RobotFactory() = default;
 
     std::shared_ptr<RobotType> Create() {
-      auto robot = std::make_shared<RobotType>();
-
-      auto skeleton = robot->MakeSkeleton();
-      robot->SetSkeleton(skeleton);
-
       if(!world_.has_value()) {
         OMPL_ERROR("Requires world");
         throw "RequiresWorld";
@@ -23,30 +18,32 @@ class RobotFactory {
         throw "RequiresObstacles";
       }
 
-      auto factor = robot->MakeSpaceInformation(skeleton);
+      auto robot = std::make_shared<RobotType>();
+
+      ////////////////////////////////////////////////////////////////////////////////
+      // Make Skeleton
+      ////////////////////////////////////////////////////////////////////////////////
+      auto skeleton = robot->MakeSkeleton();
+      robot->SetSkeleton(skeleton);
+
+      ////////////////////////////////////////////////////////////////////////////////
+      // Make SpaceInformation
+      ////////////////////////////////////////////////////////////////////////////////
+      auto factor = robot->MakeSpaceInformation(robot);
       robot->SetSpaceInformation(factor);
 
-      robot->MakeCollisionChecker(factor, world_.value(), obstacles_.value());
-      //auto validity_checker = robot->MakeValidityChecker(world_, obstacles_);
-      //factor->setStateValidityChecker(validity_checker);
-      //
+      ////////////////////////////////////////////////////////////////////////////////
+      // Make CollisionChecker
+      ////////////////////////////////////////////////////////////////////////////////
+      auto collision_checker = robot->MakeCollisionChecker(factor, world_.value(), obstacles_.value());
+      robot->SetCollisionChecker(collision_checker);
 
-      // if(world_.has_value() && obstacles_.has_value()) {
-      //   // robot->MakeCollisionChecker(factor, world_.value(), obtacles_.value());
-      //   std::vector<dart::dynamics::SkeletonPtr> collision_group_robot = {robot->GetSkeleton()};
-      //   auto collision_checker = std::make_shared<CollisionChecker>(world_.value(), collision_group_robot, obstacles_.value());
-      //   robot->SetCollisionChecker(collision_checker);
+      ////////////////////////////////////////////////////////////////////////////////
+      // Make MotionValidator
+      ////////////////////////////////////////////////////////////////////////////////
+      auto motion_validator = robot->MakeMotionValidator(factor, robot);
+      factor->setMotionValidator(motion_validator);
 
-      //   auto func = [robot](const ompl::base::State* state) -> bool
-      //   {
-      //     return robot->IsValid(state);
-      //   };
-      //   robot->GetSpaceInformation()->setStateValidityChecker(func);
-      // } else {
-      //   auto validity_checker = std::make_shared<ompl::base::AllValidStateValidityChecker>(factor);
-      //   robot->GetSpaceInformation()->setStateValidityChecker(validity_checker);
-      //   OMPL_WARN("No collision_checker set.");
-      // }
       return robot;
     }
   

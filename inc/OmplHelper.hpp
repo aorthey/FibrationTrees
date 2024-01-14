@@ -14,13 +14,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // ompl::base::State* to Eigen::Vector
 ////////////////////////////////////////////////////////////////////////////////
-Eigen::Vector3d StateToEigenVector3d(const ompl::base::State* state);
-Eigen::VectorXd StateToEigenVectorXd(const int Ndimension, const ompl::base::State* state);
-Eigen::VectorXd StateToEigenVectorXd(const ompl::base::SpaceInformation* si, const ompl::base::State* state);
-Eigen::VectorXd StateToEigenVectorXd(const ompl::base::SpaceInformationPtr& si, const ompl::base::State* state);
-
 Eigen::Vector3d ProjectStateToEigenVector3d(const ompl::multilevel::ProjectionPtr& projection, const ompl::base::State* state);
-Eigen::VectorXd LiftStateToEigenVectorXd(const ompl::multilevel::ProjectionPtr& projection, const ompl::base::State* base_state);
+Eigen::Vector3d StateToEigenVector3d(const ompl::base::State* state);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Eigen::Vector to ompl::base::State*
@@ -34,7 +29,6 @@ ompl::base::State* AllocStateFromEigen(const RobotPtr& robot, const Eigen::Vecto
 ////////////////////////////////////////////////////////////////////////////////
 // Eigen::Vector to Eigen::Vector
 ////////////////////////////////////////////////////////////////////////////////
-Eigen::Vector3d EigenVectorXdToEigenVector3d(const Eigen::VectorXd& v);
 Eigen::VectorXd MakeEigen(std::initializer_list<double> const &init_values);
 Eigen::VectorXd MakeEigen(std::vector<double> values);
 

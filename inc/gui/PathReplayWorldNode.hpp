@@ -8,7 +8,6 @@
 
 #include "CollisionChecker.hpp"
 #include "EigenPath.hpp"
-#include "OmplPath.hpp"
 
 const Eigen::Vector3d kRoadmapColorVertex = Eigen::Vector3d(0.2, 0.8, 0.2);
 const float kRoadmapLineWidth = 3.0;
@@ -52,16 +51,8 @@ public:
   bool isRunning() const;
   std::string getCurrentJointConfiguration() const;
 
-  //TODO Deprecated
-  void AddPlannerData (const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PlannerData& data);
   void AddPlannerData (const RobotPtr& robot, const ompl::base::PlannerData& data);
-
-  //TODO Deprecated
-  void AddPath(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PathPtr& path, const Eigen::Vector3d& color);
   void AddPath(const RobotPtr& robot, const ompl::base::PathPtr& path, const Eigen::Vector3d& color);
-
-  //TODO Deprecated
-  void AddMultiRobotPlannerData(const std::unordered_map<std::string, dart::dynamics::SkeletonPtr>& skeletons, const ompl::base::PlannerData& data);
   void AddMultiRobotPlannerData(const std::vector<RobotPtr>& robots, const ompl::base::PlannerData& data);
 
   void SetCollisionChecker(const CollisionCheckerPtr& collision_checker);

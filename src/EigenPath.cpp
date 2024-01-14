@@ -9,26 +9,6 @@
 EigenPath::EigenPath() {
 }
 
-EigenPath::EigenPath(const ompl::base::PathPtr& path) {
-  const auto& si = path->getSpaceInformation();
-  ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
-  auto states = pgeo.getStates();
-  configs_.clear();
-  for(size_t k = 0; k < states.size(); k++) {
-    Eigen::VectorXd config = StateToEigenVectorXd(si, states.at(k));
-    if(k > 0) {
-      if((config - configs_.back()).norm() > M_PI) {
-        OMPL_ERROR("Configs are far apart.");
-        std::cout << "Last     config: " << configs_.back().format(CommaFmt) << std::endl;
-        std::cout << "Current  config: " << config.format(CommaFmt) << std::endl;
-        continue;
-      }
-    }
-    configs_.push_back(config);
-  }
-  InitLengthFromConfigs(configs_);
-}
-
 EigenPath::EigenPath(const RobotPtr& robot, const ompl::base::PathPtr& path) {
   const auto& si = path->getSpaceInformation();
   ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());

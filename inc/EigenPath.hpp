@@ -88,8 +88,6 @@ class EigenPath {
 
     explicit EigenPath();
     explicit EigenPath(const std::vector<Eigen::VectorXd>& configs);
-    //TODO Deprecated
-    explicit EigenPath(const ompl::base::PathPtr& path);
     explicit EigenPath(const RobotPtr& robot, const ompl::base::PathPtr& path);
 
     /*\brief Get configuration along path at position s in [0,1] */

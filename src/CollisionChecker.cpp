@@ -94,31 +94,6 @@ bool MultiCollisionChecker::IsInCollision(const dart::simulation::WorldPtr& worl
   return false;
 }
 
-DartWorldCollisionChecker::DartWorldCollisionChecker(const ompl::base::SpaceInformationPtr si, 
-    const dart::simulation::WorldPtr& world,
-    const dart::dynamics::SkeletonPtr& skeleton,
-    const CollisionCheckerPtr& collision_checker)
-  : ompl::base::StateValidityChecker(si), world_(world), skeleton_(skeleton), collision_checker_(collision_checker)
-{
-}
-
-bool DartWorldCollisionChecker::isValid(const ompl::base::State *state) const
-{
-  auto config = StateToEigenVectorXd(si_, state);
-  //Check joint limits
-  auto lb = skeleton_->getPositionLowerLimits();
-  auto ub = skeleton_->getPositionUpperLimits();
-  for(size_t k = 0; k < config.size(); k++) {
-    if(config[k] < lb[k] || config[k] > ub[k] || config[k] != config[k]) {
-      OMPL_WARN("Out of limits: %f not in [%f, %f] (index %d).", config[k], lb[k], ub[k], k);
-      return false;
-    }
-  }
-  //Check collisions
-  skeleton_->setConfiguration(config);
-  return !collision_checker_->IsInCollision(world_);
-}
-
 RobotToObstaclesCollisionChecker::RobotToObstaclesCollisionChecker(
     const dart::simulation::WorldPtr& world,
     const RobotPtr& robot,
@@ -140,58 +115,6 @@ bool RobotToObstaclesCollisionChecker::isValid(const ompl::base::State *state) c
   }
   //Check collisions
   robot_->GetSkeleton()->setConfiguration(config);
-  return !collision_checker_->IsInCollision(world_);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// DartMultiSkeletonCollisionChecker
-////////////////////////////////////////////////////////////////////////////////
-
-DartMultiSkeletonCollisionChecker::DartMultiSkeletonCollisionChecker(const ompl::base::SpaceInformationPtr& si, 
-  const dart::simulation::WorldPtr& world,
-  const std::unordered_map<std::string, dart::dynamics::SkeletonPtr>& skeletons,
-  const CollisionCheckerPtr& collision_checker) 
-  : ompl::base::StateValidityChecker(si), world_(world), skeletons_(skeletons), collision_checker_(collision_checker)
-{
-  auto children = static_pointer_cast<ompl::multilevel::FactoredSpaceInformation>(si)->getChildren();
-  for(const auto& child : children) {
-    tmp_skeleton_states_.insert({child->getName(), child->allocState()});
-  }
-}
-
-DartMultiSkeletonCollisionChecker::~DartMultiSkeletonCollisionChecker() {
-  auto children = static_cast<ompl::multilevel::FactoredSpaceInformation*>(si_)->getChildren();
-  for(const auto& child : children) {
-    const auto& name = child->getName();
-    auto it = tmp_skeleton_states_.find(name);
-    if(it == tmp_skeleton_states_.end()) {
-      continue;
-    }
-    child->freeState(it->second);
-  }
-}
-
-bool DartMultiSkeletonCollisionChecker::isValid(const ompl::base::State *state) const {
-
-  auto factor = static_cast<ompl::multilevel::FactoredSpaceInformation*>(si_);
-  factor->project(state, tmp_skeleton_states_);
-
-  for(const auto& child : factor->getChildren()) {
-    const auto& name = child->getName();
-    const auto& state = tmp_skeleton_states_.at(name);
-    const auto config = StateToEigenVectorXd(child, state);
-    const auto& skeleton = skeletons_.at(name);
-    const auto lb = skeleton->getPositionLowerLimits();
-    const auto ub = skeleton->getPositionUpperLimits();
-    for(size_t k = 0; k < config.size(); k++) {
-      if(config[k] < (lb[k] - 1e-5) || config[k] > (ub[k] + 1e-5) || config[k] != config[k]) {
-        std::cout <<"Out of bounds: " << config[k] << " not in ["<< lb[k] << "," << ub[k] <<"]" << std::endl;
-
-        return false;
-      }
-    }
-    skeleton->setConfiguration(config);
-  }
   return !collision_checker_->IsInCollision(world_);
 }
 

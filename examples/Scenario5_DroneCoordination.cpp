@@ -5,6 +5,7 @@
 #include "OmplHelper.hpp"
 #include "gui/Visualizer.hpp"
 #include "robots/ZeppelinRobot.hpp"
+#include "robots/MultiRobot.hpp"
 #include "robots/ZeppelinInnerSphereRobot.hpp"
 #include "robots/RobotFactory.hpp"
 #include "Utils.hpp"
@@ -127,7 +128,9 @@ int main(int argc, char* argv[]) {
     robots.push_back(robot);
   }
 
-  auto root = MakeMultiRobotSpaceInformation(factors);
+  // auto root = MakeMultiRobotSpaceInformation(factors);
+  auto multi_robot = MultiRobot::MakeMultiRobot(robots);
+  auto root = multi_robot->GetSpaceInformation();
 
   const bool computer_fiber_space = false;
   for(size_t k = 0; k < factors.size(); k++) {

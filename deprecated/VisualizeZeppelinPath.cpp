@@ -11,10 +11,9 @@
 #include "DartHelper.hpp"
 #include "gui/Visualizer.hpp"
 #include "OmplHelper.hpp"
-#include "MakeSpaceInformation.hpp"
 #include "KinematicsSolver.hpp"
 #include "Utils.hpp"
-#include "robots/KukaSkeleton.hpp"
+#include "robots/KukaRobot.hpp"
 
 #include <ompl/base/SpaceInformation.h>
 #include <ompl/base/spaces/RealVectorStateSpace.h>

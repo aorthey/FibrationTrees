@@ -2,12 +2,12 @@
 
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 
-ompl::multilevel::FactoredSpaceInformationPtr EuclideanRobot::MakeSpaceInformation(const dart::dynamics::SkeletonPtr& manipulator) {
-  auto numDofs = manipulator->getNumDofs();
+ompl::multilevel::FactoredSpaceInformationPtr EuclideanRobot::MakeSpaceInformation(const RobotPtr& robot) {
+  auto numDofs = robot->GetSkeleton()->getNumDofs();
   ompl::base::StateSpacePtr space(new ompl::base::RealVectorStateSpace(numDofs));
   ompl::base::RealVectorBounds bounds(numDofs);
-  auto lb = manipulator->getPositionLowerLimits();
-  auto ub = manipulator->getPositionUpperLimits();
+  auto lb = robot->GetSkeleton()->getPositionLowerLimits();
+  auto ub = robot->GetSkeleton()->getPositionUpperLimits();
   for(size_t k =0; k< numDofs; k++) {
     bounds.setLow(k, lb[k]);
     bounds.setHigh(k, ub[k]);

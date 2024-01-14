@@ -3,13 +3,14 @@
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include "TaskSpaceProjection.hpp"
 #include "OmplHelper.hpp"
+#include "robots/Robot.hpp"
 
 OMPL_CLASS_FORWARD(TaskSpace);
 
 class TaskSpace : public ompl::base::RealVectorStateSpace {
  public:
 
-  explicit TaskSpace(unsigned int dim, const KinematicsSolverPtr& kinematics_solver);
+  explicit TaskSpace(unsigned int dim, const RobotPtr& robot);
 
   ~TaskSpace();
 
@@ -19,4 +20,5 @@ class TaskSpace : public ompl::base::RealVectorStateSpace {
 
  private:
   KinematicsSolverPtr kinematics_solver_;
+  RobotPtr robot_;
 };

@@ -1,6 +1,5 @@
 #include "TaskSpaceMultiRobotMotionValidator.hpp"
 
-#include "EigenPath.hpp"
 #include "OmplHelper.hpp"
 #include "Common.hpp"
 

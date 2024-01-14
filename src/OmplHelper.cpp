@@ -3,42 +3,11 @@
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/goals/GoalState.h>
 
-Eigen::VectorXd StateToEigenVectorXd(const int Ndimension, const ompl::base::State* state) {
-  double *state_R = state->as<ompl::base::RealVectorStateSpace::StateType>()->values;
-
-  Eigen::VectorXd v(Ndimension);
-  for(size_t k = 0; k < Ndimension; k++) {
-    v[k] = state_R[k];
-  }
-  return v;
-}
-
-Eigen::VectorXd StateToEigenVectorXd(const ompl::base::SpaceInformation* si, const ompl::base::State* state) {
-  // std::vector<double> reals(si->getStateDimension(), 0.0);
-  // si->getStateSpace()->copyToReals(reals, state);
-  // Eigen::VectorXd v = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(reals.data(), reals.size());
-  // return v;
-  return StateToEigenVectorXd(si->getStateDimension(), state);
-}
-
-Eigen::VectorXd StateToEigenVectorXd(const ompl::base::SpaceInformationPtr& si, const ompl::base::State* state) {
-  return StateToEigenVectorXd(si->getStateDimension(), state);
-}
-
 Eigen::Vector3d StateToEigenVector3d(const ompl::base::State* state) {
   double *state_R = state->as<ompl::base::RealVectorStateSpace::StateType>()->values;
   Eigen::Vector3d v;
   for(size_t k = 0; k < 3; k++) {
     v[k] = state_R[k];
-  }
-  return v;
-}
-
-Eigen::Vector3d EigenVectorXdToEigenVector3d(const Eigen::VectorXd& input) {
-  Eigen::Vector3d v;
-  auto N = std::min(size_t(3), size_t(input.size()));
-  for(size_t k = 0; k < N; k++) {
-    v[k] = input[k];
   }
   return v;
 }
@@ -49,19 +18,6 @@ Eigen::Vector3d ProjectStateToEigenVector3d(const ompl::multilevel::ProjectionPt
   double *state_R3 = projected_state->as<ompl::base::RealVectorStateSpace::StateType>()->values;
   Eigen::Vector3d v;
   v << state_R3[0], state_R3[1], state_R3[2];
-  projection->getBase()->freeState(projected_state);
-  return v;
-}
-
-Eigen::VectorXd LiftStateToEigenVectorXd(const ompl::multilevel::ProjectionPtr& projection, const ompl::base::State* base_state) {
-  ompl::base::State *projected_state = projection->getBundle()->allocState();
-  projection->lift(base_state, projected_state);
-  double *state_R = projected_state->as<ompl::base::RealVectorStateSpace::StateType>()->values;
-  int N = projection->getBundle()->getDimension();
-  Eigen::VectorXd v = Eigen::VectorXd::Zero(N);
-  for(size_t k = 0; k < N; k++) {
-    v[k] = state_R[k];
-  }
   projection->getBase()->freeState(projected_state);
   return v;
 }

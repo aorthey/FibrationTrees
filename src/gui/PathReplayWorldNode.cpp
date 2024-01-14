@@ -20,26 +20,6 @@ PathReplayWorldNode::~PathReplayWorldNode() {
 
 const float kVisualizationStepSize = 0.01; //was 0.01
 
-//TODO Deprecated
-std::vector<Eigen::Vector3d> MakeEdgeVertices(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::SpaceInformationPtr& si, const ompl::base::State* s1, const ompl::base::State* s2, std::vector<Eigen::VectorXd>& configs) {
-  const auto L = si->distance(s1, s2);
-
-  std::vector<Eigen::Vector3d> vertices;
-  if(L < kVisualizationStepSize) {
-    return vertices;
-  }
-
-  auto sout = si->allocState();
-  for(double d = 0.0; d < L + kVisualizationStepSize; d+= kVisualizationStepSize) {
-    si->getStateSpace()->interpolate(s1, s2, d/L, sout);
-    const auto config = StateToEigenVectorXd(si, sout);
-    configs.push_back(config);
-    const auto v = GetFK(skeleton, config);
-    vertices.push_back(v);
-  }
-  si->freeState(sout);
-  return vertices;
-}
 std::vector<Eigen::Vector3d> MakeEdgeVertices(const RobotPtr& robot, const ompl::base::SpaceInformationPtr& si, const ompl::base::State* s1, const ompl::base::State* s2, std::vector<Eigen::VectorXd>& configs) {
   const auto L = si->distance(s1, s2);
 
@@ -58,53 +38,6 @@ std::vector<Eigen::Vector3d> MakeEdgeVertices(const RobotPtr& robot, const ompl:
   }
   si->freeState(sout);
   return vertices;
-}
-
-// void PathReplayWorldNode::AddPath(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PathPtr& ompl_path, 
-//     const Eigen::Vector3d& color) {
-//   if(ompl_path == nullptr) {
-//     return;
-//   }
-//   auto factor = std::static_pointer_cast<ompl::multilevel::FactoredSpaceInformation>(ompl_path->getSpaceInformation());
-//   ompl::geometric::PathGeometric &path = *static_cast<ompl::geometric::PathGeometric *>(ompl_path.get());
-
-//   auto states = path.getStates();
-
-//   std::vector<Eigen::VectorXd> configs;
-//   std::cout << "Path has " << states.size() << " states." << std::endl;
-//   for(size_t k = 1; k < states.size(); k++) {
-//     auto s1 = states.at(k - 1);
-//     auto s2 = states.at(k);
-
-//     std::vector<Eigen::VectorXd> edge_configs;
-//     std::cout << "Create edge " << k << "/" << states.size() - 1 << std::endl;
-//     auto vertices = MakeEdgeVertices(skeleton, factor, s1, s2, edge_configs);
-//     configs.insert(configs.end(), edge_configs.begin(), edge_configs.end());
-
-//     auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices, color, kPathLineWidth));
-//     solution_path_frames_.push_back(frame_line);
-//   }
-//   std::cout << "Found " << configs.size() << " configs for path with " << states.size() << " states." << std::endl;
-//   auto eigen_path = std::make_shared<EigenPath>(configs);
-//   skeleton_and_path_.push_back(std::make_pair(skeleton, eigen_path));
-// }
-void PathReplayWorldNode::AddPath(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PathPtr& ompl_path, 
-    const Eigen::Vector3d& color) {
-  if(ompl_path == nullptr) {
-    return;
-  }
-  auto path = std::make_shared<EigenPath>(ompl_path);
-
-  const float L = path->GetLength();
-  std::vector<Eigen::Vector3d> vertices;
-  for(float d = 0; d < L+kVisualizationStepSize; d+=kVisualizationStepSize) {
-    const auto s1 = path->GetConfigAt(d / L);
-    const auto v1 = GetFK(skeleton, s1);
-    vertices.push_back(v1);
-  }
-  auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices, color, kPathLineWidth));
-  solution_path_frames_.push_back(frame_line);
-  skeleton_and_path_.push_back(std::make_pair(skeleton, path));
 }
 
 void PathReplayWorldNode::AddPath(const RobotPtr& robot, const ompl::base::PathPtr& ompl_path, 
@@ -126,28 +59,6 @@ void PathReplayWorldNode::AddPath(const RobotPtr& robot, const ompl::base::PathP
   skeleton_and_path_.push_back(std::make_pair(robot->GetSkeleton(), path));
 }
 
-void PathReplayWorldNode::AddPlannerData(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PlannerData& data) {
-  const auto& si = data.getSpaceInformation();
-  const auto Nvertices = data.numVertices();
-  unsigned int counter = 0;
-  for(unsigned int vindex = 0; vindex < Nvertices; vindex++) {
-    for(unsigned int windex = 0; windex < Nvertices; windex++) {
-      if(!data.edgeExists(vindex, windex)) {
-        continue;
-      }
-      counter++;
-      const auto s1 = data.getVertex(vindex).getState();
-      const auto s2 = data.getVertex(windex).getState();
-
-      std::vector<Eigen::VectorXd> configs;
-      auto vertices = MakeEdgeVertices(skeleton, si, s1, s2, configs);
-      auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices, kRoadmapColorVertex, kRoadmapLineWidth));
-      planner_data_frames_.push_back(frame_line);
-    }
-  }
-  OMPL_INFORM("Added %d vertices and %d(%d) edges.", Nvertices, counter, data.numEdges());
-  togglePlannerDataVisibility();
-}
 void PathReplayWorldNode::AddPlannerData(const RobotPtr& robot, const ompl::base::PlannerData& data) {
   const auto& si = data.getSpaceInformation();
   const auto Nvertices = data.numVertices();
@@ -171,60 +82,6 @@ void PathReplayWorldNode::AddPlannerData(const RobotPtr& robot, const ompl::base
   togglePlannerDataVisibility();
 }
 
-void PathReplayWorldNode::AddMultiRobotPlannerData(const std::unordered_map<std::string, dart::dynamics::SkeletonPtr>& skeletons, const ompl::base::PlannerData& data) {
-  const auto& factor = std::static_pointer_cast<ompl::multilevel::FactoredSpaceInformation>(data.getSpaceInformation());
-  const auto Nvertices = data.numVertices();
-  unsigned int counter = 0;
-  auto sout = factor->allocState();
-
-  auto childStates = factor->allocChildStates();
-
-  auto children = factor->getChildren();
-
-  for(unsigned int vindex = 0; vindex < Nvertices; vindex++) {
-    for(unsigned int windex = 0; windex < Nvertices; windex++) {
-      if(!data.edgeExists(vindex, windex)) {
-        continue;
-      }
-      counter++;
-      const auto s1 = data.getVertex(vindex).getState();
-      const auto s2 = data.getVertex(windex).getState();
-
-      const auto step_size = 0.01f;
-      const auto L = factor->distance(s1, s2);
-
-      std::unordered_map<std::string, std::vector<Eigen::Vector3d>> vertices;
-      for(const auto& childState : childStates) {
-        const auto& name = childState.first;
-        vertices[name] = std::vector<Eigen::Vector3d>{};
-      }
-
-      for(double d = 0.0; d < L + step_size; d+= step_size) {
-        factor->getStateSpace()->interpolate(s1, s2, d/L, sout);
-
-        //convert to child nodes
-        factor->project(sout, childStates);
-        for(const auto& childState : childStates) {
-          const auto& name = childState.first;
-
-          const auto config = StateToEigenVectorXd(factor->getChild(name), childState.second);
-          const auto v = GetFK(skeletons.at(name), config);
-
-          vertices.at(name).push_back(v);
-        }
-      }
-      for(const auto& childState : childStates) {
-        auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices.at(childState.first), kRoadmapColorVertex, kRoadmapLineWidth));
-        planner_data_frames_.push_back(frame_line);
-      }
-    }
-  }
-  factor->freeState(sout);
-  factor->freeChildStates(childStates);
-  OMPL_INFORM("Added %d vertices and %d(%d) edges.", Nvertices, counter, data.numEdges());
-  togglePlannerDataVisibility();
-}
-
 void PathReplayWorldNode::AddMultiRobotPlannerData(const std::vector<RobotPtr>& robots, const ompl::base::PlannerData& data) {
   const auto& factor = std::static_pointer_cast<ompl::multilevel::FactoredSpaceInformation>(data.getSpaceInformation());
   const auto Nvertices = data.numVertices();
@@ -232,7 +89,6 @@ void PathReplayWorldNode::AddMultiRobotPlannerData(const std::vector<RobotPtr>& 
   auto sout = factor->allocState();
 
   auto childStates = factor->allocChildStates();
-
   auto children = factor->getChildren();
 
   for(unsigned int vindex = 0; vindex < Nvertices; vindex++) {
@@ -258,12 +114,11 @@ void PathReplayWorldNode::AddMultiRobotPlannerData(const std::vector<RobotPtr>& 
 
         //convert to child nodes
         factor->project(sout, childStates);
-        for(const auto& childState : childStates) {
-          const auto& name = childState.first;
-
-          const auto config = StateToEigenVectorXd(factor->getChild(name), childState.second);
-          const auto v = GetFK(robots.at(0)->GetSkeleton(), config);
-
+        for(const auto& robot : robots) {
+          const auto& name = robot->GetSpaceInformation()->getName();
+          const auto& childState = childStates.at(name);
+          const auto config = robot->StateToEigen(childState);
+          const auto v = GetFK(robot->GetSkeleton(), config);
           vertices.at(name).push_back(v);
         }
       }
