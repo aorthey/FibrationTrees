@@ -12,13 +12,6 @@ const float kAccuracyStraightLine = 1e-1; //Staying along the straight line path
 const float kAccuracyGoal = 1e-2; //Reaching goal frame
 const size_t kNumberRandomConfigs = 10;
 
-double LineDistance(const Eigen::Vector3d& a, const Eigen::Vector3d& b, const Eigen::Vector3d& p) {
-  const auto& n = (b-a).normalized();
-  auto s = (p-a).dot(n);
-  auto d = ((p-a)-s*n).norm();
-  return d;
-}
-
 bool CheckStraightLineAccuracy(const KinematicsSolverPtr& kinematics_solver, 
     const std::vector<Eigen::VectorXd>& configs) {
 

@@ -48,21 +48,21 @@ bool TranslationTaskSpaceMotionValidator::checkMotion(const ompl::base::State *s
     return FillLastStateOnNoProgressAndReturn(s1, lastValid);
   }
   if(!kinematics_solver_->lastSolveWasSuccessful()) {
-    EigenVectorXdToState(configs.back(), lastValidState_);
+    robot_->EigenToState(configs.back(), lastValidState_);
     return FillLastStateOnNoProgressAndReturn(lastValidState_, lastValid);
   }
-  // std::cout << "Interpolated " << configs.size() << " states." << std::endl;
-  // std::cout << "First config: " << configs.front().format(CommaFmt) << std::endl;
-  // std::cout << "Last  config: " << configs.back().format(CommaFmt) << std::endl;
+  std::cout << "Interpolated " << configs.size() << " states." << std::endl;
+  std::cout << "First config: " << configs.front().format(CommaFmt) << std::endl;
+  std::cout << "Last  config: " << configs.back().format(CommaFmt) << std::endl;
 
   si_->copyState(lastValidState_, s1);
   EigenPath path(configs);
   float L = path.GetLength();
-  // std::cout << "Path length: " << L << std::endl;
+  std::cout << "Path length: " << L << std::endl;
   for(float d = 0; d < L; d+= kDeltaCollisionCheckStepSize) {
-    EigenVectorXdToState(path.GetConfigAt(d/L), tmpState_);
+    robot_->EigenToState(path.GetConfigAt(d/L), tmpState_);
     if(!si_->isValid(tmpState_)) {
-      // std::cout << "Invalid at " << d/L << std::endl;
+      std::cout << "Invalid at " << d/L << std::endl;
       if(lastValid.first != nullptr) {
         si_->copyState(lastValid.first, lastValidState_);
         lastValid.second = si_->distance(s1, lastValid.first);
@@ -101,7 +101,7 @@ std::vector<ompl::base::State*> TranslationTaskSpaceMotionValidator::propagateMo
   ////////////////////////////////////////////////////////////////////////////////
   auto last_config = from_vector;
   for(const auto& config : configs) {
-    EigenVectorXdToState(config, tmpState_);
+    robot_->EigenToState(config, tmpState_);
     if(!si_->isValid(tmpState_)) {
       return result;
     }

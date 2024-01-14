@@ -175,20 +175,7 @@ dart::dynamics::SkeletonPtr createFromURDF(const std::string& urdf_name, const E
       = loader.parseSkeleton(urdf_name);
 
     static int count = 0;
-    // manipulator->setName("manipulator_"+std::to_string(count++));
     object->setMobile(false);
-    // manipulator->setSelfCollisionCheck(true);
-    // manipulator->setAdjacentBodyCheck(true);
-    // static int counter = 0;
-    // std::string name = "obstacle_"+std::to_string(counter++);
-    // dart::dynamics::SkeletonPtr sphere = dart::dynamics::Skeleton::create(name);
-
-    // dart::dynamics::BodyNodePtr body =
-    //     sphere->createJointAndBodyNodePair<dart::dynamics::WeldJoint>(nullptr).second;
-    // dart::dynamics::ShapePtr shape = std::make_shared<dart::dynamics::SphereShape>(radius);
-
-    // auto shapeNode = body->createShapeNodeWith<dart::dynamics::VisualAspect, dart::dynamics::CollisionAspect, dart::dynamics::DynamicsAspect>(shape);
-    // shapeNode->getVisualAspect()->setColor(Eigen::Vector3d(0.5, 0.0, 0.5));
 
     auto body = object->getRootBodyNode();
 

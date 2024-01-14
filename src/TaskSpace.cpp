@@ -22,7 +22,7 @@ void TaskSpace::interpolate(const ompl::base::State *from, const ompl::base::Sta
     return;
   }
   EigenPath path(configs);
-  EigenVectorXdToState(path.GetConfigAt(t), state);
+  robot_->EigenToState(path.GetConfigAt(t), state);
 }
 
 double TaskSpace::distance(const ompl::base::State *from, const ompl::base::State *to) const {

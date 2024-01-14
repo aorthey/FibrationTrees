@@ -1,7 +1,14 @@
 #include "TaskSpaceProjection.hpp"
 
+#include <ompl/base/SpaceInformation.h>
+
 #include "dart/math/Random.hpp"
 #include "KinematicsSolver.hpp"
+
+ProjectionJointSpaceToR3::ProjectionJointSpaceToR3(const ompl::base::SpaceInformationPtr& bundle, 
+    const ompl::base::SpaceInformationPtr& base, 
+    const KinematicsSolverPtr& kinematics_solver) 
+  : ProjectionJointSpaceToR3(bundle->getStateSpace(), base->getStateSpace(), kinematics_solver) {}
 
 ProjectionJointSpaceToR3::ProjectionJointSpaceToR3(const ompl::base::StateSpacePtr& bundle, 
     const ompl::base::StateSpacePtr& base, 

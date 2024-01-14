@@ -14,29 +14,24 @@
 
 const size_t kMaxConnections = 20;
 
-TEST(MotionValidatorTest, RandomConfigConnectionTest) {
-  // dart::dynamics::SkeletonPtr manipulator = 
-  //   createKukaSkeleton("/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka.urdf");
-  // dart::dynamics::SkeletonPtr point = createSphere(0.01);
+class TestSphereRobot : public SphereRobot {
+  public:
+    TestSphereRobot() = default;
+    dart::dynamics::SkeletonPtr MakeSkeleton() override {
+      return createSphere(0.1);
+    }
+};
 
+TEST(MotionValidatorTest, RandomConfigConnectionTest) {
   dart::math::Random::setSeed(0);
   dart::simulation::WorldPtr world(new dart::simulation::World);
 
   auto robot = MakeRobot<KukaRobot>(world);
-  auto point = MakeRobot<SphereRobot>(world);
-
-  // KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
-  // world->addSkeleton(manipulator);
-  // world->addSkeleton(point);
-
-  // std::vector<dart::dynamics::SkeletonPtr> robot_vector = {manipulator};
-  // std::vector<dart::dynamics::SkeletonPtr> obstacle_vector = {point};
-  // auto collision_checker = std::make_shared<CollisionChecker>(world, robot_vector, obstacle_vector);
+  auto point = MakeRobot<TestSphereRobot>(world);
 
   ////////////////////////////////////////////////////////////////////////////////
   ////OMPL Setup
   ////////////////////////////////////////////////////////////////////////////////
-
   auto factor = robot->GetSpaceInformation();
   auto motion_validator = factor->getMotionValidator();
   
@@ -72,9 +67,17 @@ TEST(MotionValidatorTest, RandomConfigConnectionTest) {
 
     auto config = robot->StateToEigen(lastValid.first);
     std::cout << "Reached config " << config.format(CommaFmt) << std::endl;
-    std::cout << std::string(80,'-') << std::endl;
+    const auto s3_tcp = GetFK(robot->GetSkeleton(), config);
 
-    // EXPECT_TRUE(motion_validator->checkMotion(s1, lastValid.first));
+    std::cout << "  Tcp[start]   " << s1_tcp.format(CommaFmt) << std::endl;
+    std::cout << "  Tcp[goal]    " << s2_tcp.format(CommaFmt) << std::endl;
+    std::cout << "  Tcp[reached] " << s3_tcp.format(CommaFmt) << std::endl;
+    std::cout << "  Tcp[mid]     " << mid.format(CommaFmt) << std::endl;
+    std::cout << std::string(80,'-') << std::endl;
+    auto d_mid = LineDistance(s1_tcp, s2_tcp, mid_config);
+    auto d = LineDistance(s1_tcp, s2_tcp, s3_tcp);
+    EXPECT_LT(d_mid, 1e-6);
+    EXPECT_LT(d, 1e-6);
   }
 
   factor->freeState(s2);

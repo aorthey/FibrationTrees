@@ -11,6 +11,7 @@ OMPL_CLASS_FORWARD(ProjectionJointSpaceToR3);
 class ProjectionJointSpaceToR3 : public ompl::multilevel::Projection
 {
  public:
+  ProjectionJointSpaceToR3(const ompl::base::SpaceInformationPtr& bundle, const ompl::base::SpaceInformationPtr& base, const KinematicsSolverPtr& kinematics_solver);
   ProjectionJointSpaceToR3(const ompl::base::StateSpacePtr& bundle, const ompl::base::StateSpacePtr& base, const KinematicsSolverPtr& kinematics_solver);
   ~ProjectionJointSpaceToR3();
 

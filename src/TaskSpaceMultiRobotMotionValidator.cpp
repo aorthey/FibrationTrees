@@ -79,8 +79,6 @@ bool TaskSpaceMultiRobotMotionValidator::checkMotion(const ompl::base::State *s1
       std::cout << "Verified motion." << std::endl;
     }
   }
-
-  // OMPL_INFORM("Total %f", lastValid.second);
   return all_subspaces_are_valid;
 }
 

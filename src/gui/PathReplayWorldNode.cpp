@@ -309,7 +309,7 @@ bool PathReplayEventHandler::handle(
 {
   if (ea.getEventType() == osgGA::GUIEventAdapter::KEYDOWN)
   {
-    auto events = world_node_->GetKeyPressEvents();
+    const auto events = world_node_->GetKeyPressEvents();
     for(const auto& event : events) {
       if(ea.getKey() != event.key) {
         continue;

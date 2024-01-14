@@ -51,6 +51,8 @@ int main(int argc, char* argv[]) {
 
   auto robot1 = MakeRobot<KukaRobot>(world, obstacles);
   auto robot2 = MakeRobot<KukaRobot>(world, obstacles);
+  auto point1 = MakeRobot<SphereRobot>(world, obstacles);
+  auto point2 = MakeRobot<SphereRobot>(world, obstacles);
 
   Eigen::Isometry3d transform1(Eigen::Isometry3d::Identity());
   transform1.translation() = Eigen::Vector3d{0.0, -0.5*kRobotRobotDistance, 0};
@@ -59,9 +61,6 @@ int main(int argc, char* argv[]) {
   Eigen::Isometry3d transform2(Eigen::Isometry3d::Identity());
   transform2.translation() = Eigen::Vector3d{0.0, +0.5*kRobotRobotDistance, 0};
   robot2->GetSkeleton()->getRootBodyNode()->getParentJoint()->setTransformFromParentBodyNode(transform2);
-
-  auto point1 = MakeRobot<SphereRobot>(world, obstacles);
-  auto point2 = MakeRobot<SphereRobot>(world, obstacles);
 
   const auto limits1 = std::make_pair(Eigen::Vector3d(0.38, -0.5, 0.0), Eigen::Vector3d(0.42, +0.5, 2.0));
   const auto limits2 = std::make_pair(Eigen::Vector3d(0.38, -0.5, 0.0), Eigen::Vector3d(0.42, +0.5, 2.0));
@@ -92,11 +91,11 @@ int main(int argc, char* argv[]) {
 
   KinematicsSolverPtr kinematics_solver1 = std::make_shared<KinematicsSolver>(robot1->GetSkeleton());
 
-  ompl::multilevel::ProjectionPtr projection_child1 = std::make_shared<ProjectionJointSpaceToR3>(factor1->getStateSpace(), child1->getStateSpace(), kinematics_solver1);
+  ompl::multilevel::ProjectionPtr projection_child1 = std::make_shared<ProjectionJointSpaceToR3>(factor1, child1, kinematics_solver1);
   factor1->addChild(child1, projection_child1);
 
   KinematicsSolverPtr kinematics_solver2 = std::make_shared<KinematicsSolver>(robot2->GetSkeleton());
-  ompl::multilevel::ProjectionPtr projection_child2 = std::make_shared<ProjectionJointSpaceToR3>(factor2->getStateSpace(), child2->getStateSpace(), kinematics_solver2);
+  ompl::multilevel::ProjectionPtr projection_child2 = std::make_shared<ProjectionJointSpaceToR3>(factor2, child2, kinematics_solver2);
   factor2->addChild(child2, projection_child2);
 
   auto factor = multi_robot->GetSpaceInformation();
@@ -113,7 +112,7 @@ int main(int argc, char* argv[]) {
 
   auto pairwise_collision_checker = std::make_shared<DartMultiRobotCollisionChecker>(factor, world, robots);
   factor->setStateValidityChecker(pairwise_collision_checker);
-  factor->setStateValidityCheckingResolution(0.0001);
+  factor->setStateValidityCheckingResolution(0.001);
 
   //////////////////////////////////////////////////////////////////////////////////
   //////Create start/goal states and propagate them upwards (lift through the
@@ -196,16 +195,14 @@ int main(int argc, char* argv[]) {
   planner->setup();
   planner->setRange(Inf);
 
-  float timeout = 1000.0;
+  float timeout = 100.0;
   ompl::base::PlannerStatus status = planner->Planner::solve(timeout);
 
   //////////////////////////////////////////////////////////////////////////////////
   //////Visualize
   //////////////////////////////////////////////////////////////////////////////////
   Visualizer visualizer(world);
-
   visualizer.SetCollisionChecker(pairwise_collision_checker->GetCollisionChecker());
-
   visualizer.AddMultiRobotPlanner(robots, planner);
 
   visualizer.Run();
