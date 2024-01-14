@@ -54,13 +54,16 @@ int main()
 
     geom_path->print(std::cout);
 
-    std::ofstream pathfile(boost::str(boost::format("multi_robot_disk_path.dat")).c_str());
+    auto filename = "multi_robot_disk_path.dat";
+    std::ofstream pathfile(boost::str(boost::format(filename)).c_str());
     geom_path->printAsMatrix(pathfile);
+    OMPL_INFORM("Wrote solution to file %s", filename);
+    OMPL_INFORM("Generate video using `python3 scripts/Scenario1_plot_disks.py %s`", filename);
   } else {
     auto path = pdef->getSolutionPath();
     if(path) {
-      OMPL_INFORM("Found approximate path");
       path->print(std::cout);
+      OMPL_INFORM("Found approximate path");
     }
   }
   return 0;

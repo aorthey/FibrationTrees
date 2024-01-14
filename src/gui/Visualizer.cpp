@@ -1,9 +1,9 @@
 #include "gui/Visualizer.hpp"
-
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 
 #include "DartHelper.hpp"
 #include "OmplHelper.hpp"
+#include "Common.hpp"
 
 Visualizer::Visualizer(const dart::simulation::WorldPtr& world) {
 
@@ -90,7 +90,7 @@ void Visualizer::AddPlanner(const RobotPtr& robot, const ompl::base::PlannerPtr&
       path->getSpaceInformation()->printState(state);
       const auto config = robot->StateToEigen(state);
       const auto v = GetFK(robot->GetSkeleton(), config);
-      std::cout << "EndEffector position is " << v[0] << ", " << v[1] << ", " << v[2] << std::endl;
+      std::cout << "EndEffector position is " << v.format(CommaFmt) << std::endl;
     }
     OMPL_INFORM("Interpolate path...");
     pgeo.interpolate();
@@ -101,6 +101,10 @@ void Visualizer::AddPlanner(const RobotPtr& robot, const ompl::base::PlannerPtr&
 
 void Visualizer::AddPath(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PathPtr& path, const Eigen::Vector3d& color) {
   world_node->AddPath(skeleton, path, color);
+}
+
+void Visualizer::AddPath(const RobotPtr& robot, const ompl::base::PathPtr& path, const Eigen::Vector3d& color) {
+  world_node->AddPath(robot, path, color);
 }
 
 void Visualizer::SetCollisionChecker(const CollisionCheckerPtr& collision_checker) {
@@ -208,7 +212,7 @@ void Visualizer::AddMultiRobotPlanner(const std::vector<RobotPtr>& robots,
   planner->getPlannerData(planner_data);
   OMPL_INFORM("Found %d vertices.", planner_data.numVertices());
 
-  world_node->AddMultiRobotPlannerData(robots, planner_data);
+  //world_node->AddMultiRobotPlannerData(robots, planner_data);
 
   ////////////////////////////////////////////////////////////////////////////////
   // Maybe add solution path
@@ -222,11 +226,12 @@ void Visualizer::AddMultiRobotPlanner(const std::vector<RobotPtr>& robots,
     for(const auto& state : pgeo.getStates()) {
       path->getSpaceInformation()->printState(state);
     }
-    // pgeo.interpolate();
+    pgeo.interpolate();
     AddMultiRobotPath(robots, path);
   }
 }
 
 void Visualizer::Run() {
+  viewer->realize();
   viewer->run();
 }

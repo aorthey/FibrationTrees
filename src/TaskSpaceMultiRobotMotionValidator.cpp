@@ -12,7 +12,6 @@ TaskSpaceMultiRobotMotionValidator::TaskSpaceMultiRobotMotionValidator(const omp
   }
   auto space = factor->getStateSpace()->as<ompl::base::CompoundStateSpace>();
   for(size_t k = 0; k < space->getSubspaceCount(); k++) {
-    // lastValids_.push_back({std::make_pair(space->getSubspace(k)->allocState(), 0.0f)});
     lastValids_.push_back(space->getSubspace(k)->allocState());
   }
   if(space->getSubspaceCount() != motion_validators_.size()) {
@@ -66,7 +65,7 @@ bool TaskSpaceMultiRobotMotionValidator::checkMotion(const ompl::base::State *s1
     }
     spacek->copyState(lastValid.first->as<ompl::base::CompoundState>()->operator[](k), lastValidSpaceK.first);
     lastValid.second += lastValidSpaceK.second;
-    // OMPL_INFORM("Progress %f on %d", lastValidSpaceK.second, k);
+    OMPL_INFORM("Progress %f on %d", lastValidSpaceK.second, k);
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -78,7 +77,7 @@ bool TaskSpaceMultiRobotMotionValidator::checkMotion(const ompl::base::State *s1
     if(!ompl::base::DiscreteMotionValidator::checkMotion(s1, last_state, lastValid)) {
       all_subspaces_are_valid = false;
     } else {
-      // std::cout << "Verified motion." << std::endl;
+      std::cout << "Verified motion." << std::endl;
     }
   }
 

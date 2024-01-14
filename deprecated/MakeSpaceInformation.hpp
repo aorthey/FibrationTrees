@@ -66,6 +66,8 @@ ompl::multilevel::FactoredSpaceInformationPtr MakeMultiRobotSpaceInformation(
   const std::vector<ompl::base::StateSpacePtr>& compound_spaces) {
   auto space = std::make_shared<ompl::base::CompoundStateSpace>(compound_spaces, std::vector<double>(compound_spaces.size(), 1.0f));
   auto factor(std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space));
+  auto validity_checker = std::make_shared<ompl::base::AllValidStateValidityChecker>(factor);
+  factor->setStateValidityChecker(validity_checker);
   return factor;
 }
 

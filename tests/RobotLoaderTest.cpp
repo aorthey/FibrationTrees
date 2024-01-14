@@ -16,8 +16,8 @@ using RobotTypes = ::testing::Types<KukaRobot, SphereRobot, ZeppelinRobot, Zeppe
 TYPED_TEST_SUITE(RobotLoaderTest, RobotTypes);
 
 TYPED_TEST(RobotLoaderTest, DefaultLoaderTest) {
-  RobotFactory<TypeParam> robot_factory;
-  auto robot = robot_factory.Create();
+  //RobotFactory<TypeParam> robot_factory;
+  auto robot = MakeRobot<TypeParam>();//robot_factory.Create();
 
   auto si = robot->GetSpaceInformation();
 
@@ -108,8 +108,9 @@ TYPED_TEST(RobotLoaderTest, ObstacleLoaderTest) {
 }
 
 TYPED_TEST(RobotLoaderTest, JointLimitTest) {
-  RobotFactory<TypeParam> robot_factory;
-  auto robot = robot_factory.Create();
+  // RobotFactory<TypeParam> robot_factory;
+  // auto robot = robot_factory.Create();
+  auto robot = MakeRobot<TypeParam>();//robot_factory.Create();
 
   auto skeleton = robot->GetSkeleton();
   auto lb = skeleton->getPositionLowerLimits();

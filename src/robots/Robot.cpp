@@ -29,22 +29,38 @@ void Robot::SetCollisionChecker(const CollisionCheckerPtr& collision_checker) {
 }
 
 bool Robot::IsValid(const ompl::base::State* state) const {
-  // std::cout << "IsValid" << std::endl;
-  // factor_->printSettings(std::cout);
-  // factor_->printState(state);
   auto config = this->StateToEigen(state);
   auto lb = skeleton_->getPositionLowerLimits();
   auto ub = skeleton_->getPositionUpperLimits();
   for(size_t k = 0; k < config.size(); k++) {
     if(config[k] < lb[k] || config[k] > ub[k] || config[k] != config[k]) {
-      OMPL_WARN("Out of limits: %f < %f < %f (index %d).", lb[k], ub[k], config[k], k);
+      OMPL_WARN("Out of limits: %f is not in [%f, %f] (index %d).", config[k], lb[k], ub[k], k);
       return false;
     }
   }
   if(!collision_checker_) {
+    OMPL_WARN("No collision checker set.");
     return true;
   }
   //Check collisions
   skeleton_->setConfiguration(config);
   return !collision_checker_->IsInCollision();
+}
+
+CollisionCheckerPtr Robot::MakeCollisionChecker(
+    const ompl::multilevel::FactoredSpaceInformationPtr& factor, 
+    const dart::simulation::WorldPtr& world,
+    const std::vector<dart::dynamics::SkeletonPtr>& obstacles) {
+
+  std::vector<dart::dynamics::SkeletonPtr> collision_group_robot = {GetSkeleton()};
+  auto collision_checker = std::make_shared<CollisionChecker>(world, collision_group_robot, obstacles);
+  SetCollisionChecker(collision_checker);
+
+  auto func = [&](const ompl::base::State* state) -> bool
+  {
+    return IsValid(state);
+  };
+  factor->setStateValidityChecker(func);
+  factor->setStateValidityCheckingResolution(0.001);
+  return collision_checker;
 }

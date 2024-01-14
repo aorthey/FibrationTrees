@@ -1,4 +1,6 @@
 #include "robots/KukaRobot.hpp"
+#include "robots/KukaRobot.hpp"
+#include "TranslationTaskSpaceMotionValidator.hpp"
 
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include "TaskSpace.hpp"
@@ -46,5 +48,8 @@ ompl::multilevel::FactoredSpaceInformationPtr KukaRobot::MakeSpaceInformation(co
     bounds.setHigh(k, ub[k]);
   }
   space->as<ompl::base::RealVectorStateSpace>()->setBounds(bounds);
-  return std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space);
+  auto factor = std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space);
+  ompl::base::MotionValidatorPtr motion_validator = std::make_shared<TranslationTaskSpaceMotionValidator>(factor, kinematics_solver);
+  factor->setMotionValidator(motion_validator);
+  return factor;
 }

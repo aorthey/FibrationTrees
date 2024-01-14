@@ -16,7 +16,9 @@ class Visualizer {
 
     explicit Visualizer(const dart::simulation::WorldPtr& world);
 
+    //TODO Deprecated
     void AddPath(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PathPtr& path, const Eigen::Vector3d& color = kDefaultPathColor);
+    void AddPath(const RobotPtr& robot, const ompl::base::PathPtr& path, const Eigen::Vector3d& color = kDefaultPathColor);
 
     //TODO Deprecated
     void AddPlanner(const dart::dynamics::SkeletonPtr& skeleton, const ompl::base::PlannerPtr& planner);

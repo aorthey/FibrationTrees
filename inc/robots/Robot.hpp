@@ -12,6 +12,10 @@ class Robot {
 
     virtual dart::dynamics::SkeletonPtr MakeSkeleton() = 0;
     virtual ompl::multilevel::FactoredSpaceInformationPtr MakeSpaceInformation(const dart::dynamics::SkeletonPtr& skeleton) = 0;
+    virtual CollisionCheckerPtr MakeCollisionChecker(
+        const ompl::multilevel::FactoredSpaceInformationPtr& factor, 
+        const dart::simulation::WorldPtr& world,
+        const std::vector<dart::dynamics::SkeletonPtr>& obstacles);
 
     virtual Eigen::VectorXd StateToEigen(const ompl::base::State* state) const = 0;
     virtual void EigenToState(const Eigen::VectorXd& v, ompl::base::State* state) const = 0;

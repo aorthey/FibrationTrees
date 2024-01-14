@@ -11,12 +11,10 @@
 #include "DartHelper.hpp"
 #include "gui/Visualizer.hpp"
 #include "OmplHelper.hpp"
+#include "MakeSpaceInformation.hpp"
 #include "KinematicsSolver.hpp"
 #include "Utils.hpp"
-#include "robots/KukaRobot.hpp"
-#include "robots/MultiRobot.hpp"
-#include "robots/SphereRobot.hpp"
-#include "robots/RobotFactory.hpp"
+#include "robots/KukaSkeleton.hpp"
 
 #include <ompl/base/SpaceInformation.h>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
@@ -25,6 +23,7 @@
 #include <ompl/util/RandomNumbers.h>
 #include <ompl/geometric/PathSimplifier.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
+#include <ompl/multilevel/datastructures/projections/RN_RM.h>
 #include <ompl/multilevel/datastructures/projections/SubspaceProjection.h>
 #include <ompl/multilevel/planners/factor/FibrationRRT.h>
 
@@ -32,45 +31,62 @@ const float kRobotRobotDistance = 0.3;
 
 int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
-  ////World creation
+  ////Creating manipulator
   ////////////////////////////////////////////////////////////////////////////////
-  std::vector<dart::dynamics::SkeletonPtr> obstacles;
-  obstacles.push_back(createFloor());
-  obstacles.push_back(createBox(Eigen::Vector3d(+0.5, +0.0, 0.75), 0.16, 2.0, 1.5));
+  dart::dynamics::SkeletonPtr manipulator1 = createKukaSkeleton();
+  dart::dynamics::SkeletonPtr manipulator2 = createKukaSkeleton();
+
+  Eigen::Isometry3d transform1(Eigen::Isometry3d::Identity());
+  transform1.translation() = Eigen::Vector3d{0.0, -0.5*kRobotRobotDistance, 0};
+  manipulator1->getRootBodyNode()->getParentJoint()->setTransformFromParentBodyNode(transform1);
+
+  Eigen::Isometry3d transform2(Eigen::Isometry3d::Identity());
+  transform2.translation() = Eigen::Vector3d{0.0, +0.5*kRobotRobotDistance, 0};
+  manipulator2->getRootBodyNode()->getParentJoint()->setTransformFromParentBodyNode(transform2);
 
   dart::math::Random::setSeed(0);
 
   ////////////////////////////////////////////////////////////////////////////////
   ////World creation
   ////////////////////////////////////////////////////////////////////////////////
+  dart::dynamics::SkeletonPtr floor = createFloor();
+  dart::dynamics::SkeletonPtr wall = createBox(Eigen::Vector3d(+0.5, +0.0, 0.75), 0.16, 2.0, 1.5);
+  dart::dynamics::SkeletonPtr point1 = createSphere(0.01);
+  dart::dynamics::SkeletonPtr point2 = createSphere(0.01);
+
+  hide(point1);
+  hide(point2);
+
   dart::simulation::WorldPtr world(new dart::simulation::World);
-  for(const auto& obstacle : obstacles) {
-    world->addSkeleton(obstacle);
-  }
+  world->addSkeleton(manipulator1);
+  world->addSkeleton(manipulator2);
+  world->addSkeleton(floor);
+  world->addSkeleton(wall);
+  world->addSkeleton(point1);
+  world->addSkeleton(point2);
   world->setGravity(Eigen::Vector3d::Zero());
 
-  auto robot1 = MakeRobot<KukaRobot>(world, obstacles);
-  auto robot2 = MakeRobot<KukaRobot>(world, obstacles);
+  ////////////////////////////////////////////////////////////////////////////////
+  ////Collision checking
+  ////////////////////////////////////////////////////////////////////////////////
+  KinematicsSolverPtr kinematics_solver1 = std::make_shared<KinematicsSolver>(manipulator1);
+  KinematicsSolverPtr kinematics_solver2 = std::make_shared<KinematicsSolver>(manipulator2);
 
-  Eigen::Isometry3d transform1(Eigen::Isometry3d::Identity());
-  transform1.translation() = Eigen::Vector3d{0.0, -0.5*kRobotRobotDistance, 0};
-  robot1->GetSkeleton()->getRootBodyNode()->getParentJoint()->setTransformFromParentBodyNode(transform1);
+  std::vector<dart::dynamics::SkeletonPtr> collision_environment = {floor, wall};
+  std::vector<dart::dynamics::SkeletonPtr> collision_robot1 = {manipulator1};
+  std::vector<dart::dynamics::SkeletonPtr> collision_robot2 = {manipulator2};
+  std::vector<dart::dynamics::SkeletonPtr> collision_point1 = {point1};
+  std::vector<dart::dynamics::SkeletonPtr> collision_point2 = {point2};
 
-  Eigen::Isometry3d transform2(Eigen::Isometry3d::Identity());
-  transform2.translation() = Eigen::Vector3d{0.0, +0.5*kRobotRobotDistance, 0};
-  robot2->GetSkeleton()->getRootBodyNode()->getParentJoint()->setTransformFromParentBodyNode(transform2);
+  CollisionCheckerPtr collision_checker1 = std::make_shared<CollisionChecker>(world, collision_robot1, collision_environment);
+  CollisionCheckerPtr collision_checker2 = std::make_shared<CollisionChecker>(world, collision_robot2, collision_environment);
+  CollisionCheckerPtr collision_checker_robot_robot = std::make_shared<CollisionChecker>(world, collision_robot1, collision_robot2);
 
-  auto point1 = MakeRobot<SphereRobot>(world, obstacles);
-  auto point2 = MakeRobot<SphereRobot>(world, obstacles);
+  CollisionCheckerPtr collision_checker_multi_robot = std::make_shared<MultiCollisionChecker>(world, 
+      std::vector<CollisionCheckerPtr>({collision_checker_robot_robot, collision_checker1, collision_checker2}));
 
-  const auto limits1 = std::make_pair(Eigen::Vector3d(0.38, -0.5, 0.0), Eigen::Vector3d(0.42, +0.5, 2.0));
-  const auto limits2 = std::make_pair(Eigen::Vector3d(0.38, -0.5, 0.0), Eigen::Vector3d(0.42, +0.5, 2.0));
-  point1->SetLimits(limits1);
-  point2->SetLimits(limits2);
-
-  std::vector<RobotPtr> robots = {robot1, robot2};
-
-  auto multi_robot = MultiRobot::MakeMultiRobot(robots);
+  CollisionCheckerPtr collision_checker_point1 = std::make_shared<CollisionChecker>(world, collision_point1, collision_environment);
+  CollisionCheckerPtr collision_checker_point2 = std::make_shared<CollisionChecker>(world, collision_point2, collision_environment);
 
   ////////////////////////////////////////////////////////////////////////////////
   ////OMPL Setup
@@ -84,22 +100,22 @@ int main(int argc, char* argv[]) {
   //
   ////////////////////////////////////////////////////////////////////////////////
 
-  auto factor1 = robot1->GetSpaceInformation();
-  auto factor2 = robot2->GetSpaceInformation();
+  auto factor1 = MakeTaskSpaceInformation(manipulator1, world, kinematics_solver1, collision_checker1);
+  auto factor2 = MakeTaskSpaceInformation(manipulator2, world, kinematics_solver2, collision_checker2);
 
-  auto child1 = point1->GetSpaceInformation();
-  auto child2 = point2->GetSpaceInformation();
-
-  KinematicsSolverPtr kinematics_solver1 = std::make_shared<KinematicsSolver>(robot1->GetSkeleton());
+  const auto limits1 = std::make_pair(Eigen::Vector3d(0.38, -0.5, 0.0), Eigen::Vector3d(0.42, +0.5, 2.0));
+  auto child1 = Make3DPointSpaceInformation(point1, world, collision_checker_point1, limits1);
+  const auto limits2 = std::make_pair(Eigen::Vector3d(0.38, -0.5, 0.0), Eigen::Vector3d(0.42, +0.5, 2.0));
+  auto child2 = Make3DPointSpaceInformation(point2, world, collision_checker_point2, limits2);
 
   ompl::multilevel::ProjectionPtr projection_child1 = std::make_shared<ProjectionJointSpaceToR3>(factor1->getStateSpace(), child1->getStateSpace(), kinematics_solver1);
   factor1->addChild(child1, projection_child1);
 
-  KinematicsSolverPtr kinematics_solver2 = std::make_shared<KinematicsSolver>(robot2->GetSkeleton());
   ompl::multilevel::ProjectionPtr projection_child2 = std::make_shared<ProjectionJointSpaceToR3>(factor2->getStateSpace(), child2->getStateSpace(), kinematics_solver2);
   factor2->addChild(child2, projection_child2);
 
-  auto factor = multi_robot->GetSpaceInformation();
+  const std::vector<ompl::base::StateSpacePtr> task_spaces = {factor1->getStateSpace(), factor2->getStateSpace()};
+  auto factor = MakeMultiRobotSpaceInformation(task_spaces);
 
   auto projection1 = std::make_shared<ompl::multilevel::Projection_Subspace>(factor->getStateSpace(), factor1->getStateSpace(), 0);
   auto projection2 = std::make_shared<ompl::multilevel::Projection_Subspace>(factor->getStateSpace(), factor2->getStateSpace(), 1);
@@ -108,12 +124,14 @@ int main(int argc, char* argv[]) {
   ReturnOnFalse(factor->addChild(factor1, projection1, computer_fiber_space), 1);
   ReturnOnFalse(factor->addChild(factor2, projection2, computer_fiber_space), 1);
 
-  // ompl::base::MotionValidatorPtr motion_validator = std::make_shared<TaskSpaceMultiRobotMotionValidator>(factor);
-  // factor->setMotionValidator(motion_validator);
+  std::unordered_map<std::string, dart::dynamics::SkeletonPtr> manipulators;
+  manipulators[factor1->getName()] = manipulator1;
+  manipulators[factor2->getName()] = manipulator2;
 
-  auto pairwise_collision_checker = std::make_shared<DartMultiRobotCollisionChecker>(factor, world, robots);
-  factor->setStateValidityChecker(pairwise_collision_checker);
-  factor->setStateValidityCheckingResolution(0.0001);
+  factor->setStateValidityChecker(std::make_shared<DartMultiSkeletonCollisionChecker>(factor, world, manipulators, collision_checker_multi_robot));
+
+  auto motion_validator = std::make_shared<TaskSpaceMultiRobotMotionValidator>(factor);
+  factor->setMotionValidator(motion_validator);
 
   //////////////////////////////////////////////////////////////////////////////////
   //////Create start/goal states and propagate them upwards (lift through the
@@ -129,10 +147,10 @@ int main(int argc, char* argv[]) {
   auto task_goal1 = child1->allocState();
   auto task_goal2 = child2->allocState();
 
-  point1->EigenToState(task_start1_eigen, task_start1);
-  point2->EigenToState(task_start2_eigen, task_start2);
-  point1->EigenToState(task_goal1_eigen, task_goal1);
-  point2->EigenToState(task_goal2_eigen, task_goal2);
+  EigenVector3dToState(task_start1_eigen, task_start1);
+  EigenVector3dToState(task_start2_eigen, task_start2);
+  EigenVector3dToState(task_goal1_eigen, task_goal1);
+  EigenVector3dToState(task_goal2_eigen, task_goal2);
 
   std::unordered_map<std::string, ompl::base::State*> task_space_start_states;
   task_space_start_states[child1->getName()] = task_start1;
@@ -196,7 +214,7 @@ int main(int argc, char* argv[]) {
   planner->setup();
   planner->setRange(Inf);
 
-  float timeout = 1000.0;
+  float timeout = 10.0;
   ompl::base::PlannerStatus status = planner->Planner::solve(timeout);
 
   //////////////////////////////////////////////////////////////////////////////////
@@ -204,9 +222,9 @@ int main(int argc, char* argv[]) {
   //////////////////////////////////////////////////////////////////////////////////
   Visualizer visualizer(world);
 
-  visualizer.SetCollisionChecker(pairwise_collision_checker->GetCollisionChecker());
+  visualizer.SetCollisionChecker(collision_checker_multi_robot);
 
-  visualizer.AddMultiRobotPlanner(robots, planner);
+  visualizer.AddMultiRobotPlanner(manipulators, planner);
 
   visualizer.Run();
   return 0;

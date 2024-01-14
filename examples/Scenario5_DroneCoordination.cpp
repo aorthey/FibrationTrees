@@ -7,7 +7,6 @@
 #include "robots/ZeppelinRobot.hpp"
 #include "robots/ZeppelinInnerSphereRobot.hpp"
 #include "robots/RobotFactory.hpp"
-#include "MakeSpaceInformation.hpp"
 #include "Utils.hpp"
 
 #include <dart/dart.hpp>
@@ -25,7 +24,7 @@
 
 #include <ranges>
 
-const auto Nrobots = 2;
+const auto Nrobots = 10;
 
 ompl::base::ProblemDefinitionPtr CreateMultiDroneProblemDefinition(
   const ompl::multilevel::FactoredSpaceInformationPtr& factor, 
@@ -33,12 +32,13 @@ ompl::base::ProblemDefinitionPtr CreateMultiDroneProblemDefinition(
   size_t Nrobots) 
 {
   auto children = factor->getChildren();
-  float x = 0.0;
-  float y = 0.0;
+  float y_step = 0.3;
+
+  float x = 1.5;
+  const float yoffset = 0.5 * (Nrobots - 1) * y_step;
+  float y = -yoffset;
   float z = 0.1;
   float yaw = 0.57;
-
-  float y_step = 0.2;
 
   auto startStates = factor->allocChildStates();
   auto goalStates = factor->allocChildStates();
@@ -46,11 +46,15 @@ ompl::base::ProblemDefinitionPtr CreateMultiDroneProblemDefinition(
   for(const auto& robot : robots) {
     const auto name = robot->GetSpaceInformation()->getName();
 
-    auto start = MakeEigen({x, y, z, yaw});
+    if(y > 0) {
+      z = 0.3;
+      y = -yoffset;
+    }
+    auto start = MakeEigen({x, y + 0.5 *yoffset, z, yaw});
     auto start_state = AllocStateFromEigen(robot, start);
     startStates[name] = start_state;
 
-    auto goal = MakeEigen({x - 1.5, y, z, yaw});
+    auto goal = MakeEigen({-1.5, y + 0.5 *yoffset, z, yaw});
     auto goal_state = AllocStateFromEigen(robot, goal);
     goalStates[name] = goal_state;
 
@@ -79,9 +83,17 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
   std::vector<dart::dynamics::SkeletonPtr> obstacles;
   dart::dynamics::SkeletonPtr floor = createFloor(-0.25);
-  dart::dynamics::SkeletonPtr o1 = createCylinder(Eigen::Vector3d(-1.0, 0.0, 0.0), 0.3, 1.5);
+  dart::dynamics::SkeletonPtr o1 = createCylinder(Eigen::Vector3d(-0.5, 0.0, 0.0), 0.2, 1.5);
+  dart::dynamics::SkeletonPtr o2 = createCylinder(Eigen::Vector3d(-0.0, 0.2, 0.0), 0.15, 1.0);
+  dart::dynamics::SkeletonPtr o3 = createCylinder(Eigen::Vector3d(-0.5, -0.3, 0.0), 0.3, 1.5);
+  dart::dynamics::SkeletonPtr o4 = createCylinder(Eigen::Vector3d(-1.0, 0.8, 0.0), 0.05, 2.5);
+  dart::dynamics::SkeletonPtr o5 = createCylinder(Eigen::Vector3d(-0.6, 1.2, 0.0), 0.08, 0.8);
   obstacles.push_back(floor);
   obstacles.push_back(o1);
+  obstacles.push_back(o2);
+  obstacles.push_back(o3);
+  obstacles.push_back(o4);
+  obstacles.push_back(o5);
 
   dart::math::Random::setSeed(0);
 
@@ -105,11 +117,11 @@ int main(int argc, char* argv[]) {
     auto factor = robot->GetSpaceInformation();
 
     //Create lower-dimensional abstraction
-    // auto sphere_robot = MakeRobot<ZeppelinInnerSphereRobot>(world, obstacles);
-    // hide(sphere_robot->GetSkeleton());
-    // auto child = sphere_robot->GetSpaceInformation();
-    // auto projection = std::make_shared<ompl::multilevel::Projection_RNSO2_RN>(factor->getStateSpace(), child->getStateSpace());
-    // factor->addChild(child, projection);
+    auto sphere_robot = MakeRobot<ZeppelinInnerSphereRobot>(world, obstacles);
+    hide(sphere_robot->GetSkeleton());
+    auto child = sphere_robot->GetSpaceInformation();
+    auto projection = std::make_shared<ompl::multilevel::Projection_RNSO2_RN>(factor->getStateSpace(), child->getStateSpace());
+    factor->addChild(child, projection);
 
     factors.push_back(factor);
     robots.push_back(robot);
@@ -123,6 +135,9 @@ int main(int argc, char* argv[]) {
     auto projection = std::make_shared<ompl::multilevel::Projection_Subspace>(root->getStateSpace(), factor->getStateSpace(), k);
     ReturnOnFalse(root->addChild(factor, projection, computer_fiber_space), 1);
   }
+  auto pairwise_collision_checker = std::make_shared<DartMultiRobotCollisionChecker>(root, world, robots);
+  root->setStateValidityChecker(pairwise_collision_checker);
+  root->setStateValidityCheckingResolution(0.0001);
 
   root->printFactorization(std::cout);
   //////////////////////////////////////////////////////////////////////////////////
@@ -137,17 +152,19 @@ int main(int argc, char* argv[]) {
   planner->setProblemDefinition(pdef);
   planner->setup();
   planner->setRange(Inf);
+  planner->setSmoothIntermediateSolutions(true);
  
-  float timeout = 10.0;
+  float timeout = 1000.0;
   ompl::base::PlannerStatus status = planner->Planner::solve(timeout);
  
   ////////////////////////////////////////////////////////////////////////////////
   ////Visualize
   ////////////////////////////////////////////////////////////////////////////////
   Visualizer visualizer(world);
-  // visualizer.SetCollisionChecker(robot->GetCollisionChecker());
+  visualizer.SetCollisionChecker(pairwise_collision_checker->GetCollisionChecker());
   // visualizer.AddPlanner(robot, planner);
   visualizer.AddMultiRobotPlanner(robots, planner);
+
   visualizer.Run();
 
   return 0;

@@ -43,7 +43,7 @@ ompl::multilevel::FactoredSpaceInformationPtr ZeppelinRobot::MakeSpaceInformatio
   ompl::base::RealVectorBounds bounds(3);
   auto lb = skeleton->getPositionLowerLimits();
   auto ub = skeleton->getPositionUpperLimits();
-  for(size_t k=0; k<3; k++) {
+  for(size_t k = 0; k < 3; k++) {
     bounds.setLow(k, lb[k]);
     bounds.setHigh(k, ub[k]);
   }

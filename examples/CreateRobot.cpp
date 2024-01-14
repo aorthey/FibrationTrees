@@ -4,7 +4,6 @@
 #include "DartHelper.hpp"
 #include "OmplHelper.hpp"
 #include "KinematicsSolver.hpp"
-#include "MakeSpaceInformation.hpp"
 #include "gui/Visualizer.hpp"
 #include "robots/RobotFactory.hpp"
 #include "robots/KukaRobot.hpp"

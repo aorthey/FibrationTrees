@@ -12,6 +12,7 @@ PathReplayWorldNode::PathReplayWorldNode(dart::simulation::WorldPtr world)
   reverse_ = false;
   path_position_ = 0.0f;
   CreateKeyPressEvents();
+  simulate(true);
 }
 
 PathReplayWorldNode::~PathReplayWorldNode() {
@@ -337,7 +338,9 @@ void PathReplayWorldNode::customPostStep()
   if(pause_) {
     return;
   }
+
   path_position_ += (reverse_ ? -step_size_ : +step_size_);
+
   if(path_position_ > 1.0f) {
     reverse_ = true;
     path_position_ = 1.0f;

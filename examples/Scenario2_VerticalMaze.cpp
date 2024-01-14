@@ -4,9 +4,11 @@
 #include "DartHelper.hpp"
 #include "OmplHelper.hpp"
 #include "KinematicsSolver.hpp"
-#include "MakeSpaceInformation.hpp"
+#include "TaskSpaceProjection.hpp"
 #include "gui/Visualizer.hpp"
-#include "robots/KukaSkeleton.hpp"
+#include "robots/KukaRobot.hpp"
+#include "robots/SphereRobot.hpp"
+#include "robots/RobotFactory.hpp"
 
 #include <dart/dart.hpp>
 
@@ -20,49 +22,38 @@
 
 int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
-  ////Creating manipulator
+  ////Creating obstacles
   ////////////////////////////////////////////////////////////////////////////////
-  dart::dynamics::SkeletonPtr manipulator = createKukaSkeleton();
-
   std::vector<dart::dynamics::SkeletonPtr> obstacles;
   obstacles.push_back(createFromURDF("/home/aorthey/git/FibrationTrees/data/objects/maze.urdf", Eigen::Vector3d(+0.55, +0.1, 0.85)));
   obstacles.push_back(createFloor());
   obstacles.push_back(createBox(Eigen::Vector3d(+0.5, +0.0, 0.75), 0.15, 2.0, 1.5));
 
-  PrintSkeletonInfo(manipulator);
   dart::math::Random::setSeed(0);
 
   ////////////////////////////////////////////////////////////////////////////////
   ////World creation
   ////////////////////////////////////////////////////////////////////////////////
-  dart::dynamics::SkeletonPtr point = createSphere(0.01);
-
   dart::simulation::WorldPtr world(new dart::simulation::World);
-  world->addSkeleton(manipulator);
   for(const auto& obstacle : obstacles) {
     world->addSkeleton(obstacle);
   }
-  world->addSkeleton(point);
   world->setGravity(Eigen::Vector3d::Zero());
+  addCoordinateFrameToWorld(world);
 
-  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
+  auto robot = MakeRobot<KukaRobot>(world, obstacles);
+  auto point = MakeRobot<SphereRobot>(world, obstacles);
 
-  ////////////////////////////////////////////////////////////////////////////////
-  ////Collision checking
-  ////////////////////////////////////////////////////////////////////////////////
-  std::vector<dart::dynamics::SkeletonPtr> collision_group_robot = {manipulator};
-  CollisionCheckerPtr collision_checker = std::make_shared<CollisionChecker>(world, collision_group_robot, obstacles);
-  std::vector<dart::dynamics::SkeletonPtr> collision_group_tcp = {point};
-  CollisionCheckerPtr collision_checker_point_robot = std::make_shared<CollisionChecker>(world, collision_group_tcp, obstacles);
+  const auto limits = std::make_pair(Eigen::Vector3d(0.39, -0.4, 0), Eigen::Vector3d(0.43, +0.4, 2));
+  point->SetLimits(limits);
 
   ////////////////////////////////////////////////////////////////////////////////
   ////OMPL Setup
   ////////////////////////////////////////////////////////////////////////////////
+  auto factor = robot->GetSpaceInformation();
+  auto child = point->GetSpaceInformation();
 
-  const auto limits = std::make_pair(Eigen::Vector3d(0.39, -0.4, 0), Eigen::Vector3d(0.43, +0.4, 2));
-  auto factor = MakeTaskSpaceInformation(manipulator, world, kinematics_solver, collision_checker);
-  auto child = Make3DPointSpaceInformation(point, world, collision_checker_point_robot, limits);
-
+  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(robot->GetSkeleton());
   ompl::multilevel::ProjectionPtr projection = std::make_shared<ProjectionJointSpaceToR3>(factor->getStateSpace(), child->getStateSpace(), kinematics_solver);
   factor->addChild(child, projection);
 
@@ -123,11 +114,8 @@ int main(int argc, char* argv[]) {
     ompl::base::PlannerStatus status = planner->solve(ptc);
 
     Visualizer visualizer(world);
-    std::cout << "Add planner to visualizer..." << std::endl;
-    visualizer.AddPlanner(manipulator, planner);
-    std::cout << "Set collision checker..." << std::endl;
-    visualizer.SetCollisionChecker(collision_checker);
-    std::cout << "Add path to visualizer..." << std::endl;
+    visualizer.AddPlanner(robot, planner);
+    visualizer.SetCollisionChecker(robot->GetCollisionChecker());
     visualizer.AddPath(point, planner->getProblemDefinition(child->getName())->getSolutionPath(), Eigen::Vector3d(1, 1, 0));
     visualizer.Run();
   }
