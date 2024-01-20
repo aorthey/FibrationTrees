@@ -29,13 +29,6 @@ void EigenVector3dToState(const Eigen::Vector3d& v, ompl::base::State* state) {
   }
 }
 
-// void EigenVectorXdToState(const Eigen::VectorXd& v, ompl::base::State* state) {
-//   double *state_R = state->as<ompl::base::RealVectorStateSpace::StateType>()->values;
-//   for(size_t k = 0; k < v.size(); k++) {
-//     state_R[k] = v[k];
-//   }
-// }
-
 bool SampleValidLift(const ompl::multilevel::ProjectionPtr& projection, const ompl::base::SpaceInformationPtr& si, 
     const size_t max_iterations, const ompl::base::State *xBase, ompl::base::State *xBundle) {
   int iterations=0;
@@ -47,17 +40,6 @@ bool SampleValidLift(const ompl::multilevel::ProjectionPtr& projection, const om
   }
   return false;
 }
-
-// ompl::geometric::PathGeometricPtr PathFromEigenVectors(const std::vector<Eigen::VectorXd>& configs,
-//     const ompl::base::SpaceInformationPtr& si) {
-//   std::vector<const ompl::base::State*> states;
-//   for(const auto& config : configs) {
-//     auto state = si->allocState();
-//     EigenVectorXdToState(config, state);
-//     states.push_back(state);
-//   }
-//   return std::make_shared<ompl::geometric::PathGeometric>(si, states);
-// }
 
 const int kMaxResampleIteration = 100;
 std::optional<ompl::base::State*> ComputeValidIKState(const ompl::base::SpaceInformationPtr& si, 
@@ -110,8 +92,6 @@ ompl::base::GoalPtr GoalFromEigen(const RobotPtr& robot, const Eigen::VectorXd& 
 
 Eigen::VectorXd MakeEigen(std::initializer_list<double> const &init_values) {
   std::vector<double> values{init_values};
-  // Eigen::VectorXd v = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(values.data(), values.size());
-  // return v;
   return MakeEigen(values);
 }
 Eigen::VectorXd MakeEigen(std::vector<double> values) {

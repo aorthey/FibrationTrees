@@ -25,7 +25,7 @@
 
 #include <ranges>
 
-const auto Nrobots = 10;
+const auto Nrobots = 2;
 
 ompl::base::ProblemDefinitionPtr CreateMultiDroneProblemDefinition(
   const ompl::multilevel::FactoredSpaceInformationPtr& factor, 
@@ -62,11 +62,14 @@ ompl::base::ProblemDefinitionPtr CreateMultiDroneProblemDefinition(
     y += y_step;
   }
 
+  OMPL_INFORM("Lifted start and goal states:");
   auto start = factor->allocState();
   factor->lift(startStates, start);
+  factor->printState(start);
 
   auto goal = factor->allocState();
   factor->lift(goalStates, goal);
+  factor->printState(goal);
 
   auto goal_region = std::make_shared<ompl::base::GoalState>(factor);
   goal_region->setState(goal);
@@ -113,6 +116,7 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
   std::vector<ompl::multilevel::FactoredSpaceInformationPtr> factors;
   std::vector<RobotPtr> robots;
+  std::vector<RobotPtr> child_robots;
   for(size_t k = 0; k < Nrobots; k++) {
     auto robot = MakeRobot<ZeppelinRobot>(world, obstacles);
     auto factor = robot->GetSpaceInformation();
@@ -123,12 +127,12 @@ int main(int argc, char* argv[]) {
     auto child = sphere_robot->GetSpaceInformation();
     auto projection = std::make_shared<ompl::multilevel::Projection_RNSO2_RN>(factor->getStateSpace(), child->getStateSpace());
     factor->addChild(child, projection);
+    child_robots.push_back(sphere_robot);
 
     factors.push_back(factor);
     robots.push_back(robot);
   }
 
-  // auto root = MakeMultiRobotSpaceInformation(factors);
   auto multi_robot = MultiRobot::MakeMultiRobot(robots);
   auto root = multi_robot->GetSpaceInformation();
 
@@ -138,6 +142,7 @@ int main(int argc, char* argv[]) {
     auto projection = std::make_shared<ompl::multilevel::Projection_Subspace>(root->getStateSpace(), factor->getStateSpace(), k);
     ReturnOnFalse(root->addChild(factor, projection, computer_fiber_space), 1);
   }
+
   auto pairwise_collision_checker = std::make_shared<DartMultiRobotCollisionChecker>(root, world, robots);
   root->setStateValidityChecker(pairwise_collision_checker);
   root->setStateValidityCheckingResolution(0.0001);
@@ -164,7 +169,7 @@ int main(int argc, char* argv[]) {
   ////Visualize
   ////////////////////////////////////////////////////////////////////////////////
   Visualizer visualizer(world);
-  visualizer.SetCollisionChecker(pairwise_collision_checker->GetCollisionChecker());
+  // visualizer.SetCollisionChecker(pairwise_collision_checker->GetCollisionChecker());
   // visualizer.AddPlanner(robot, planner);
   visualizer.AddMultiRobotPlanner(robots, planner);
 

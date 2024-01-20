@@ -16,8 +16,9 @@ Visualizer::Visualizer(const dart::simulation::WorldPtr& world) {
   ////////////////////////////////////////////////////////////////////////////////
   viewer->addEventHandler(new PathReplayEventHandler(world_node.get()));
   viewer->addWorldNode(world_node);
-  viewer->getImGuiHandler()->addWidget(
-      std::make_shared<TextWidget>(viewer, world_node.get()));
+
+  // viewer->getImGuiHandler()->addWidget(
+  //     std::make_shared<TextWidget>(viewer, world_node.get()));
 
   viewer->setUpViewInWindow(0, 0, 640, 480);
 
@@ -31,15 +32,29 @@ Visualizer::Visualizer(const dart::simulation::WorldPtr& world) {
   viewer->simulate(true);
 }
 
-void Visualizer::AddPlanner(const RobotPtr& robot, const ompl::base::PlannerPtr& planner) {
+void Visualizer::AddPlanner(const RobotPtr& robot, const ompl::base::PlannerPtr& planner, bool displayPlannerData) {
   ////////////////////////////////////////////////////////////////////////////////
   // Visualize Planner data
   ////////////////////////////////////////////////////////////////////////////////
-  ompl::base::PlannerData planner_data(planner->getSpaceInformation());
-  planner->getPlannerData(planner_data);
-  OMPL_INFORM("Found %d vertices.", planner_data.numVertices());
-  OMPL_INFORM("Add planner data to visualizer...");
-  world_node->AddPlannerData(robot, planner_data);
+  if(planner->getSpaceInformation() != robot->GetSpaceInformation()) {
+    OMPL_ERROR("StateSpace of robot differs from planner.");
+    OMPL_ERROR("-----------------------------------------------");
+    OMPL_ERROR("Planner SpaceInformation");
+    planner->getSpaceInformation()->printSettings(std::cout);
+    OMPL_ERROR("-----------------------------------------------");
+    OMPL_ERROR("Robot SpaceInformation");
+    robot->GetSpaceInformation()->printSettings(std::cout);
+    OMPL_ERROR("-----------------------------------------------");
+    throw "InvalidStateSpace";
+  }
+
+  if(displayPlannerData) {
+    ompl::base::PlannerData planner_data(planner->getSpaceInformation());
+    planner->getPlannerData(planner_data);
+    OMPL_INFORM("Found %d vertices.", planner_data.numVertices());
+    OMPL_INFORM("Add planner data to visualizer...");
+    world_node->AddPlannerData(robot, planner_data);
+  }
 
   ////////////////////////////////////////////////////////////////////////////////
   // Maybe add solution path

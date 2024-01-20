@@ -61,6 +61,7 @@ public:
 
   std::vector<KeyPressEvent> GetKeyPressEvents() const;
   void CreateKeyPressEvents();
+  void PrintKeyPressEvents() const;
 
 protected:
   std::vector<KeyPressEvent> events_;

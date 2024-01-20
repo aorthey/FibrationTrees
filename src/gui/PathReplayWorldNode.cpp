@@ -12,7 +12,7 @@ PathReplayWorldNode::PathReplayWorldNode(dart::simulation::WorldPtr world)
   reverse_ = false;
   path_position_ = 0.0f;
   CreateKeyPressEvents();
-  simulate(true);
+  simulate(false);
 }
 
 PathReplayWorldNode::~PathReplayWorldNode() {
@@ -268,7 +268,15 @@ std::vector<KeyPressEvent> PathReplayWorldNode::GetKeyPressEvents() const {
   return events_;
 }
 
+void PathReplayWorldNode::PrintKeyPressEvents() const {
+  std::cout << "Key options " << std::endl;
+  for(const auto& event : events_) {
+    std::cout << std::string{event.key} << ": " << event.description << std::endl;
+  }
+}
+
 void PathReplayWorldNode::CreateKeyPressEvents() {
+  events_.push_back({'h', "display key options", [&](){PrintKeyPressEvents();}});
   events_.push_back({'s', "play/pause planned path", [&](){toggleStartStop();}});
   events_.push_back({'r', "reverse execution direction", [&](){toggleReverse();}});
   events_.push_back({'n', "decrease execution speed", [&](){decreaseSpeed();}});
@@ -307,6 +315,40 @@ PathReplayEventHandler::PathReplayEventHandler(PathReplayWorldNode* world_node)
 bool PathReplayEventHandler::handle(
     const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter&) 
 {
+  // if(ea.getUnmodifiedKey() > 128) {
+  //   return true;
+  // }
+  // std::cout << " key       : " << ea.getUnmodifiedKey() << std::endl;
+  // std::cout << " mod       : " << ea.getModKeyMask() << std::endl;
+  // std::cout << " event type: " << ea.getEventType() << std::endl;
+  // if(ea.getModKeyMask() == osgGA::GUIEventAdapter::ModKeyMask::MODKEY_META) {
+  //   return true;
+  // }
+  // if(ea.getModKeyMask() == osgGA::GUIEventAdapter::ModKeyMask::MODKEY_SUPER) {
+  //   return true;
+  // }
+  // if(ea.getModKeyMask() == osgGA::GUIEventAdapter::ModKeyMask::MODKEY_HYPER) {
+  //   return true;
+  // }
+  // if(ea.getModKeyMask() == osgGA::GUIEventAdapter::ModKeyMask::MODKEY_SHIFT) {
+  //   return true;
+  // }
+  // if(ea.getModKeyMask() == osgGA::GUIEventAdapter::ModKeyMask::MODKEY_CTRL) {
+  //   return true;
+  // }
+  // if(ea.getModKeyMask() == osgGA::GUIEventAdapter::ModKeyMask::MODKEY_ALT) {
+  //   return true;
+  // }
+  // if(ea.getKey() == osgGA::GUIEventAdapter::KeySymbol::KEY_Alt_L) {
+  //   return true;
+  // }
+  // if(ea.getKey() == osgGA::GUIEventAdapter::KeySymbol::KEY_Alt_R) {
+  //   return true;
+  // }
+
+  // if (ea.getEventType() == osgGA::GUIEventAdapter::RESIZE) {
+  //   return true;
+  // }
   if (ea.getEventType() == osgGA::GUIEventAdapter::KEYDOWN)
   {
     const auto events = world_node_->GetKeyPressEvents();
@@ -315,6 +357,7 @@ bool PathReplayEventHandler::handle(
         continue;
       }
       event.function();
+      return true;
     }
   }
   return false;

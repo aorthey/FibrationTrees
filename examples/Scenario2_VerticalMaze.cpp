@@ -6,7 +6,8 @@
 #include "KinematicsSolver.hpp"
 #include "TaskSpaceProjection.hpp"
 #include "gui/Visualizer.hpp"
-#include "robots/KukaRobot.hpp"
+#include "robots/KukaRobotTaskSpace.hpp"
+#include "robots/MobileKukaRobotTaskSpace.hpp"
 #include "robots/SphereRobot.hpp"
 #include "robots/RobotFactory.hpp"
 
@@ -41,7 +42,7 @@ int main(int argc, char* argv[]) {
   world->setGravity(Eigen::Vector3d::Zero());
   addCoordinateFrameToWorld(world);
 
-  auto robot = MakeRobot<KukaRobot>(world, obstacles);
+  auto robot = MakeRobot<KukaRobotTaskSpace>(world, obstacles);
   auto point = MakeRobot<SphereRobot>(world, obstacles);
 
   const auto limits = std::make_pair(Eigen::Vector3d(0.39, -0.4, 0), Eigen::Vector3d(0.43, +0.4, 2));
@@ -53,8 +54,7 @@ int main(int argc, char* argv[]) {
   auto factor = robot->GetSpaceInformation();
   auto child = point->GetSpaceInformation();
 
-  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(robot->GetSkeleton());
-  ompl::multilevel::ProjectionPtr projection = std::make_shared<ProjectionJointSpaceToR3>(factor->getStateSpace(), child->getStateSpace(), kinematics_solver);
+  ompl::multilevel::ProjectionPtr projection = std::make_shared<TaskSpaceProjection>(factor, child, robot);//, kinematics_solver);
   factor->addChild(child, projection);
 
   ////////////////////////////////////////////////////////////////////////////////

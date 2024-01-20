@@ -5,48 +5,37 @@
 #include "dart/math/Random.hpp"
 #include "KinematicsSolver.hpp"
 
-ProjectionJointSpaceToR3::ProjectionJointSpaceToR3(const ompl::base::SpaceInformationPtr& bundle, 
+TaskSpaceProjection::TaskSpaceProjection(const ompl::base::SpaceInformationPtr& bundle, 
     const ompl::base::SpaceInformationPtr& base, 
-    const KinematicsSolverPtr& kinematics_solver) 
-  : ProjectionJointSpaceToR3(bundle->getStateSpace(), base->getStateSpace(), kinematics_solver) {}
+    const RobotPtr& robot)
+  : ompl::multilevel::Projection(bundle->getStateSpace(), base->getStateSpace()), robot_(robot) {
 
-ProjectionJointSpaceToR3::ProjectionJointSpaceToR3(const ompl::base::StateSpacePtr& bundle, 
-    const ompl::base::StateSpacePtr& base, 
-    const KinematicsSolverPtr& kinematics_solver)
-  : ompl::multilevel::Projection(bundle, base), kinematics_solver_(kinematics_solver)
-{
-    type_ = ompl::multilevel::PROJECTION_TASK_SPACE;
-    if(getBase()->getDimension() != 3) {
-      throw "Not3dStateSpace";
-    }
+  kinematics_solver_ = std::make_shared<KinematicsSolver>(robot->GetSkeleton());
+  type_ = ompl::multilevel::PROJECTION_TASK_SPACE;
+  if(getBase()->getDimension() != 3) {
+    throw "Not3dStateSpace";
+  }
 
-    defaultBundleReturnState_ = getBundle()->allocState();
-    double *bundle_values = defaultBundleReturnState_->as<ompl::base::RealVectorStateSpace::StateType>()->values;
-    for (uint k = 0; k < getBundle()->getDimension(); k++)
-    {
-        bundle_values[k] = std::numeric_limits<double>::quiet_NaN();
-    }
+  //Create default return states
+  defaultBundleReturnState_ = getBundle()->allocState();
+  Eigen::VectorXd nan_config = Eigen::VectorXd::Constant(getBundle()->getDimension(), std::numeric_limits<float>::quiet_NaN());
+  robot->EigenToState(nan_config, defaultBundleReturnState_);
 
-    defaultBaseReturnState_ = getBase()->allocState();
-    double *base_values = defaultBaseReturnState_->as<ompl::base::RealVectorStateSpace::StateType>()->values;
-    for (uint k = 0; k < getBase()->getDimension(); k++)
-    {
-        base_values[k] = std::numeric_limits<double>::quiet_NaN();
-    }
+  defaultBaseReturnState_ = getBase()->allocState();
+  double *base_values = defaultBaseReturnState_->as<ompl::base::RealVectorStateSpace::StateType>()->values;
+  for (uint k = 0; k < getBase()->getDimension(); k++)
+  {
+      base_values[k] = std::numeric_limits<double>::quiet_NaN();
+  }
 }
-ProjectionJointSpaceToR3::~ProjectionJointSpaceToR3() {
+TaskSpaceProjection::~TaskSpaceProjection() {
   getBundle()->freeState(defaultBundleReturnState_);
   getBase()->freeState(defaultBaseReturnState_);
 }
 
-void ProjectionJointSpaceToR3::project(const ompl::base::State *xBundle, ompl::base::State *xBase) const
+void TaskSpaceProjection::project(const ompl::base::State *xBundle, ompl::base::State *xBase) const
 {
-    double *xBundleValues = xBundle->as<ompl::base::RealVectorStateSpace::StateType>()->values;
-    Eigen::VectorXd config = Eigen::VectorXd::Zero(getBundle()->getDimension());
-    for(size_t dim = 0; dim < getBundle()->getDimension(); dim++)
-    {
-      config[dim] = xBundleValues[dim];
-    }
+    auto config = robot_->StateToEigen(xBundle);
     const auto maybe_frame = kinematics_solver_->solve_fk(config);
     if(!maybe_frame.has_value()) {
       getBase()->copyState(xBase, defaultBaseReturnState_);
@@ -55,16 +44,15 @@ void ProjectionJointSpaceToR3::project(const ompl::base::State *xBundle, ompl::b
 
     const auto& frame = maybe_frame.value();
 
-    double *angles = xBase->as<ompl::base::RealVectorStateSpace::StateType>()->values;
-    angles[0] = frame[0];
-    angles[1] = frame[1];
-    angles[2] = frame[2];
+    double *values = xBase->as<ompl::base::RealVectorStateSpace::StateType>()->values;
+    values[0] = frame[0];
+    values[1] = frame[1];
+    values[2] = frame[2];
 }
 
-void ProjectionJointSpaceToR3::lift(const ompl::base::State *xBase, ompl::base::State *xBundle) const
+void TaskSpaceProjection::lift(const ompl::base::State *xBase, ompl::base::State *xBundle) const
 {
     double *xBaseValues = xBase->as<ompl::base::RealVectorStateSpace::StateType>()->values;
-
     Eigen::Vector3d frame;
     frame[0] = xBaseValues[0];
     frame[1] = xBaseValues[1];
@@ -72,24 +60,10 @@ void ProjectionJointSpaceToR3::lift(const ompl::base::State *xBase, ompl::base::
 
     auto maybe_result = kinematics_solver_->solve_ik(frame);
     if(!maybe_result.has_value()) {
-      // OMPL_ERROR("Returning default state. Could not solve IK");
-      // std::cout << frame << std::endl;
       getBundle()->copyState(xBundle, defaultBundleReturnState_);
       return;
     }
-    auto result = maybe_result.value();
+    auto config = maybe_result.value();
 
-    double *angles = xBundle->as<ompl::base::RealVectorStateSpace::StateType>()->values;
-    for (uint k = 0; k < getBundle()->getDimension(); k++)
-    {
-        angles[k] = result[k];
-    }
-
-    auto tmpState = getBase()->allocState();
-    project(xBundle, tmpState);
-    // OMPL_WARN("Base -> Bundle -> Base");
-    // getBase()->printState(xBase);
-    // getBundle()->printState(xBundle);
-    // getBase()->printState(tmpState);
-    getBase()->freeState(tmpState);
+    robot_->EigenToState(config, xBundle);
 }

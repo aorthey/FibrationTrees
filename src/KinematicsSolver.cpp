@@ -77,25 +77,30 @@ std::optional<Eigen::Vector3d> KinematicsSolver::solve_fk(const Eigen::VectorXd&
 }
 
 //Avoid duplicates, add additional configs during joint flips
-void AddConfig(const Eigen::VectorXd& config, std::vector<Eigen::VectorXd>& configs) {
+bool KinematicsSolver::AddConfig(const Eigen::VectorXd& config, std::vector<Eigen::VectorXd>& configs) {
   if(configs.empty()) {
     configs.push_back(config);
-    return;
+    return true;
   }
   const auto last_config = configs.back();
   const auto dist = (last_config-config).norm();
-  if(dist > 1.0) {
+  if(dist > M_PI) {
     // std::cout << "Detected joint flip" << std::endl;
     // std::cout << "Current config : " << config.format(CommaFmt) << std::endl;
     // std::cout << "Last    config : " << last_config.format(CommaFmt) << std::endl;
-    return;
-    // throw "JointFlip";
+    return false;
   }
 
   int num_steps = dist / kIntermediateStatesStepSize;
   for(size_t k = 1; k<num_steps;k++) {
-    configs.push_back(last_config + k * kIntermediateStatesStepSize * (config - last_config));
+    auto next = last_config + k * kIntermediateStatesStepSize * (config - last_config);
+    if(!solve_fk(next).has_value()) {
+      return false;
+    }
+
+    configs.push_back(next);
   }
+  return true;
 }
 
 
@@ -167,7 +172,9 @@ std::vector<Eigen::VectorXd> KinematicsSolver::solve_edge_ik_with_config(const E
     return configs;
   }
 
-  AddConfig(current.config, configs);
+  if(!AddConfig(current.config, configs)) {
+    return configs;
+  }
 
   const auto body_tcp = skeleton_->getBodyNode(endeffector_);
 
@@ -240,7 +247,13 @@ std::vector<Eigen::VectorXd> KinematicsSolver::solve_edge_ik_with_config(const E
     }
 
     current = next;
-    AddConfig(next.config, configs);
+    if(!AddConfig(next.config, configs)) {
+      success_ = true;
+      return configs;
+    }
+  }
+  if(kDebugInfo) {
+    std::cout << "Returning " << configs.size() << " configs." << std::endl;
   }
   success_ = true;
   return configs;

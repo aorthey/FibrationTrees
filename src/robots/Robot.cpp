@@ -1,5 +1,7 @@
 #include "robots/Robot.hpp"
 
+#include "Common.hpp"
+
 size_t Robot::GetDimension() const {
   return factor_->getStateDimension();
 }

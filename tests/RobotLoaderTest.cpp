@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
+#include "robots/MobileKukaRobot.hpp"
 #include "robots/KukaRobot.hpp"
+#include "robots/MobileKukaRobotTaskSpace.hpp"
+#include "robots/KukaRobotTaskSpace.hpp"
 #include "robots/SphereRobot.hpp"
 #include "robots/ZeppelinRobot.hpp"
 #include "robots/ZeppelinInnerSphereRobot.hpp"
@@ -11,13 +14,12 @@
 template <class T>
 class RobotLoaderTest : public testing::Test {};
 
-using RobotTypes = ::testing::Types<KukaRobot, SphereRobot, ZeppelinRobot, ZeppelinInnerSphereRobot>;
+using RobotTypes = ::testing::Types<MobileKukaRobot, MobileKukaRobotTaskSpace, KukaRobot, KukaRobotTaskSpace, SphereRobot, ZeppelinRobot, ZeppelinInnerSphereRobot>;
 
 TYPED_TEST_SUITE(RobotLoaderTest, RobotTypes);
 
 TYPED_TEST(RobotLoaderTest, DefaultLoaderTest) {
-  //RobotFactory<TypeParam> robot_factory;
-  auto robot = MakeRobot<TypeParam>();//robot_factory.Create();
+  auto robot = MakeRobot<TypeParam>();
 
   auto si = robot->GetSpaceInformation();
 

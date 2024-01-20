@@ -62,23 +62,24 @@ bool TaskSpaceMultiRobotMotionValidator::checkMotion(const ompl::base::State *s1
     if(!motion_validators_.at(k)->checkMotion(s1_k, s2_k, lastValidSpaceK)) {
       all_subspaces_are_valid = false;
     }
-    spacek->copyState(lastValid.first->as<ompl::base::CompoundState>()->operator[](k), lastValidSpaceK.first);
+    //copyState: destination <- source
+    // spacek->copyState(lastValid.first->as<ompl::base::CompoundState>()->operator[](k), lastValidSpaceK.first);
+    spacek->copyState(lastValid.first->as<ompl::base::CompoundState>()->operator[](k), lastValids_.at(k));
     lastValid.second += lastValidSpaceK.second;
-    OMPL_INFORM("Progress %f on %d", lastValidSpaceK.second, k);
   }
 
   ////////////////////////////////////////////////////////////////////////////////
   // Check that resulting states are valid for this factor
   ////////////////////////////////////////////////////////////////////////////////
-  if(all_subspaces_are_valid || lastValid.second > 0.0) {
-    const auto last_state = (all_subspaces_are_valid ? s2 : lastValid.first);
-    //TODO: Needs to forward propagate, not direct interpolation
-    if(!ompl::base::DiscreteMotionValidator::checkMotion(s1, last_state, lastValid)) {
-      all_subspaces_are_valid = false;
-    } else {
-      std::cout << "Verified motion." << std::endl;
-    }
-  }
+  //if(all_subspaces_are_valid || lastValid.second > 0.0) {
+  //  const auto last_state = (all_subspaces_are_valid ? s2 : lastValid.first);
+  //  //TODO: Needs to forward propagate, not direct interpolation
+  //  if(!ompl::base::DiscreteMotionValidator::checkMotion(s1, last_state, lastValid)) {
+  //    all_subspaces_are_valid = false;
+  //  } else {
+  //    std::cout << "Verified motion." << std::endl;
+  //  }
+  //}
   return all_subspaces_are_valid;
 }
 
@@ -91,6 +92,7 @@ std::vector<ompl::base::State*> TaskSpaceMultiRobotMotionValidator::propagateMot
   ////////////////////////////////////////////////////////////////////////////////
   // Propagate states forward on each subspace until collision or failure
   ////////////////////////////////////////////////////////////////////////////////
+
   std::vector<std::vector<ompl::base::State*>> split_states;
 
   size_t max_number_states = 0;
@@ -108,13 +110,14 @@ std::vector<ompl::base::State*> TaskSpaceMultiRobotMotionValidator::propagateMot
 
   //Abort when no progress was made
   if(max_number_states == 0) {
+    OMPL_DEBUG("No progress");
     return result;
   }
 
   ////////////////////////////////////////////////////////////////////////////////
   // Stitch individual states together into one path
   ////////////////////////////////////////////////////////////////////////////////
-  for(size_t i = 0; i < max_number_states; i++) {
+  for(size_t i = 1; i < max_number_states; i++) {
     auto state = space->allocState();
 
     for(size_t space_index = 0; space_index < space->getSubspaceCount(); space_index++) {
@@ -131,10 +134,9 @@ std::vector<ompl::base::State*> TaskSpaceMultiRobotMotionValidator::propagateMot
         if( i < N - 1) {
           sk = statesk.at(i);
         } else {
-            sk = statesk.back();
+          sk = statesk.back();
         }
       }
-      sk = s1_compound->operator[](space_index);
       spacek->copyState(state->as<ompl::base::CompoundState>()->operator[](space_index), sk);
     }
 

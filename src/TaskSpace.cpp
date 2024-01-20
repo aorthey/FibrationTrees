@@ -3,9 +3,19 @@
 #include "EigenPath.hpp"
 #include "Common.hpp"
 
-TaskSpace::TaskSpace(unsigned int dim, const RobotPtr& robot) 
-  : ompl::base::RealVectorStateSpace(dim), robot_(robot) {
+TaskSpace::TaskSpace(const RobotPtr& robot) 
+  : ompl::base::RealVectorStateSpace(robot->GetSkeleton()->getNumDofs()), robot_(robot) {
   kinematics_solver_ = std::make_shared<KinematicsSolver>(robot->GetSkeleton());
+
+  auto numDofs = robot->GetSkeleton()->getNumDofs();
+  ompl::base::RealVectorBounds bounds(numDofs);
+  auto lb = robot->GetSkeleton()->getPositionLowerLimits();
+  auto ub = robot->GetSkeleton()->getPositionUpperLimits();
+  for(size_t k =0; k< numDofs; k++) {
+    bounds.setLow(k, lb[k]);
+    bounds.setHigh(k, ub[k]);
+  }
+  setBounds(bounds);
 }
 
 TaskSpace::~TaskSpace() {

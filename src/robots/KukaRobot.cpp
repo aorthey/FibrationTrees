@@ -1,6 +1,4 @@
 #include "robots/KukaRobot.hpp"
-#include "robots/KukaRobot.hpp"
-#include "TranslationTaskSpaceMotionValidator.hpp"
 
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include "TaskSpace.hpp"
@@ -39,7 +37,7 @@ dart::dynamics::SkeletonPtr KukaRobot::MakeSkeleton() {
 ompl::multilevel::FactoredSpaceInformationPtr KukaRobot::MakeSpaceInformation(const RobotPtr& robot) {
   KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(robot->GetSkeleton());
   auto numDofs = robot->GetSkeleton()->getNumDofs();
-  ompl::base::StateSpacePtr space(new TaskSpace(numDofs, robot));
+  auto space = std::make_shared<ompl::base::RealVectorStateSpace>(numDofs);
   ompl::base::RealVectorBounds bounds(numDofs);
   auto lb = robot->GetSkeleton()->getPositionLowerLimits();
   auto ub = robot->GetSkeleton()->getPositionUpperLimits();
@@ -49,10 +47,5 @@ ompl::multilevel::FactoredSpaceInformationPtr KukaRobot::MakeSpaceInformation(co
   }
   space->as<ompl::base::RealVectorStateSpace>()->setBounds(bounds);
   auto factor = std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space);
-
   return factor;
-}
-
-ompl::base::MotionValidatorPtr KukaRobot::MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& robot) {
-  return std::make_shared<TranslationTaskSpaceMotionValidator>(factor, robot);
 }

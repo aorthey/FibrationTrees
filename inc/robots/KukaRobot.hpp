@@ -7,5 +7,4 @@ class KukaRobot : public EuclideanRobot {
     KukaRobot() = default;
     dart::dynamics::SkeletonPtr MakeSkeleton() override;
     ompl::multilevel::FactoredSpaceInformationPtr MakeSpaceInformation(const RobotPtr& robot) override;
-    ompl::base::MotionValidatorPtr MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& robot) override;
 };

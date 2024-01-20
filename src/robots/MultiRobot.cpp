@@ -28,16 +28,12 @@ ompl::multilevel::FactoredSpaceInformationPtr MultiRobot::MakeSpaceInformation(c
   auto space = std::make_shared<ompl::base::CompoundStateSpace>(compound_spaces, std::vector<double>(compound_spaces.size(), 1.0f));
 
   auto factor(std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space));
-
-  // auto validity_checker = std::make_shared<ompl::base::AllValidStateValidityChecker>(factor);
-  // factor->setStateValidityChecker(validity_checker);
-
-  // child_states_ = factor->allocChildStates();
   return factor;
 }
 
 typedef std::unordered_map<std::string, ompl::base::State*> SplitConfig;
 Eigen::VectorXd MultiRobot::StateToEigen(const ompl::base::State* state) const {
+  OMPL_ERROR("NYI");
   std::vector<SplitConfig> configs;
   factor_->project(state, child_states_);
 
