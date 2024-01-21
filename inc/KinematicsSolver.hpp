@@ -6,7 +6,7 @@
 
 OMPL_CLASS_FORWARD(KinematicsSolver);
 
-const bool kDebugInfo = true;
+const bool kDebugInfo = false;
 const float kStepSize = 0.1; //was 0.1. Best results for 0.01
 const float kIntermediateStatesStepSize = 0.01; //was 0.01
 const size_t kMaxNonIncreasingIterations = 10;

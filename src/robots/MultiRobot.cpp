@@ -1,5 +1,6 @@
 #include "robots/MultiRobot.hpp"
 #include "TaskSpaceMultiRobotMotionValidator.hpp"
+#include "DartHelper.hpp"
 
 MultiRobot::MultiRobot(const std::vector<RobotPtr>& robots) 
   : robots_(robots) {
@@ -57,6 +58,23 @@ Eigen::VectorXd MultiRobot::StateToEigen(const ompl::base::State* state) const {
     current_dimension += eigen_vector.rows();
   }
   return result;
+}
+
+std::vector<Eigen::Vector3d> MultiRobot::GetFK(const ompl::base::State* state) const {
+  auto child_states = factor_->allocChildStates();
+  factor_->project(state, child_states);
+
+  std::vector<Eigen::Vector3d> tcps;
+  for(const auto& robot : robots_) {
+    for(const auto& child_state : child_states) {
+      if(child_state.first == robot->GetSpaceInformation()->getName()) {
+        auto tcp = ::GetFK(robot->GetSkeleton(), robot->StateToEigen(child_state.second));
+        tcps.push_back(tcp);
+      }
+    }
+  }
+  factor_->freeChildStates(child_states);
+  return tcps;
 }
 
 void MultiRobot::EigenToState(const Eigen::VectorXd& v, ompl::base::State* state) const {

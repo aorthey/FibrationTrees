@@ -38,8 +38,6 @@ Eigen::VectorXd MakeEigen(std::vector<double> values);
 
 bool SampleValidLift(const ompl::multilevel::ProjectionPtr& projection, const ompl::base::SpaceInformationPtr& si, 
     size_t max_iterations, const ompl::base::State *xBase, ompl::base::State *xBundle);
-// ompl::geometric::PathGeometricPtr PathFromEigenVectors(const std::vector<Eigen::VectorXd>& configs, 
-//     const ompl::base::SpaceInformationPtr& si);
 
 std::optional<ompl::base::State*> ComputeValidIKState(const ompl::base::SpaceInformationPtr& si, 
     const ompl::multilevel::ProjectionPtr& projection, const Eigen::Vector3d& point);

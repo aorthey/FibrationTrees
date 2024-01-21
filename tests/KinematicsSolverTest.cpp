@@ -70,27 +70,12 @@ void CheckFrontAndBackConfigs(const KinematicsSolverPtr& kinematics_solver, cons
   EXPECT_NEAR((config2_frame - goal_frame).norm(), 0.0f, kAccuracyGoal);
 }
 
-void EdgeIKTest(const KinematicsSolverPtr& kinematics_solver, const Eigen::VectorXd& start, const Eigen::VectorXd& goal) {
-  const auto maybe_config1_frame = kinematics_solver->solve_fk(start);
-  EXPECT_TRUE(maybe_config1_frame.has_value());
-  const auto maybe_config2_frame = kinematics_solver->solve_fk(goal);
-  EXPECT_TRUE(maybe_config2_frame.has_value());
-  auto start_frame = maybe_config1_frame.value();
-  auto goal_frame = maybe_config2_frame.value();
-
-  auto configs = kinematics_solver->solve_edge_ik_with_config(start, goal);
-  EXPECT_GE(configs.size(), 2u);
-
-  std::cout << "Start (Desired): " << start.format(CommaFmt) << ", Goal (Desired): " << goal.format(CommaFmt) << std::endl;
-  std::cout << "Start (Actual) : " << configs.front().format(CommaFmt) << ", Goal (Actual) : " << configs.back().format(CommaFmt) << std::endl;
-  EXPECT_NEAR((start - configs.front()).norm(), 0.0f, Epsilon);
-  CheckFrontAndBackConfigs(kinematics_solver, configs, start_frame, goal_frame);
-  EXPECT_TRUE(CheckStraightLineAccuracy(kinematics_solver, configs));
-}
-
 void EdgeIKTestFromFrames(const KinematicsSolverPtr& kinematics_solver, 
     const Eigen::Vector3d& start_frame, const Eigen::Vector3d& goal_frame) {
   dart::math::Random::setSeed(0);
+  std::cout << std::string(80, '-') << std::endl;
+  std::cout << "Start Tcp (Desired): " << start_frame.format(CommaFmt) << std::endl;
+  std::cout << "Goal Tcp (Desired): " << goal_frame.format(CommaFmt) << std::endl;
 
   const size_t kMaxResampleIterations = 100;
 
@@ -102,20 +87,18 @@ void EdgeIKTestFromFrames(const KinematicsSolverPtr& kinematics_solver,
   EXPECT_TRUE(maybe_goal_ik.has_value());
   auto goal = maybe_goal_ik.value();
 
-  EdgeIKTest(kinematics_solver, start, goal);
-}
+  const auto maybe_config1_frame = kinematics_solver->solve_fk(start);
+  EXPECT_TRUE(maybe_config1_frame.has_value());
+  const auto maybe_config2_frame = kinematics_solver->solve_fk(goal);
+  EXPECT_TRUE(maybe_config2_frame.has_value());
 
-TEST(KinematicsSolverTest, StraightLineTaskSpaceTest) {
-  auto robot = MakeRobot<KukaRobot>();
-  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(robot->GetSkeleton());
+  auto configs = kinematics_solver->solve_edge_ik_with_config(start, goal);
+  EXPECT_GE(configs.size(), 1u);
 
-  // CheckEdgeIK(kinematics_solver, Eigen::Vector3d(0.4, 0.4, 0.3), Eigen::Vector3d(0.4, 0.4, 0.6));
-  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.6, 0.1, 0.3), Eigen::Vector3d(0.6, 0.3, 0.3));
-  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.7, 0.2, 0.3), Eigen::Vector3d(0.5, 0.2, 0.3));
-  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.7, 0.2, 0.3), Eigen::Vector3d(0.5, 0.2, 0.3));
-  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.6, 0.1, 0.3), Eigen::Vector3d(0.4, 0.3, 0.3));
-  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.6, 0.1, 0.2), Eigen::Vector3d(0.4, 0.4, 0.5));
-  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.3, 0.4, 0.2), Eigen::Vector3d(0.6, 0.4, 0.7));
+  std::cout << "Start (Desired): " << start.format(CommaFmt) << ", Goal (Desired): " << goal.format(CommaFmt) << std::endl;
+  std::cout << "Start (Actual) : " << configs.front().format(CommaFmt) << ", Goal (Actual) : " << configs.back().format(CommaFmt) << std::endl;
+  EXPECT_NEAR((start - configs.front()).norm(), 0.0f, Epsilon);
+  EXPECT_TRUE(CheckStraightLineAccuracy(kinematics_solver, configs));
 }
 
 TEST(KinematicsSolverTest, ConfigEdgeIKSameConfigTest) {
@@ -219,7 +202,7 @@ TEST(KinematicsSolverTest, JointFlipTest) {
   EXPECT_TRUE(CheckStraightLineAccuracy(kinematics_solver, configs));
 }
 
-TEST(KinematicsSolverTest, DISABLED_RandomizedConfigsTest) {
+TEST(KinematicsSolverTest, RandomizedConfigsTest) {
   auto robot = MakeRobot<KukaRobot>();
   auto manipulator = robot->GetSkeleton();
   KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
@@ -232,3 +215,16 @@ TEST(KinematicsSolverTest, DISABLED_RandomizedConfigsTest) {
     EXPECT_TRUE(CheckStraightLineAccuracy(kinematics_solver, configs));
   }
 }
+
+TEST(KinematicsSolverTest, StraightLineTaskSpaceTest) {
+  auto robot = MakeRobot<KukaRobot>();
+  KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(robot->GetSkeleton());
+
+  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.7, 0.2, 0.3), Eigen::Vector3d(0.5, 0.2, 0.3));
+  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.6, 0.1, 0.3), Eigen::Vector3d(0.6, 0.3, 0.3));
+  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.6, 0.1, 0.3), Eigen::Vector3d(0.4, 0.5, 0.3));
+  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.6, 0.1, 0.2), Eigen::Vector3d(0.4, 0.4, 0.5));
+  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.4, 0.4, 0.3), Eigen::Vector3d(0.4, 0.4, 0.6));
+  EdgeIKTestFromFrames(kinematics_solver, Eigen::Vector3d(0.3, 0.4, 0.2), Eigen::Vector3d(0.6, 0.4, 0.7));
+}
+

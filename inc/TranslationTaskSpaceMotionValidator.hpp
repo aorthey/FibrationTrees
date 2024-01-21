@@ -8,7 +8,7 @@
 #include "KinematicsSolver.hpp"
 #include "robots/Robot.hpp"
 
-const float kMinimumSpacing = 0.25; //minimal distance between two joint configurations (was 0.25)
+const float kMinimumSpacing = 0.05; //minimal distance between two joint configurations (was 0.25)
 
 class TranslationTaskSpaceMotionValidator : public ompl::multilevel::TaskSpaceMotionValidator
 {

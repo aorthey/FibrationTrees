@@ -7,7 +7,7 @@
 
 #include "KinematicsSolver.hpp"
 
-class TaskSpaceMultiRobotMotionValidator : public ompl::multilevel::TaskSpaceMotionValidator//ompl::base::DiscreteMotionValidator
+class TaskSpaceMultiRobotMotionValidator : public ompl::multilevel::TaskSpaceMotionValidator
 {
 public:
     TaskSpaceMultiRobotMotionValidator() = delete;

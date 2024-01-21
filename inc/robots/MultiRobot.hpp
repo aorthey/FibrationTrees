@@ -12,6 +12,8 @@ class MultiRobot : public Robot {
     Eigen::VectorXd StateToEigen(const ompl::base::State* state) const override;
     void EigenToState(const Eigen::VectorXd& v, ompl::base::State* state) const override;
 
+    std::vector<Eigen::Vector3d> GetFK(const ompl::base::State* state) const;
+
     static std::shared_ptr<MultiRobot> MakeMultiRobot(const std::vector<RobotPtr>& robots);
   private:
     std::vector<RobotPtr> robots_;
