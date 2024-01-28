@@ -24,7 +24,7 @@
 
 #include <ranges>
 
-const auto Nrobots = 3;
+const auto Nrobots = 6;
 
 ompl::base::ProblemDefinitionPtr CreateMultiDroneProblemDefinition(
   const ompl::multilevel::FactoredSpaceInformationPtr& factor, 
@@ -161,7 +161,7 @@ int main(int argc, char* argv[]) {
   planner->setRange(Inf);
   planner->setSmoothIntermediateSolutions(true);
  
-  float timeout = 1000.0;
+  float timeout = 10000.0;
 
   auto ptc = TimeOrSolutionPtc(pdef, timeout);
   ompl::base::PlannerStatus status = planner->solve(ptc);

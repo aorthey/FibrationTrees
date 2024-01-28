@@ -13,6 +13,9 @@
 using namespace ompl::base;
 using namespace ompl::multilevel;
 
+//Ideas: Use manipulator to move throuhg a hallway, where anohter person moves
+//along (dynamic obstacle), and where boxes block the way (static obstacles)
+
 const float kLowerBound{-1};
 const float kUpperBound{+1};
 const size_t kMaximumIterations = 50;
