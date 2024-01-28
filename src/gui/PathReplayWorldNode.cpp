@@ -50,17 +50,27 @@ void PathReplayWorldNode::AddPath(const RobotPtr& robot, const ompl::base::PathP
   auto path = std::make_shared<EigenPath>(robot, ompl_path);
 
   const float L = path->GetLength();
-  std::vector<Eigen::Vector3d> vertices;
+
+  std::vector<std::vector<Eigen::Vector3d>> vertices;
+  const auto s = path->GetConfigAt(0.0);
+  const auto frames = robot->GetFK(s);
+  for(size_t k = 0; k < frames.size(); k++) {
+    std::vector<Eigen::Vector3d> vector;
+    vertices.push_back(vector);
+  }
+
   for(float d = 0; d < L+kVisualizationStepSize; d+=kVisualizationStepSize) {
     const auto s1 = path->GetConfigAt(d / L);
     const auto frames = robot->GetFK(s1);
-    for(const auto& frame : frames) {
-      vertices.push_back(frame);
+    for(size_t k = 0; k < frames.size(); k++) {
+      vertices.at(k).push_back(frames.at(k));
     }
   }
-  auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices, color, kPathLineWidth));
-  solution_path_frames_.push_back(frame_line);
-  skeleton_and_path_.push_back(std::make_pair(robot->GetSkeleton(), path));
+  for(const auto& vertices_frame : vertices) {
+    auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices_frame, color, kPathLineWidth));
+    solution_path_frames_.push_back(frame_line);
+  }
+  robot_and_path_.push_back(std::make_pair(robot, path));
 }
 
 void PathReplayWorldNode::AddPlannerData(const RobotPtr& robot, const ompl::base::PlannerData& data) {
@@ -124,11 +134,9 @@ void PathReplayWorldNode::customPostRefresh()
 
 void PathReplayWorldNode::customPreStep()
 {
-  for(const auto& pair : skeleton_and_path_) {
-    const auto& manipulator = pair.first;
-    const auto& path = pair.second;
+  for(const auto& [robot, path] : robot_and_path_) {
     auto config = path->GetConfigAt(path_position_);
-    manipulator->setConfiguration(config);
+    robot->SetConfiguration(config);
   }
   if(collision_checker_ != nullptr) {
     if(collision_checker_->IsInCollision()) {
@@ -139,7 +147,7 @@ void PathReplayWorldNode::customPreStep()
 
 void PathReplayWorldNode::customPostStep()
 {
-  if(skeleton_and_path_.empty()) {
+  if(robot_and_path_.empty()) {
     return;
   }
   if(pause_) {
@@ -182,11 +190,8 @@ void PathReplayWorldNode::toggleReverse() {
 std::string PathReplayWorldNode::getCurrentJointConfiguration() const {
   std::string s;
   std::string delim = "";
-  for(const auto& pair : skeleton_and_path_) {
-    const auto& manipulator = pair.first;
-    const auto& path = pair.second;
+  for(const auto& [_, path] : robot_and_path_) {
     auto config = path->GetConfigAt(path_position_);
-
     for(size_t k =0; k < config.size();k++) {
       s+= delim + std::to_string(config[k]);
       delim = ", \n";
@@ -237,24 +242,24 @@ void PathReplayWorldNode::CreateKeyPressEvents() {
   events_.push_back({'2', "show/hide planner data", [&](){togglePlannerDataVisibility();}});
   events_.push_back({'8', "store planner path", 
       [&](){
-        for(const auto& [skeleton, path] : skeleton_and_path_) {
-          auto name = "eigen_path_"+skeleton->getName();
+        for(const auto& [robot, path] : robot_and_path_) {
+          auto name = "eigen_path_"+robot->GetName();
           path->Save(name);
           OMPL_INFORM("Save path %s", name.c_str()); 
         }
       }});
   events_.push_back({'9', "load planner path", 
       [&](){
-        for(const auto& [skeleton, path] : skeleton_and_path_) {
-          auto name = "fail_eigen_path_"+skeleton->getName();
+        for(const auto& [robot, path] : robot_and_path_) {
+          auto name = "fail_eigen_path_"+robot->GetName();
           path->Load(name);
           OMPL_INFORM("Load path %s", name.c_str()); 
         }
       }});
-  events_.push_back({'p', "output current skeleton info", 
+  events_.push_back({'p', "output current robot info", 
       [&](){
-        for(const auto& [skeleton, _] : skeleton_and_path_) {
-          PrintSkeletonInfo(skeleton);
+        for(const auto& [robot, _] : robot_and_path_) {
+          PrintSkeletonInfo(robot->GetSkeleton());
         }
       }});
 }

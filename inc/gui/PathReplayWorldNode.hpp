@@ -68,7 +68,7 @@ protected:
   std::vector<std::string> planner_data_frames_;
   std::vector<std::string> solution_path_frames_;
 
-  std::vector<std::pair<dart::dynamics::SkeletonPtr, std::shared_ptr<EigenPath>>> skeleton_and_path_;
+  std::vector<std::pair<RobotPtr, std::shared_ptr<EigenPath>>> robot_and_path_;
   CollisionCheckerPtr collision_checker_;
 
   float step_size_{kDefaultStepSize};

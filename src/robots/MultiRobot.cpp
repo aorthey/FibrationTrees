@@ -101,21 +101,12 @@ std::vector<Eigen::Vector3d> MultiRobot::GetFK(const Eigen::VectorXd& config) co
   return tcps;
 }
 
-// std::vector<Eigen::Vector3d> MultiRobot::GetFK(const ompl::base::State* state) const {
-  // auto child_states = factor_->allocChildStates();
-  // factor_->project(state, child_states);
-
-  // std::vector<Eigen::Vector3d> tcps;
-  // for(const auto& robot : robots_) {
-  //   for(const auto& child_state : child_states) {
-  //     if(child_state.first == robot->GetSpaceInformation()->getName()) {
-  //       auto frames = robot->GetFK(child_state);
-  //       for(const auto& tcp : frames) {
-  //         tcps.push_back(tcp);
-  //       }
-  //     }
-  //   }
-  // }
-  // factor_->freeChildStates(child_states);
-  // return tcps;
-//}
+void MultiRobot::SetConfiguration(const Eigen::VectorXd& config) {
+  int current_dimension = 0;
+  for(const auto& robot : robots_) {
+    int Nrobot = robot->GetSpaceInformation()->getStateDimension();
+    auto eigen_vector = config.segment(current_dimension, Nrobot);
+    robot->SetConfiguration(eigen_vector);
+    current_dimension = current_dimension + Nrobot;
+  }
+}

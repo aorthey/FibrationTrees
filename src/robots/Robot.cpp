@@ -40,6 +40,14 @@ std::vector<Eigen::Vector3d> Robot::GetFK(const Eigen::VectorXd& config) const {
   return std::vector<Eigen::Vector3d>({skeleton_->getBodyNode(endeffector)->getTransform().translation()});
 }
 
+std::string Robot::GetName() const {
+  return factor_->getName();
+}
+
+void Robot::SetConfiguration(const Eigen::VectorXd& config) {
+  skeleton_->setConfiguration(config);
+}
+
 bool Robot::IsValid(const ompl::base::State* state) const {
   auto config = this->StateToEigen(state);
   auto lb = skeleton_->getPositionLowerLimits();
@@ -50,7 +58,6 @@ bool Robot::IsValid(const ompl::base::State* state) const {
       return false;
     }
   }
-  //Check collisions
   skeleton_->setConfiguration(config);
   return !collision_checker_->IsInCollision();
 }

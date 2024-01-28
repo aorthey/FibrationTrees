@@ -70,11 +70,14 @@ void Visualizer::AddPlanner(const RobotPtr& robot, const ompl::base::PlannerPtr&
     for(const auto& state : pgeo.getStates()) {
       path->getSpaceInformation()->printState(state);
       const auto config = robot->StateToEigen(state);
-      const auto v = robot->GetFK(config).front();//GetFK(robot->GetSkeleton(), config);
-      std::cout << "EndEffector position is " << v.format(CommaFmt) << std::endl;
+      const auto tcps = robot->GetFK(config);
+      std::cout << "EndEffector position is " <<std::endl;
+      for(const auto& tcp : tcps) {
+        std::cout << "\t" << tcp.format(CommaFmt) << std::endl;
+      }
     }
     OMPL_INFORM("Interpolate path...");
-    //pgeo.interpolate();
+    pgeo.interpolate();
     OMPL_INFORM("Add path to visualizer...");
     world_node->AddPath(robot, path, kDefaultPathColor);
   }

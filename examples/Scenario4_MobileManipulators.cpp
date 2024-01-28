@@ -218,7 +218,6 @@ int main(int argc, char* argv[]) {
   planner->setSmoothIntermediateSolutions(false);
  
   float timeout = 100.0;
-  //float timeout = 1.0;
 
   auto ptc = TimeOrSolutionPtc(pdef, timeout);
   ompl::base::PlannerStatus status = planner->solve(ptc);

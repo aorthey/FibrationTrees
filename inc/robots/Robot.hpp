@@ -27,6 +27,9 @@ class Robot {
 
     size_t GetDimension() const;
 
+    std::string GetName() const;
+    virtual void SetConfiguration(const Eigen::VectorXd& config);
+
     void SetSkeleton(const dart::dynamics::SkeletonPtr& skeleton);
     void SetSpaceInformation(const ompl::multilevel::FactoredSpaceInformationPtr& factor);
     void SetCollisionChecker(const CollisionCheckerPtr& collision_checker);
