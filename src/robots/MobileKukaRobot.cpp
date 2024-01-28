@@ -69,8 +69,6 @@ ompl::multilevel::FactoredSpaceInformationPtr MobileKukaRobot::MakeSpaceInformat
   spaceSE2->setBounds(boundsSE2);
 
   auto factor = std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space);
-  factor->printSettings(std::cout);
-
   return factor;
 }
 

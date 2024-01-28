@@ -18,7 +18,7 @@ class Visualizer {
     void AddPath(const RobotPtr& robot, const ompl::base::PathPtr& path, const Eigen::Vector3d& color = kDefaultPathColor);
     void AddPlanner(const RobotPtr& robot, const ompl::base::PlannerPtr& planner, bool displayPlannerData = false);
     void AddMultiRobotPath(const std::vector<RobotPtr>& robots, const ompl::base::PathPtr& path);
-    void AddMultiRobotPlanner(const std::vector<RobotPtr>& robots, const ompl::base::PlannerPtr& planner);
+    void AddMultiRobotPlanner(const std::vector<RobotPtr>& robots, const ompl::base::PlannerPtr& planner, bool interpolate=false);
 
     void SetCollisionChecker(const CollisionCheckerPtr& collision_checker);
 

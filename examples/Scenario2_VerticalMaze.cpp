@@ -57,6 +57,8 @@ int main(int argc, char* argv[]) {
   ompl::multilevel::ProjectionPtr projection = std::make_shared<TaskSpaceProjection>(factor, child, robot);//, kinematics_solver);
   factor->addChild(child, projection);
 
+  factor->printFactorization(std::cout);
+
   ////////////////////////////////////////////////////////////////////////////////
   ////Create planning problem
   ////////////////////////////////////////////////////////////////////////////////

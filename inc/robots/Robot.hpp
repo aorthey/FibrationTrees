@@ -33,6 +33,10 @@ class Robot {
 
     bool IsValid(const ompl::base::State* state) const;
 
+    virtual std::vector<Eigen::Vector3d> GetFK(const Eigen::VectorXd& config) const;
+
+    std::vector<Eigen::Vector3d> GetFK(const ompl::base::State* state) const;
+
   protected:
     dart::dynamics::SkeletonPtr skeleton_;
     ompl::multilevel::FactoredSpaceInformationPtr factor_;

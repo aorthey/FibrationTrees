@@ -10,8 +10,6 @@
 ompl::multilevel::FactoredSpaceInformationPtr MobileKukaRobotTaskSpace::MakeSpaceInformation(const RobotPtr& robot) {
   ompl::base::StateSpacePtr space(new TaskSpaceMobile(robot));
   auto factor = std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space);
-  factor->printSettings(std::cout);
-
   return factor;
 }
 

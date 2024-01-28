@@ -40,8 +40,3 @@ dart::dynamics::SimpleFramePtr createSphereFrame(const Eigen::Vector3d& position
 dart::dynamics::SimpleFramePtr createLineSegmentFrame(const Eigen::Vector3d& s1, const Eigen::Vector3d& s2, const Eigen::Vector3d& color = kPathColor, float line_width= kDefaultLineWidth);
 dart::dynamics::SimpleFramePtr createLineSegmentFrame(const std::vector<Eigen::Vector3d>& vertices, const Eigen::Vector3d& color = kPathColor, float line_width= kDefaultLineWidth);
 void addCoordinateFrameToWorld(const dart::simulation::WorldPtr& world);
-
-////////////////////////////////////////////////////////////////////////////////
-// Misc
-////////////////////////////////////////////////////////////////////////////////
-Eigen::Vector3d GetFK(const dart::dynamics::SkeletonPtr& skeleton, const Eigen::VectorXd& config);

@@ -11,15 +11,14 @@
 #include "OmplHelper.hpp"
 #include "KinematicsSolver.hpp"
 #include "TranslationTaskSpaceMotionValidator.hpp"
-#include "TaskSpaceMultiRobotMotionValidator.hpp"
+#include "TaskSpaceProjection.hpp"
 #include "robots/KukaRobotTaskSpace.hpp"
-#include "robots/MultiRobot.hpp"
 #include "robots/SphereRobot.hpp"
 #include "robots/RobotFactory.hpp"
-#include "robots/MobileKukaRobotTaskSpace.hpp"
 
 const size_t kMaxConnections = 20;
 const float kLineAccuracy = 0.1;
+const float kIKSolutionAccuracy = 1e-5;
 
 class TestSphereRobot : public SphereRobot {
   public:
@@ -59,8 +58,8 @@ TEST(MotionValidatorTest, EarlyStoppageLineDistanceTest) {
     robot->EigenToState(random_s2, s2);
     factor->printState(s1);
     factor->printState(s2);
-    const auto s1_tcp = GetFK(robot->GetSkeleton(), random_s1);
-    const auto s2_tcp = GetFK(robot->GetSkeleton(), random_s2);
+    const auto s1_tcp = robot->GetFK(random_s1).front();
+    const auto s2_tcp = robot->GetFK(random_s2).front();
 
     ////////////////////////////////////////////////////////////////////////////////
     //Set obstacle to mid point along task space straight line
@@ -83,7 +82,7 @@ TEST(MotionValidatorTest, EarlyStoppageLineDistanceTest) {
 
     auto config = robot->StateToEigen(configs.back());
     std::cout << "Reached config " << config.format(CommaFmt) << std::endl;
-    const auto s3_tcp = GetFK(robot->GetSkeleton(), config);
+    const auto s3_tcp = robot->GetFK(config).front();
 
     std::cout << "  Tcp[start]   " << s1_tcp.format(CommaFmt) << std::endl;
     std::cout << "  Tcp[goal]    " << s2_tcp.format(CommaFmt) << std::endl;
@@ -98,76 +97,4 @@ TEST(MotionValidatorTest, EarlyStoppageLineDistanceTest) {
 
   factor->freeState(s2);
   factor->freeState(s1);
-}
-
-TEST(MotionValidatorTest, MultiRobotCollisionTest) {
-  dart::math::Random::setSeed(0);
-  dart::simulation::WorldPtr world(new dart::simulation::World);
-
-  auto robot1 = MakeRobot<MobileKukaRobotTaskSpace>(world);
-  auto robot2 = MakeRobot<MobileKukaRobotTaskSpace>(world);
-
-  std::vector<RobotPtr> robots = {robot1, robot2};
-  auto robot = MultiRobot::MakeMultiRobot(robots);
-
-  ////////////////////////////////////////////////////////////////////////////////
-  ////OMPL Setup
-  ////////////////////////////////////////////////////////////////////////////////
-  auto factor = robot->GetSpaceInformation();
-
-  auto pairwise_collision_checker = std::make_shared<DartMultiRobotCollisionChecker>(factor, world, robots);
-  factor->setStateValidityChecker(pairwise_collision_checker);
-
-  auto motion_validator = std::make_shared<TaskSpaceMultiRobotMotionValidator>(factor);
-  factor->setMotionValidator(motion_validator);
-
-  auto child1 = robot1->GetSpaceInformation();
-  auto child2 = robot2->GetSpaceInformation();
-  
-  auto task_start1 = child1->allocState();
-  auto task_start2 = child2->allocState();
-  auto task_goal1 = child1->allocState();
-  auto task_goal2 = child2->allocState();
-
-  auto task_start1_eigen = MakeEigen({1.0, 0.0, 0.8});
-  auto task_goal1_eigen = MakeEigen({0.0, 0.0, 0.8});
-  auto task_start2_eigen = MakeEigen({-1.0, 0.0, 0.8);
-  auto task_goal2_eigen = MakeEigen({0.0, 0.0, 0.8);
-
-  robot1->EigenToState(task_start1_eigen, task_start1);
-  robot1->EigenToState(task_goal1_eigen, task_goal1);
-  robot2->EigenToState(task_start2_eigen, task_start2);
-  robot2->EigenToState(task_goal2_eigen, task_goal2);
-
-  std::unordered_map<std::string, ompl::base::State*> task_space_start_states;
-  task_space_start_states[child1->getName()] = task_start1;
-  task_space_start_states[child2->getName()] = task_start2;
-
-  auto maybe_start = ComputeValidTotalState(factor, task_space_start_states);
-  EXPECT_TRUE(maybe_start.has_value());
-  auto start = maybe_start.value();
-  factor->printState(start);
-
-  std::unordered_map<std::string, ompl::base::State*> task_space_goal_states;
-  task_space_goal_states[child1->getName()] = task_goal1;
-  task_space_goal_states[child2->getName()] = task_goal2;
-
-  auto maybe_goal = ComputeValidTotalState(factor, task_space_goal_states);
-  EXPECT_TRUE(maybe_goal.has_value());
-  auto goal = maybe_goal.value();
-  factor->printState(goal);
-
-  auto configs = motion_validator->propagateMotion(start, goal);
-  EXPECT_GT(configs.size(), 0);
-  auto d_total = factor->distance(configs.front(), configs.back());
-  std::cout << "Propagation Progress is " << d_total << "/" << factor->distance(start, goal) << std::endl;
-  auto config = robot->StateToEigen(configs.back());
-  std::cout << "Reached config " << config.format(CommaFmt) << std::endl;
-
-  auto tcps = robot->GetFK(configs.back());
-  std::cout << "  Tcp for " << config.format(CommaFmt) << std::endl;
-  for(const auto& tcp : tcps) {
-    std::cout << "    " << tcp.format(CommaFmt) << std::endl;
-  }
-
 }

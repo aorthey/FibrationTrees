@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "EigenPath.hpp"
+#include "OmplHelper.hpp"
 #include "Common.hpp"
 
 TEST(EigenPathTest, EmptyTest) {
@@ -162,3 +163,13 @@ TEST(EigenPathTest, SaveLoadTest) {
   }
 }
 
+TEST(EigenPathTest, EigenSplitTest) {
+  auto v = MakeEigen({0, 1, 2, 3, 4, 5});
+  EXPECT_EQ(v.size(), 6);
+  auto v1 = v.segment(0, 3);
+  std::cout << v1.format(CommaFmt) << std::endl;
+  EXPECT_EQ(v1.size(), 3);
+  auto v2 = v.segment(3, 3);
+  std::cout << v2.format(CommaFmt) << std::endl;
+  EXPECT_EQ(v2.size(), 3);
+}

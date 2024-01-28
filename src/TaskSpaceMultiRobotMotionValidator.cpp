@@ -3,6 +3,8 @@
 #include "OmplHelper.hpp"
 #include "Common.hpp"
 
+bool kDebug = false;
+
 TaskSpaceMultiRobotMotionValidator::TaskSpaceMultiRobotMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor)
   : ompl::multilevel::TaskSpaceMotionValidator(factor)
 {
@@ -35,6 +37,8 @@ bool TaskSpaceMultiRobotMotionValidator::checkMotion(const ompl::base::State *s1
 }
 
 bool TaskSpaceMultiRobotMotionValidator::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const {
+  OMPL_ERROR("Last valid state is required.");
+  throw "NYI";
   if(lastValid.first == nullptr) {
     OMPL_ERROR("Last valid state is required.");
     throw "NYI";
@@ -87,7 +91,6 @@ std::vector<ompl::base::State*> TaskSpaceMultiRobotMotionValidator::propagateMot
   auto s1_compound = s1->as<ompl::base::CompoundState>();
   auto s2_compound = s2->as<ompl::base::CompoundState>();
   auto space = si_->getStateSpace()->as<ompl::base::CompoundStateSpace>();
-  std::vector<ompl::base::State*> result;
 
   ////////////////////////////////////////////////////////////////////////////////
   // Propagate states forward on each subspace until collision or failure
@@ -106,8 +109,15 @@ std::vector<ompl::base::State*> TaskSpaceMultiRobotMotionValidator::propagateMot
 
     max_number_states = std::max(max_number_states, states.size());
     split_states.push_back(states);
+    if(kDebug) {
+      std::cout << "Space " << space->getSubspace(k)->getName() << " propagated " << states.size() << " states." << std::endl;
+    }
+  }
+  if(kDebug) {
+    std::cout << "Check validity on " << max_number_states << " states." << std::endl;
   }
 
+  std::vector<ompl::base::State*> result;
   //Abort when no progress was made
   if(max_number_states == 0) {
     OMPL_DEBUG("No progress");
@@ -117,7 +127,7 @@ std::vector<ompl::base::State*> TaskSpaceMultiRobotMotionValidator::propagateMot
   ////////////////////////////////////////////////////////////////////////////////
   // Stitch individual states together into one path
   ////////////////////////////////////////////////////////////////////////////////
-  for(size_t i = 1; i < max_number_states; i++) {
+  for(size_t i = 0; i < max_number_states; i++) {
     auto state = space->allocState();
 
     for(size_t space_index = 0; space_index < space->getSubspaceCount(); space_index++) {

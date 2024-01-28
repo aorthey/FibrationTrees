@@ -12,7 +12,6 @@
 #include "gui/Visualizer.hpp"
 #include "OmplHelper.hpp"
 #include "KinematicsSolver.hpp"
-#include "Utils.hpp"
 #include "robots/KukaRobotTaskSpace.hpp"
 #include "robots/MultiRobot.hpp"
 #include "robots/SphereRobot.hpp"

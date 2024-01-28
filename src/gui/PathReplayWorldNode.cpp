@@ -33,8 +33,10 @@ std::vector<Eigen::Vector3d> MakeEdgeVertices(const RobotPtr& robot, const ompl:
     si->getStateSpace()->interpolate(s1, s2, d/L, sout);
     const auto config = robot->StateToEigen(sout);
     configs.push_back(config);
-    const auto v = GetFK(robot->GetSkeleton(), config);
-    vertices.push_back(v);
+    const auto frames = robot->GetFK(config);
+    for(const auto& frame : frames) {
+      vertices.push_back(frame);
+    }
   }
   si->freeState(sout);
   return vertices;
@@ -51,8 +53,10 @@ void PathReplayWorldNode::AddPath(const RobotPtr& robot, const ompl::base::PathP
   std::vector<Eigen::Vector3d> vertices;
   for(float d = 0; d < L+kVisualizationStepSize; d+=kVisualizationStepSize) {
     const auto s1 = path->GetConfigAt(d / L);
-    const auto v1 = GetFK(robot->GetSkeleton(), s1);
-    vertices.push_back(v1);
+    const auto frames = robot->GetFK(s1);
+    for(const auto& frame : frames) {
+      vertices.push_back(frame);
+    }
   }
   auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices, color, kPathLineWidth));
   solution_path_frames_.push_back(frame_line);
@@ -118,8 +122,10 @@ void PathReplayWorldNode::AddMultiRobotPlannerData(const std::vector<RobotPtr>& 
           const auto& name = robot->GetSpaceInformation()->getName();
           const auto& childState = childStates.at(name);
           const auto config = robot->StateToEigen(childState);
-          const auto v = GetFK(robot->GetSkeleton(), config);
-          vertices.at(name).push_back(v);
+          const auto frames = robot->GetFK(config);
+          for(const auto& frame : frames) {
+            vertices.at(name).push_back(frame);
+          }
         }
       }
       for(const auto& childState : childStates) {

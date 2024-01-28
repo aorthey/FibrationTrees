@@ -65,12 +65,11 @@ Eigen::VectorXd ZeppelinRobot::StateToEigen(const ompl::base::State* state) cons
   for (unsigned int k = 0; k < N-1; k++)
   {
       v[k] = state_RN->values[k];
-      if(v[k] != v[k]) {
-        std::cout << "Detected NaN in StateToEigen" << std::endl;
-        factor_->printState(state);
-        std::cout << v << std::endl;
-        exit(0);
-      }
+      // if(v[k] != v[k]) {
+      //   OMPL_ERROR("Detected NaN in StateToEigen");
+      //   factor_->printState(state);
+      //   throw "DetectedNaN";
+      // }
   }
   v[N-1] = state_SO2->value;
   return v;
@@ -83,12 +82,11 @@ void ZeppelinRobot::EigenToState(const Eigen::VectorXd& v, ompl::base::State* st
   for (unsigned int k = 0; k < N-1; k++)
   {
       state_RN->values[k] = v[k];
-      if(v[k] != v[k]) {
-        std::cout << "Detected NaN in EigenToState" << std::endl;
-        factor_->printState(state);
-        std::cout << v << std::endl;
-        exit(0);
-      }
+      // if(v[k] != v[k]) {
+      //   OMPL_ERROR("Detected NaN in EigenToState");
+      //   factor_->printState(state);
+      //   throw "DetectedNaN";
+      // }
   }
   state_SO2->value = v[N-1];
 }

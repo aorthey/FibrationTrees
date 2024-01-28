@@ -30,6 +30,16 @@ void Robot::SetCollisionChecker(const CollisionCheckerPtr& collision_checker) {
   collision_checker_ = collision_checker;
 }
 
+std::vector<Eigen::Vector3d> Robot::GetFK(const ompl::base::State* state) const {
+  return GetFK(StateToEigen(state));
+}
+
+std::vector<Eigen::Vector3d> Robot::GetFK(const Eigen::VectorXd& config) const {
+  auto endeffector = skeleton_->getBodyNode(skeleton_->getNumBodyNodes() - 1)->getName();
+  skeleton_->setConfiguration(config);
+  return std::vector<Eigen::Vector3d>({skeleton_->getBodyNode(endeffector)->getTransform().translation()});
+}
+
 bool Robot::IsValid(const ompl::base::State* state) const {
   auto config = this->StateToEigen(state);
   auto lb = skeleton_->getPositionLowerLimits();

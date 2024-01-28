@@ -8,7 +8,6 @@
 #include "robots/MultiRobot.hpp"
 #include "robots/ZeppelinInnerSphereRobot.hpp"
 #include "robots/RobotFactory.hpp"
-#include "Utils.hpp"
 
 #include <dart/dart.hpp>
 

@@ -70,11 +70,11 @@ void Visualizer::AddPlanner(const RobotPtr& robot, const ompl::base::PlannerPtr&
     for(const auto& state : pgeo.getStates()) {
       path->getSpaceInformation()->printState(state);
       const auto config = robot->StateToEigen(state);
-      const auto v = GetFK(robot->GetSkeleton(), config);
+      const auto v = robot->GetFK(config).front();//GetFK(robot->GetSkeleton(), config);
       std::cout << "EndEffector position is " << v.format(CommaFmt) << std::endl;
     }
     OMPL_INFORM("Interpolate path...");
-    pgeo.interpolate();
+    //pgeo.interpolate();
     OMPL_INFORM("Add path to visualizer...");
     world_node->AddPath(robot, path, kDefaultPathColor);
   }
@@ -121,7 +121,7 @@ void Visualizer::AddMultiRobotPath(const std::vector<RobotPtr>& robots, const om
 }
 
 void Visualizer::AddMultiRobotPlanner(const std::vector<RobotPtr>& robots, 
-    const ompl::base::PlannerPtr& planner) {
+    const ompl::base::PlannerPtr& planner, bool interpolate) {
   ////////////////////////////////////////////////////////////////////////////////
   // Visualize Planner data
   ////////////////////////////////////////////////////////////////////////////////
@@ -143,7 +143,9 @@ void Visualizer::AddMultiRobotPlanner(const std::vector<RobotPtr>& robots,
     for(const auto& state : pgeo.getStates()) {
       path->getSpaceInformation()->printState(state);
     }
-    pgeo.interpolate();
+    if(interpolate) {
+      pgeo.interpolate();
+    }
     AddMultiRobotPath(robots, path);
   }
 }

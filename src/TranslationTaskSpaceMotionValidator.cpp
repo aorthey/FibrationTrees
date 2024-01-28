@@ -4,8 +4,6 @@
 #include "OmplHelper.hpp"
 #include "Common.hpp"
 
-const float kDeltaCollisionCheckStepSize = 0.005;
-
 TranslationTaskSpaceMotionValidator::TranslationTaskSpaceMotionValidator(
     const ompl::base::SpaceInformationPtr &si, const RobotPtr& robot) 
   : ompl::multilevel::TaskSpaceMotionValidator(si), robot_(robot)

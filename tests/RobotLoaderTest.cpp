@@ -2,8 +2,10 @@
 #include "robots/MobileKukaRobot.hpp"
 #include "robots/KukaRobot.hpp"
 #include "robots/MobileKukaRobotTaskSpace.hpp"
+#include "robots/MobileKukaBase.hpp"
 #include "robots/KukaRobotTaskSpace.hpp"
 #include "robots/SphereRobot.hpp"
+#include "robots/MultiRobot.hpp"
 #include "robots/ZeppelinRobot.hpp"
 #include "robots/ZeppelinInnerSphereRobot.hpp"
 #include "robots/RobotFactory.hpp"
@@ -14,17 +16,32 @@
 template <class T>
 class RobotLoaderTest : public testing::Test {};
 
-using RobotTypes = ::testing::Types<MobileKukaRobot, MobileKukaRobotTaskSpace, KukaRobot, KukaRobotTaskSpace, SphereRobot, ZeppelinRobot, ZeppelinInnerSphereRobot>;
+// struct MultiRobotTest : public MultiRobot {
+//   MultiRobotTest() : MultiRobot(std::vector<RobotPtr>({MakeRobot<SphereRobot>(), MakeRobot<SphereRobot>()})) {
+//   };
+// };
+
+using RobotTypes = ::testing::Types<
+    MobileKukaRobot, 
+    MobileKukaRobotTaskSpace, 
+    KukaRobot, 
+    KukaRobotTaskSpace, 
+    SphereRobot, 
+    ZeppelinRobot, 
+    ZeppelinInnerSphereRobot,
+    MobileKukaBase>;
 
 TYPED_TEST_SUITE(RobotLoaderTest, RobotTypes);
 
 TYPED_TEST(RobotLoaderTest, DefaultLoaderTest) {
   auto robot = MakeRobot<TypeParam>();
+  std::cout << "Done" << std::endl;
 
   auto si = robot->GetSpaceInformation();
 
   const auto Ndim = si->getStateDimension();
 
+  std::cout << "Created robot " << robot->GetSpaceInformation()->getName() << " with " << Ndim << " dimensions." << std::endl;
   Eigen::VectorXd v(Ndim);
   for(size_t k = 0; k < Ndim; k++) {
     v[k] = k+1;
@@ -73,6 +90,9 @@ TYPED_TEST(RobotLoaderTest, ObstacleLoaderTest) {
   dart::simulation::WorldPtr world(new dart::simulation::World);
   world->addSkeleton(floor);
 
+  ////////////////////////////////////////////////////////////////////////////////
+  std::cout << "Create Robot" << std::endl;
+  ////////////////////////////////////////////////////////////////////////////////
   auto robot = MakeRobot<TypeParam>(world, obstacles);
 
   auto factor = robot->GetSpaceInformation();
