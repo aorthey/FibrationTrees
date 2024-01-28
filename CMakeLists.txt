@@ -52,7 +52,7 @@ ENDFOREACH(DEPENDENCY)
 ################################################################################
 # Build executables
 ################################################################################
-FILE(GLOB EXECUTABLES_SOURCES examples/*.cpp)
+FILE(GLOB EXECUTABLES_SOURCES executables/*.cpp)
 LIST(SORT EXECUTABLES_SOURCES)
 FOREACH(EXEC_FILENAME ${EXECUTABLES_SOURCES})
   GET_FILENAME_COMPONENT(EXEC ${EXEC_FILENAME} NAME_WE)
