@@ -1,0 +1,75 @@
+<?xml version="1.0" ?>
+<robot name="airplane">
+  <link name="world"/>
+  <link name="empty_link_x"/>
+  <link name="empty_link_y"/>
+  <link name="empty_link_z"/>
+  <link name="empty_link_yaw"/>
+  <link name="empty_link_pitch"/>
+  <link name="body">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh scale="0.1 0.1 0.1" filename="meshes/zeppelin.stl"/>
+      </geometry>
+       <material name="grey">
+        <color rgba="0.5 0.5 0.5 0.5"/>
+      </material>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh scale="0.1 0.1 0.1" filename="meshes/zeppelin.stl"/>
+      </geometry>
+       <material name="grey">
+        <color rgba="0.5 0.5 0.5 0.5"/>
+      </material>
+    </visual>
+    <inertial>
+      <mass value="10"/>
+      <inertia ixx="1e-6" ixy="0.0" ixz="0.0" iyy="0.083" iyz="0.0" izz="0.083"/>
+    </inertial>
+  </link>
+  <joint name="joint_translation_x" type="prismatic">
+    <origin xyz="-0.0 -0.0 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <parent link="world"/>
+    <child link="empty_link_x"/>
+    <limit effort="1" lower="-1.5" upper="1.5" velocity="1"/>
+  </joint>
+  <joint name="joint_translation_y" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <parent link="empty_link_x"/>
+    <child link="empty_link_y"/>
+    <limit effort="1" lower="-1.5" upper="1.5" velocity="1"/>
+  </joint>
+  <joint name="joint_translation_z" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="empty_link_y"/>
+    <child link="empty_link_z"/>
+    <limit effort="1" lower="-0.5" upper="1.5" velocity="1"/>
+  </joint>
+  <joint name="joint_translation_yaw" type="revolute">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="empty_link_z"/>
+    <child link="empty_link_yaw"/>
+    <limit effort="100" lower="-3.1415" upper="3.1415" velocity="1"/>
+  </joint>
+  <joint name="joint_translation_pitch" type="revolute">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <parent link="empty_link_yaw"/>
+    <child link="empty_link_pitch"/>
+    <limit effort="100" lower="-3.1415" upper="3.1415" velocity="1"/>
+  </joint>
+  <joint name="joint_translation_roll" type="revolute">
+    <origin xyz="0 0 0" rpy="0 -1.75 0"/>
+    <axis xyz="1 0 0"/>
+    <parent link="empty_link_pitch"/>
+    <child link="body"/>
+    <limit effort="100" lower="-3.1415" upper="3.1415" velocity="1"/>
+  </joint>
+</robot>
