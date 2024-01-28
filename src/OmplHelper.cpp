@@ -98,3 +98,9 @@ Eigen::VectorXd MakeEigen(std::vector<double> values) {
   Eigen::VectorXd v = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(values.data(), values.size());
   return v;
 }
+
+ompl::base::PlannerTerminationCondition TimeOrSolutionPtc(const ompl::base::ProblemDefinitionPtr &pdef, double timeout) {
+  auto solution_ptc = ompl::base::exactSolnPlannerTerminationCondition(pdef);
+  auto timed_ptc = ompl::base::timedPlannerTerminationCondition(timeout);
+  return ompl::base::plannerOrTerminationCondition(solution_ptc, timed_ptc);
+}

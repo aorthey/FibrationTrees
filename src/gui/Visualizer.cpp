@@ -88,68 +88,6 @@ void Visualizer::SetCollisionChecker(const CollisionCheckerPtr& collision_checke
   world_node->SetCollisionChecker(collision_checker);
 }
 
-void Visualizer::AddMultiRobotPath(const std::vector<RobotPtr>& robots, const ompl::base::PathPtr& path) {
-  typedef std::unordered_map<std::string, ompl::base::State*> SplitConfig;
-
-  auto factor = std::static_pointer_cast<ompl::multilevel::FactoredSpaceInformation>(path->getSpaceInformation());
-  ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
-
-  std::vector<SplitConfig> configs;
-  for(const auto& state : pgeo.getStates()) {
-    factor->printState(state);
-    auto childStates = factor->allocChildStates();
-    factor->project(state, childStates);
-    configs.push_back(childStates);
-  }
-
-  for(const auto& robot : robots) {
-    const auto& name = robot->GetSpaceInformation()->getName();
-    std::vector<const ompl::base::State*> states;
-    for(const auto& config : configs) {
-      auto it = config.find(name);
-      if(it == config.end()){
-        OMPL_ERROR("Could not find %s in states.", name.c_str());
-        throw "NameDoesNotExist";
-      }
-      states.push_back(it->second); 
-    }
-
-    auto child = factor->getChild(name);
-    auto child_path = std::make_shared<ompl::geometric::PathGeometric>(child, states);
-    world_node->AddPath(robot, child_path, kDefaultPathColor);
-  }
-}
-
-void Visualizer::AddMultiRobotPlanner(const std::vector<RobotPtr>& robots, 
-    const ompl::base::PlannerPtr& planner, bool interpolate) {
-  ////////////////////////////////////////////////////////////////////////////////
-  // Visualize Planner data
-  ////////////////////////////////////////////////////////////////////////////////
-  ompl::base::PlannerData planner_data(planner->getSpaceInformation());
-  planner->getPlannerData(planner_data);
-  OMPL_INFORM("Found %d vertices.", planner_data.numVertices());
-
-  //world_node->AddMultiRobotPlannerData(robots, planner_data);
-
-  ////////////////////////////////////////////////////////////////////////////////
-  // Maybe add solution path
-  ////////////////////////////////////////////////////////////////////////////////
-  auto pdef = planner->getProblemDefinition();
-  if(pdef->hasApproximateSolution() ||
-     pdef->hasExactSolution())
-  {
-    auto path = pdef->getSolutionPath();
-    ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
-    for(const auto& state : pgeo.getStates()) {
-      path->getSpaceInformation()->printState(state);
-    }
-    if(interpolate) {
-      pgeo.interpolate();
-    }
-    AddMultiRobotPath(robots, path);
-  }
-}
-
 void Visualizer::Run() {
   viewer->realize();
   viewer->run();

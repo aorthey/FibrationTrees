@@ -195,14 +195,15 @@ int main(int argc, char* argv[]) {
   planner->setRange(Inf);
 
   float timeout = 100.0;
-  ompl::base::PlannerStatus status = planner->Planner::solve(timeout);
+  auto ptc = TimeOrSolutionPtc(pdef, timeout);
+  ompl::base::PlannerStatus status = planner->solve(ptc);
 
   //////////////////////////////////////////////////////////////////////////////////
   //////Visualize
   //////////////////////////////////////////////////////////////////////////////////
   Visualizer visualizer(world);
   visualizer.SetCollisionChecker(pairwise_collision_checker->GetCollisionChecker());
-  visualizer.AddMultiRobotPlanner(robots, planner);
+  visualizer.AddPlanner(multi_robot, planner);
 
   visualizer.Run();
   return 0;

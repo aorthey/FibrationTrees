@@ -24,7 +24,7 @@
 
 #include <ranges>
 
-const auto Nrobots = 2;
+const auto Nrobots = 3;
 
 ompl::base::ProblemDefinitionPtr CreateMultiDroneProblemDefinition(
   const ompl::multilevel::FactoredSpaceInformationPtr& factor, 
@@ -162,15 +162,16 @@ int main(int argc, char* argv[]) {
   planner->setSmoothIntermediateSolutions(true);
  
   float timeout = 1000.0;
-  ompl::base::PlannerStatus status = planner->Planner::solve(timeout);
+
+  auto ptc = TimeOrSolutionPtc(pdef, timeout);
+  ompl::base::PlannerStatus status = planner->solve(ptc);
  
   ////////////////////////////////////////////////////////////////////////////////
   ////Visualize
   ////////////////////////////////////////////////////////////////////////////////
   Visualizer visualizer(world);
-  // visualizer.SetCollisionChecker(pairwise_collision_checker->GetCollisionChecker());
-  // visualizer.AddPlanner(robot, planner);
-  visualizer.AddMultiRobotPlanner(robots, planner);
+  visualizer.SetCollisionChecker(pairwise_collision_checker->GetCollisionChecker());
+  visualizer.AddPlanner(multi_robot, planner);
 
   visualizer.Run();
 

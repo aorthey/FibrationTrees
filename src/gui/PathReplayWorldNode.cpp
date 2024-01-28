@@ -86,60 +86,6 @@ void PathReplayWorldNode::AddPlannerData(const RobotPtr& robot, const ompl::base
   togglePlannerDataVisibility();
 }
 
-void PathReplayWorldNode::AddMultiRobotPlannerData(const std::vector<RobotPtr>& robots, const ompl::base::PlannerData& data) {
-  const auto& factor = std::static_pointer_cast<ompl::multilevel::FactoredSpaceInformation>(data.getSpaceInformation());
-  const auto Nvertices = data.numVertices();
-  unsigned int counter = 0;
-  auto sout = factor->allocState();
-
-  auto childStates = factor->allocChildStates();
-  auto children = factor->getChildren();
-
-  for(unsigned int vindex = 0; vindex < Nvertices; vindex++) {
-    for(unsigned int windex = 0; windex < Nvertices; windex++) {
-      if(!data.edgeExists(vindex, windex)) {
-        continue;
-      }
-      counter++;
-      const auto s1 = data.getVertex(vindex).getState();
-      const auto s2 = data.getVertex(windex).getState();
-
-      const auto step_size = 0.01f;
-      const auto L = factor->distance(s1, s2);
-
-      std::unordered_map<std::string, std::vector<Eigen::Vector3d>> vertices;
-      for(const auto& childState : childStates) {
-        const auto& name = childState.first;
-        vertices[name] = std::vector<Eigen::Vector3d>{};
-      }
-
-      for(double d = 0.0; d < L + step_size; d+= step_size) {
-        factor->getStateSpace()->interpolate(s1, s2, d/L, sout);
-
-        //convert to child nodes
-        factor->project(sout, childStates);
-        for(const auto& robot : robots) {
-          const auto& name = robot->GetSpaceInformation()->getName();
-          const auto& childState = childStates.at(name);
-          const auto config = robot->StateToEigen(childState);
-          const auto frames = robot->GetFK(config);
-          for(const auto& frame : frames) {
-            vertices.at(name).push_back(frame);
-          }
-        }
-      }
-      for(const auto& childState : childStates) {
-        auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices.at(childState.first), kRoadmapColorVertex, kRoadmapLineWidth));
-        planner_data_frames_.push_back(frame_line);
-      }
-    }
-  }
-  factor->freeState(sout);
-  factor->freeChildStates(childStates);
-  OMPL_INFORM("Added %d vertices and %d(%d) edges.", Nvertices, counter, data.numEdges());
-  togglePlannerDataVisibility();
-}
-
 void PathReplayWorldNode::SetCollisionChecker(const CollisionCheckerPtr& collision_checker) {
   collision_checker_ = collision_checker;
 }

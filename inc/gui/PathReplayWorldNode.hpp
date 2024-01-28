@@ -53,7 +53,6 @@ public:
 
   void AddPlannerData (const RobotPtr& robot, const ompl::base::PlannerData& data);
   void AddPath(const RobotPtr& robot, const ompl::base::PathPtr& path, const Eigen::Vector3d& color);
-  void AddMultiRobotPlannerData(const std::vector<RobotPtr>& robots, const ompl::base::PlannerData& data);
 
   void SetCollisionChecker(const CollisionCheckerPtr& collision_checker);
 

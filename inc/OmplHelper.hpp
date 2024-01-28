@@ -5,6 +5,8 @@
 #include <ompl/base/State.h>
 #include <ompl/base/Goal.h>
 #include <ompl/base/SpaceInformation.h>
+#include <ompl/base/PlannerTerminationCondition.h>
+#include <ompl/base/ProblemDefinition.h>
 #include <ompl/geometric/PathGeometric.h>
 #include <ompl/multilevel/datastructures/Projection.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
@@ -43,3 +45,5 @@ std::optional<ompl::base::State*> ComputeValidIKState(const ompl::base::SpaceInf
     const ompl::multilevel::ProjectionPtr& projection, const Eigen::Vector3d& point);
 std::optional<ompl::base::State*> ComputeValidTotalState(const ompl::multilevel::FactoredSpaceInformationPtr& factor, 
     const std::unordered_map<std::string, ompl::base::State*>& leaf_node_states);
+
+ompl::base::PlannerTerminationCondition TimeOrSolutionPtc(const ompl::base::ProblemDefinitionPtr &pdef, double timeout);

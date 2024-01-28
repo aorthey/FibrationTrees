@@ -217,9 +217,11 @@ int main(int argc, char* argv[]) {
   planner->setRange(Inf);
   planner->setSmoothIntermediateSolutions(false);
  
-  float timeout = 1000.0;
+  float timeout = 100.0;
   //float timeout = 1.0;
-  ompl::base::PlannerStatus status = planner->Planner::solve(timeout);
+
+  auto ptc = TimeOrSolutionPtc(pdef, timeout);
+  ompl::base::PlannerStatus status = planner->solve(ptc);
  
   ////////////////////////////////////////////////////////////////////////////////
   ////Visualize
@@ -230,7 +232,6 @@ int main(int argc, char* argv[]) {
 
   Visualizer visualizer(world);
   visualizer.SetCollisionChecker(pairwise_collision_checker->GetCollisionChecker());
-  //visualizer.AddMultiRobotPlanner(robots, planner);
   visualizer.AddPlanner(multi_robot, planner);
 
   visualizer.Run();
