@@ -26,9 +26,9 @@ int main(int argc, char* argv[]) {
   ////Creating obstacles
   ////////////////////////////////////////////////////////////////////////////////
   std::vector<dart::dynamics::SkeletonPtr> obstacles;
-  obstacles.push_back(createFromURDF("/home/aorthey/git/FibrationTrees/data/objects/maze.urdf", Eigen::Vector3d(+0.55, +0.1, 0.85)));
+  obstacles.push_back(createFromURDF("/home/aorthey/git/FibrationTrees/data/objects/maze.urdf", State3d(+0.55, +0.1, 0.85)));
   obstacles.push_back(createFloor());
-  obstacles.push_back(createBox(Eigen::Vector3d(+0.5, +0.0, 0.75), 0.15, 2.0, 1.5));
+  obstacles.push_back(createBox(State3d(+0.5, +0.0, 0.75), 0.15, 2.0, 1.5));
 
   dart::math::Random::setSeed(0);
 
@@ -39,13 +39,13 @@ int main(int argc, char* argv[]) {
   for(const auto& obstacle : obstacles) {
     world->addSkeleton(obstacle);
   }
-  world->setGravity(Eigen::Vector3d::Zero());
+  world->setGravity(State3d::Zero());
   addCoordinateFrameToWorld(world);
 
   auto robot = MakeRobot<KukaRobotTaskSpace>(world, obstacles);
   auto point = MakeRobot<SphereRobot>(world, obstacles);
 
-  const auto limits = std::make_pair(Eigen::Vector3d(0.39, -0.4, 0), Eigen::Vector3d(0.43, +0.4, 2));
+  const auto limits = std::make_pair(State3d(0.39, -0.4, 0), State3d(0.43, +0.4, 2));
   point->SetLimits(limits);
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -65,8 +65,8 @@ int main(int argc, char* argv[]) {
   ompl::base::State *task_start = child->allocState();
   ompl::base::State *task_goal = child->allocState();
 
-  EigenVector3dToState({0.4, +0.35, 0.95}, task_start);
-  EigenVector3dToState({0.4, -0.25, 0.95}, task_goal);
+  point->EigenToState(MakeState({0.4, +0.35, 0.95}), task_start);
+  point->EigenToState(MakeState({0.4, -0.25, 0.95}), task_goal);
 
   ompl::base::State *start = factor->allocState();
   ompl::base::State *goal = factor->allocState();
@@ -93,10 +93,10 @@ int main(int argc, char* argv[]) {
     pdef->addStartState(start);
     pdef->setGoal(goal_region);
 
-    auto start_vector = ProjectStateToEigenVector3d(projection, start);
-    auto goal_vector = StateToEigenVector3d(task_goal);
-    world->addSimpleFrame(createSphereFrame(start_vector, 0.01));
-    world->addSimpleFrame(createSphereFrame(goal_vector, 0.01));
+    auto start_vector = point->StateToEigen(task_start);
+    auto goal_vector = point->StateToEigen(task_goal);
+    world->addSimpleFrame(createSphereFrame(start_vector.configuration, 0.01));
+    world->addSimpleFrame(createSphereFrame(goal_vector.configuration, 0.01));
 
     ////////////////////////////////////////////////////////////////////////////////
     ////Planning
@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
     Visualizer visualizer(world);
     visualizer.AddPlanner(robot, planner);
     visualizer.SetCollisionChecker(robot->GetCollisionChecker());
-    visualizer.AddPath(point, planner->getProblemDefinition(child->getName())->getSolutionPath(), Eigen::Vector3d(1, 1, 0));
+    visualizer.AddPath(point, planner->getProblemDefinition(child->getName())->getSolutionPath(), State3d(1, 1, 0));
     visualizer.Run();
   }
   return 0;

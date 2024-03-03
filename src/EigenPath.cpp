@@ -17,13 +17,13 @@ EigenPath::EigenPath(const RobotPtr& robot, const ompl::base::PathPtr& path) {
 
   std::cout << "Create EigenPath from " << states.size() << " states." << std::endl;
   for(size_t k = 0; k < states.size(); k++) {
-    Eigen::VectorXd config = robot->StateToEigen(states.at(k));
+    StateXd config = robot->StateToEigen(states.at(k));
     if(k > 0) {
       auto d = robot->GetSpaceInformation()->distance(states.at(k), states.at(k-1));
       if(d > M_PI) {
         OMPL_ERROR("Configs are far apart.");
-        std::cout << "Last     config: " << configs_.back().format(CommaFmt) << std::endl;
-        std::cout << "Current  config: " << config.format(CommaFmt) << std::endl;
+        std::cout << "Last     config: " << configs_.back() << std::endl;
+        std::cout << "Current  config: " << config << std::endl;
         continue;
       }
     }
@@ -32,27 +32,27 @@ EigenPath::EigenPath(const RobotPtr& robot, const ompl::base::PathPtr& path) {
   InitLengthFromConfigs(configs_);
 }
 
-EigenPath::EigenPath(const std::vector<Eigen::VectorXd>& configs) : configs_(configs) {
+EigenPath::EigenPath(const std::vector<StateXd>& configs) : configs_(configs) {
   InitLengthFromConfigs(configs_);
 }
 
-void EigenPath::InitLengthFromConfigs(const std::vector<Eigen::VectorXd>& configs) {
+void EigenPath::InitLengthFromConfigs(const std::vector<StateXd>& configs) {
   if(configs.size() < 1) {
     throw std::length_error("Cannot initialize an empty path.");
   }
   for(size_t k = 1; k < configs.size(); k++) {
-    auto v1 = configs.at(k-1);
-    auto v2 = configs.at(k);
+    auto v1 = configs.at(k-1).configuration;
+    auto v2 = configs.at(k).configuration;
     auto d = (v2 - v1).norm();
     lengths_.push_back(d);
   }
   total_length_ = std::accumulate(lengths_.begin(), lengths_.end(), 0.0f);
 }
 
-Eigen::VectorXd EigenPath::GetConfigAt(float s) {
+StateXd EigenPath::GetConfigAt(float s) {
   if(configs_.empty()) {
     std::cout << "Error: Path contains no configs." << std::endl;
-    return Eigen::VectorXd::Zero(0);
+    throw "InvalidPath";
   }
   if(s <= 0.0f) {
     return configs_.front();
@@ -83,22 +83,25 @@ float EigenPath::GetLength() const {
 }
 
 void EigenPath::Save(const std::string& filename) {
-  std::ofstream out(filename);
-  boost::archive::text_oarchive oa(out);
-  oa << *this;
+  // std::ofstream out(filename);
+  // boost::archive::text_oarchive oa(out);
+  // oa << *this;
+  OMPL_ERROR("NYI");
 }
 
 void EigenPath::Load(const std::string& filename) {
-  std::ifstream input(filename);
-  boost::archive::text_iarchive ia(input);
-  ia >> *this;
+  // std::ifstream input(filename);
+  // boost::archive::text_iarchive ia(input);
+  // ia >> *this;
+  OMPL_ERROR("NYI");
 }
 EigenPath EigenPath::FromFile(const std::string& filename) {
   EigenPath path;
-  {
-    std::ifstream input(filename);
-    boost::archive::text_iarchive ia(input);
-    ia >> path;
-  }
+  // {
+  //   std::ifstream input(filename);
+  //   boost::archive::text_iarchive ia(input);
+  //   ia >> path;
+  // }
+  OMPL_ERROR("NYI");
   return path;
 }

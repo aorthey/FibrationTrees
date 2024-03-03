@@ -36,7 +36,7 @@ ompl::multilevel::FactoredSpaceInformationPtr MultiRobot::MakeSpaceInformation(c
 
 typedef std::unordered_map<std::string, ompl::base::State*> SplitConfig;
 
-Eigen::VectorXd MultiRobot::StateToEigen(const ompl::base::State* state) const {
+StateXd MultiRobot::StateToEigen(const ompl::base::State* state) const {
   auto child_states = factor_->allocChildStates();
   std::vector<SplitConfig> configs;
   factor_->project(state, child_states);
@@ -46,7 +46,7 @@ Eigen::VectorXd MultiRobot::StateToEigen(const ompl::base::State* state) const {
   int dimension = 0;
   for(const auto& robot : robots_) {
     auto state = child_states.at(robot->GetSpaceInformation()->getName());
-    auto eigen_vector = robot->StateToEigen(state);
+    auto eigen_vector = robot->StateToEigen(state).configuration;
     eigen_vectors.push_back(eigen_vector);
     dimension += eigen_vector.rows();
   }
@@ -60,17 +60,17 @@ Eigen::VectorXd MultiRobot::StateToEigen(const ompl::base::State* state) const {
     }
     current_dimension += eigen_vector.rows();
   }
-  return result;
+  return MakeState(result);
 }
 
-void MultiRobot::EigenToState(const Eigen::VectorXd& v, ompl::base::State* state) const {
+void MultiRobot::EigenToState(const StateXd& v, ompl::base::State* state) const {
   int current_dimension = 0;
   auto child_states = factor_->allocChildStates();
   for(const auto& robot : robots_) {
     int Nrobot = robot->GetSpaceInformation()->getStateDimension();
-    auto eigen_vector = v.segment(current_dimension, Nrobot);
+    auto eigen_vector = v.configuration.segment(current_dimension, Nrobot);
     auto state = child_states.at(robot->GetSpaceInformation()->getName());
-    robot->EigenToState(eigen_vector, state);
+    robot->EigenToState(MakeState(eigen_vector), state);
 
     current_dimension = current_dimension + Nrobot;
   }
@@ -78,14 +78,14 @@ void MultiRobot::EigenToState(const Eigen::VectorXd& v, ompl::base::State* state
   factor_->freeChildStates(child_states);
 }
 
-std::vector<Eigen::Vector3d> MultiRobot::GetFK(const Eigen::VectorXd& config) const {
+std::vector<State3d> MultiRobot::GetFK(const StateXd& config) const {
   auto state = factor_->allocState();
   EigenToState(config, state);
 
   auto child_states = factor_->allocChildStates();
   factor_->project(state, child_states);
 
-  std::vector<Eigen::Vector3d> tcps;
+  std::vector<State3d> tcps;
   for(const auto& robot : robots_) {
     for(const auto& child_state : child_states) {
       if(child_state.first == robot->GetSpaceInformation()->getName()) {
@@ -101,12 +101,12 @@ std::vector<Eigen::Vector3d> MultiRobot::GetFK(const Eigen::VectorXd& config) co
   return tcps;
 }
 
-void MultiRobot::SetConfiguration(const Eigen::VectorXd& config) {
+void MultiRobot::SetConfiguration(const StateXd& config) {
   int current_dimension = 0;
   for(const auto& robot : robots_) {
     int Nrobot = robot->GetSpaceInformation()->getStateDimension();
-    auto eigen_vector = config.segment(current_dimension, Nrobot);
-    robot->SetConfiguration(eigen_vector);
+    auto eigen_vector = config.configuration.segment(current_dimension, Nrobot);
+    robot->SetConfiguration(MakeState(eigen_vector));
     current_dimension = current_dimension + Nrobot;
   }
 }

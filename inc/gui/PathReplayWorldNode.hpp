@@ -9,7 +9,7 @@
 #include "CollisionChecker.hpp"
 #include "EigenPath.hpp"
 
-const Eigen::Vector3d kRoadmapColorVertex = Eigen::Vector3d(0.2, 0.8, 0.2);
+const State3d kRoadmapColorVertex = State3d(0.2, 0.8, 0.2);
 const float kRoadmapLineWidth = 3.0;
 const float kPathLineWidth = 5.0;
 
@@ -52,7 +52,7 @@ public:
   std::string getCurrentJointConfiguration() const;
 
   void AddPlannerData (const RobotPtr& robot, const ompl::base::PlannerData& data);
-  void AddPath(const RobotPtr& robot, const ompl::base::PathPtr& path, const Eigen::Vector3d& color);
+  void AddPath(const RobotPtr& robot, const ompl::base::PathPtr& path, const State3d& color);
 
   void SetCollisionChecker(const CollisionCheckerPtr& collision_checker);
 

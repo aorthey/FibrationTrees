@@ -25,10 +25,10 @@
 const float kIKSolutionAccuracy = 1e-5;
 
 void CheckMultiRobotEdge(
-  const Eigen::VectorXd& task_start1_eigen,
-  const Eigen::VectorXd& task_goal1_eigen,
-  const Eigen::VectorXd& task_start2_eigen,
-  const Eigen::VectorXd& task_goal2_eigen) {
+  const StateXd& task_start1_eigen,
+  const StateXd& task_goal1_eigen,
+  const StateXd& task_start2_eigen,
+  const StateXd& task_goal2_eigen) {
 
   dart::math::Random::setSeed(0);
   dart::simulation::WorldPtr world(new dart::simulation::World);
@@ -59,7 +59,7 @@ void CheckMultiRobotEdge(
   ////Add task space projections
   ////////////////////////////////////////////////////////////////////////////////
   auto point1 = MakeRobot<SphereRobot>(world);
-  const auto limits = std::make_pair(Eigen::Vector3d(-1.5, -0.1, 0.0), Eigen::Vector3d(1.5, 0.1, 2.0));
+  const auto limits = std::make_pair(State3d(-1.5, -0.1, 0.0), State3d(1.5, 0.1, 2.0));
   point1->SetLimits(limits);
   auto grand_child1 = point1->GetSpaceInformation();
   auto projection1 = std::make_shared<TaskSpaceProjection>(child1, grand_child1, robot1);
@@ -111,8 +111,8 @@ void CheckMultiRobotEdge(
 
   auto tcp_start = robot->Robot::GetFK(start);
   EXPECT_EQ(tcp_start.size(), 2u);
-  std::cout << "Tcp start[1] " << tcp_start.at(0).format(CommaFmt) << std::endl;
-  std::cout << "Tcp start[2] " << tcp_start.at(1).format(CommaFmt) << std::endl;
+  std::cout << "Tcp start[1] " << tcp_start.at(0) << std::endl;
+  std::cout << "Tcp start[2] " << tcp_start.at(1) << std::endl;
   EXPECT_NEAR((tcp_start.at(0) - task_start1_eigen).norm(), 0.0, kIKSolutionAccuracy);
   EXPECT_NEAR((tcp_start.at(1) - task_start2_eigen).norm(), 0.0, kIKSolutionAccuracy);
 
@@ -131,8 +131,8 @@ void CheckMultiRobotEdge(
 
   auto tcp_goal = robot->Robot::GetFK(goal);
   EXPECT_EQ(tcp_goal.size(), 2u);
-  std::cout << "Tcp goal[1] " << tcp_goal.at(0).format(CommaFmt) << std::endl;
-  std::cout << "Tcp goal[2] " << tcp_goal.at(1).format(CommaFmt) << std::endl;
+  std::cout << "Tcp goal[1] " << tcp_goal.at(0) << std::endl;
+  std::cout << "Tcp goal[2] " << tcp_goal.at(1) << std::endl;
   EXPECT_NEAR((tcp_goal.at(0) - task_goal1_eigen).norm(), 0.0, kIKSolutionAccuracy);
   EXPECT_NEAR((tcp_goal.at(1) - task_goal2_eigen).norm(), 0.0, kIKSolutionAccuracy);
 
@@ -162,7 +162,7 @@ void CheckMultiRobotEdge(
     EXPECT_LT(d, 0.1);
   }
   auto config = robot->StateToEigen(configs.back());
-  std::cout << "Reached config " << config.format(CommaFmt) << std::endl;
+  std::cout << "Reached config " << config << std::endl;
 
   //Check for invalid entries in config
   for(size_t k = 0; k < config.size(); k++) {
@@ -170,35 +170,35 @@ void CheckMultiRobotEdge(
   }
 
   auto tcps = robot->Robot::GetFK(configs.back());
-  std::cout << "  Reached Tcp for " << config.format(CommaFmt) << std::endl;
+  std::cout << "  Reached Tcp for " << config << std::endl;
   for(const auto& tcp : tcps) {
-    std::cout << "    " << tcp.format(CommaFmt) << std::endl;
+    std::cout << "    " << tcp << std::endl;
   }
 }
 
 TEST(MultiRobotMotionValidatorTest, CollisionTest) {
   const float kHeight = 0.5;
   {
-    auto start1 = MakeEigen({1.0, 0.0, kHeight});
-    auto goal1 = MakeEigen({0.1, 0.0, kHeight});
-    auto start2 = MakeEigen({-1.0, 0.0, kHeight});
-    auto goal2 = MakeEigen({-0.1, 0.0, kHeight});
+    auto start1 = MakeState({1.0, 0.0, kHeight});
+    auto goal1 = MakeState({0.1, 0.0, kHeight});
+    auto start2 = MakeState({-1.0, 0.0, kHeight});
+    auto goal2 = MakeState({-0.1, 0.0, kHeight});
     CheckMultiRobotEdge(start1, goal1, start2, goal2);
   }
 
   {
-    auto start1 = MakeEigen({0.0, 1.0, kHeight});
-    auto goal1 = MakeEigen({0.0, -1.0, kHeight});
-    auto start2 = MakeEigen({-1.0, 0.0, kHeight});
-    auto goal2 = MakeEigen({+1.0, 0.0, kHeight});
+    auto start1 = MakeState({0.0, 1.0, kHeight});
+    auto goal1 = MakeState({0.0, -1.0, kHeight});
+    auto start2 = MakeState({-1.0, 0.0, kHeight});
+    auto goal2 = MakeState({+1.0, 0.0, kHeight});
     CheckMultiRobotEdge(start1, goal1, start2, goal2);
   }
 
   {
-    auto start1 = MakeEigen({-1.0, -1.0, kHeight});
-    auto goal1 = MakeEigen({+1.0, +1.0, kHeight});
-    auto start2 = MakeEigen({-1.0, +1.0, kHeight});
-    auto goal2 = MakeEigen({+1.0, -1.0, kHeight});
+    auto start1 = MakeState({-1.0, -1.0, kHeight});
+    auto goal1 = MakeState({+1.0, +1.0, kHeight});
+    auto start2 = MakeState({-1.0, +1.0, kHeight});
+    auto goal2 = MakeState({+1.0, -1.0, kHeight});
     CheckMultiRobotEdge(start1, goal1, start2, goal2);
   }
 }
@@ -217,12 +217,12 @@ protected:
     dart::simulation::WorldPtr world(new dart::simulation::World);
 
     robot1 = MakeRobot<DiskRobot>(world);
-    const auto limits1 = std::make_pair(Eigen::Vector3d(-1.0, 0.0, 0.0), Eigen::Vector3d(1.0, 0.0, 0.0));
+    const auto limits1 = std::make_pair(State3d(-1.0, 0.0, 0.0), State3d(1.0, 0.0, 0.0));
     robot1->SetLimits(limits1);
     auto space1 = robot1->GetSpaceInformation();
 
     robot2 = MakeRobot<DiskRobot>(world);
-    const auto limits2 = std::make_pair(Eigen::Vector3d(0.0, -1.0, 0.0), Eigen::Vector3d(0.0, 1.0, 0.0));
+    const auto limits2 = std::make_pair(State3d(0.0, -1.0, 0.0), State3d(0.0, 1.0, 0.0));
     robot2->SetLimits(limits2);
     auto space2 = robot2->GetSpaceInformation();
 
@@ -245,7 +245,7 @@ protected:
     name2 = robot2->GetSpaceInformation()->getName();
   }
 
-  EigenPathPtr CreateDiskEdgePath(const std::vector<Eigen::VectorXd>& configs) {
+  EigenPathPtr CreateDiskEdgePath(const std::vector<StateXd>& configs) {
     auto children_states = factor->allocChildStates();
     std::vector<const ompl::base::State*> states;
     for(const auto& config : configs) {
@@ -266,7 +266,7 @@ protected:
 
     for(float position = 0.0; position < 1.0; position += kStepSize) {
       auto config = path->GetConfigAt(position);
-      //std::cout << "[Step " << position << "] Config " << config.format(CommaFmt) << std::endl;
+      //std::cout << "[Step " << position << "] Config " << config << std::endl;
       robot->EigenToState(config, state);
       factor->project(state, children_states);
 
@@ -294,27 +294,27 @@ protected:
 TEST_F(DiskRobotTest, PathSpacingTest) {
   CheckDiskEdgePath(
       CreateDiskEdgePath({
-        MakeEigen({-1,0,0,0,-1,0}), 
-        MakeEigen({+1,0,0,0,-1,0}), 
-        MakeEigen({+1,0,0,0,+1,0})
+        MakeState({-1,0,0,0,-1,0}), 
+        MakeState({+1,0,0,0,-1,0}), 
+        MakeState({+1,0,0,0,+1,0})
       }),
       false
   );
   CheckDiskEdgePath(
       CreateDiskEdgePath({
-        MakeEigen({-1,0,0,0,-1,0}), 
-        MakeEigen({+1,0,0,0,-1,0}), 
-        MakeEigen({+1,0,0,0,-1,0}), 
-        MakeEigen({+1,0,0,0,+1,0})
+        MakeState({-1,0,0,0,-1,0}), 
+        MakeState({+1,0,0,0,-1,0}), 
+        MakeState({+1,0,0,0,-1,0}), 
+        MakeState({+1,0,0,0,+1,0})
       }),
       false
   );
   CheckDiskEdgePath(
       CreateDiskEdgePath({
-        MakeEigen({-1,0,0,0,-1,0}), 
-        MakeEigen({+0,0,0,0,-1,0}), 
-        MakeEigen({+1,0,0,0,-1,0}), 
-        MakeEigen({+1,0,0,0,+1,0})
+        MakeState({-1,0,0,0,-1,0}), 
+        MakeState({+0,0,0,0,-1,0}), 
+        MakeState({+1,0,0,0,-1,0}), 
+        MakeState({+1,0,0,0,+1,0})
       }),
       false
   );

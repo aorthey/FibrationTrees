@@ -5,16 +5,16 @@
 #include "Common.hpp"
 
 TEST(EigenPathTest, EmptyTest) {
-  std::vector<Eigen::VectorXd> configs;
+  std::vector<StateXd> configs;
   EXPECT_THROW(auto path = EigenPath(configs), std::length_error);
 }
 
 TEST(EigenPathTest, StraightLineTest) {
-  Eigen::VectorXd v1(2); v1[0]=0.0; v1[1]=0.0;
-  Eigen::VectorXd v2(2); v2[0]=0.0; v2[1]=1.0;
-  Eigen::VectorXd v3(2); v3[0]=0.0; v3[1]=2.0;
-  Eigen::VectorXd v4(2); v4[0]=0.0; v4[1]=3.0;
-  std::vector<Eigen::VectorXd> configs = {v1, v2, v3, v4};
+  auto v1 = MakeState({0.0, 0.0});
+  auto v2 = MakeState({0.0, 1.0});
+  auto v3 = MakeState({0.0, 2.0});
+  auto v4 = MakeState({0.0, 3.0});
+  std::vector<StateXd> configs = {v1, v2, v3, v4};
 
   EigenPath path(configs);
 
@@ -42,11 +42,11 @@ TEST(EigenPathTest, StraightLineTest) {
 }
 
 TEST(EigenPathTest, BendLineTest) {
-  Eigen::VectorXd v1(2); v1[0]=0.0; v1[1]=0.0;
-  Eigen::VectorXd v2(2); v2[0]=1.0; v2[1]=0.0;
-  Eigen::VectorXd v3(2); v3[0]=1.0; v3[1]=1.0;
-  Eigen::VectorXd v4(2); v4[0]=2.0; v4[1]=1.0;
-  std::vector<Eigen::VectorXd> configs = {v1, v2, v3, v4};
+  auto v1 = MakeState({0.0, 0.0});
+  auto v2 = MakeState({1.0, 0.0});
+  auto v3 = MakeState({1.0, 1.0});
+  auto v4 = MakeState({2.0, 1.0});
+  std::vector<StateXd> configs = {v1, v2, v3, v4};
 
   EigenPath path(configs);
 
@@ -77,12 +77,12 @@ TEST(EigenPathTest, BendLineTest) {
 }
 
 TEST(EigenPathTest, SquareTest) {
-  Eigen::VectorXd v1(2); v1[0]=0.0; v1[1]=0.0;
-  Eigen::VectorXd v2(2); v2[0]=1.0; v2[1]=0.0;
-  Eigen::VectorXd v3(2); v3[0]=1.0; v3[1]=1.0;
-  Eigen::VectorXd v4(2); v4[0]=0.0; v4[1]=1.0;
-  Eigen::VectorXd v5(2); v5[0]=0.0; v5[1]=0.0;
-  std::vector<Eigen::VectorXd> configs = {v1, v2, v3, v4, v5};
+  auto v1 = MakeState({0.0, 0.0});
+  auto v2 = MakeState({1.0, 0.0});
+  auto v3 = MakeState({1.0, 1.0});
+  auto v4 = MakeState({0.0, 1.0});
+  auto v5 = MakeState({0.0, 0.0});
+  std::vector<StateXd> configs = {v1, v2, v3, v4, v5};
 
   EigenPath path(configs);
 
@@ -113,12 +113,11 @@ TEST(EigenPathTest, SquareTest) {
 }
 
 TEST(EigenPathTest, ManipulatorTest) {
-  Eigen::VectorXd v1(13), v2(13), v3(13), v4(13);
-  v1 << 0, 0, 0, 0, 0, 0, 0.0613498, -1.03295, 0.0240684, 1.41603, -0.886764, 2.00979, -2.65123;
-  v2 << 0, 0, 0, 0, 0, 0, -0.0361243, -1.04131, 0.174474, 1.41603, -1.00731, 1.93957, -2.70616;
-  v3 << 0, 0, 0, 0, 0, 0, -1.0888, 1.5708, 1.72408, 2.08122, 0.869073, 1.57153, -2.01826;
-  v4 << 0, 0, 0, 0, 0, 0, -0.964628, 1.5106, -1.41911, -1.58668, -2.21218, 1.18343, -2.52305;
-  std::vector<Eigen::VectorXd> configs = {v1, v2, v3, v4};
+  auto v1 = MakeState({0, 0, 0, 0, 0, 0, 0.0613498, -1.03295, 0.0240684, 1.41603, -0.886764, 2.00979, -2.65123});
+  auto v2 = MakeState({0, 0, 0, 0, 0, 0, -0.0361243, -1.04131, 0.174474, 1.41603, -1.00731, 1.93957, -2.70616});
+  auto v3 = MakeState({0, 0, 0, 0, 0, 0, -1.0888, 1.5708, 1.72408, 2.08122, 0.869073, 1.57153, -2.01826});
+  auto v4 = MakeState({0, 0, 0, 0, 0, 0, -0.964628, 1.5106, -1.41911, -1.58668, -2.21218, 1.18343, -2.52305});
+  std::vector<StateXd> configs = {v1, v2, v3, v4};
 
   auto vmax1 = v1.cwiseMax(v2);
   auto vmax2 = vmax1.cwiseMax(v3);
@@ -140,12 +139,11 @@ TEST(EigenPathTest, ManipulatorTest) {
 }
 
 TEST(EigenPathTest, SaveLoadTest) {
-  Eigen::VectorXd v1(13), v2(13), v3(13), v4(13);
-  v1 << 0, 0, 0, 0, 0, 0, 0.0613498, -1.03295, 0.0240684, 1.41603, -0.886764, 2.00979, -2.65123;
-  v2 << 0, 0, 0, 0, 0, 0, -0.0361243, -1.04131, 0.174474, 1.41603, -1.00731, 1.93957, -2.70616;
-  v3 << 0, 0, 0, 0, 0, 0, -1.0888, 1.5708, 1.72408, 2.08122, 0.869073, 1.57153, -2.01826;
-  v4 << 0, 0, 0, 0, 0, 0, -0.964628, 1.5106, -1.41911, -1.58668, -2.21218, 1.18343, -2.52305;
-  std::vector<Eigen::VectorXd> configs = {v1, v2, v3, v4};
+  auto v1 = MakeState({0, 0, 0, 0, 0, 0, 0.0613498, -1.03295, 0.0240684, 1.41603, -0.886764, 2.00979, -2.65123});
+  auto v2 = MakeState({0, 0, 0, 0, 0, 0, -0.0361243, -1.04131, 0.174474, 1.41603, -1.00731, 1.93957, -2.70616});
+  auto v3 = MakeState({0, 0, 0, 0, 0, 0, -1.0888, 1.5708, 1.72408, 2.08122, 0.869073, 1.57153, -2.01826});
+  auto v4 = MakeState({0, 0, 0, 0, 0, 0, -0.964628, 1.5106, -1.41911, -1.58668, -2.21218, 1.18343, -2.52305});
+  std::vector<StateXd> configs = {v1, v2, v3, v4};
 
   auto length = (v1 - v2).norm() + (v2 - v3).norm() + (v3 - v4).norm();
 
@@ -164,12 +162,12 @@ TEST(EigenPathTest, SaveLoadTest) {
 }
 
 TEST(EigenPathTest, EigenSplitTest) {
-  auto v = MakeEigen({0, 1, 2, 3, 4, 5});
+  auto v = MakeState({0, 1, 2, 3, 4, 5});
   EXPECT_EQ(v.size(), 6);
   auto v1 = v.segment(0, 3);
-  std::cout << v1.format(CommaFmt) << std::endl;
+  std::cout << v1 << std::endl;
   EXPECT_EQ(v1.size(), 3);
   auto v2 = v.segment(3, 3);
-  std::cout << v2.format(CommaFmt) << std::endl;
+  std::cout << v2 << std::endl;
   EXPECT_EQ(v2.size(), 3);
 }

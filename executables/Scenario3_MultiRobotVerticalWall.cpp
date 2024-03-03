@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
   std::vector<dart::dynamics::SkeletonPtr> obstacles;
   obstacles.push_back(createFloor());
-  obstacles.push_back(createBox(Eigen::Vector3d(+0.5, +0.0, 0.75), 0.16, 2.0, 1.5));
+  obstacles.push_back(createBox(State3d(+0.5, +0.0, 0.75), 0.16, 2.0, 1.5));
 
   dart::math::Random::setSeed(0);
 
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
   for(const auto& obstacle : obstacles) {
     world->addSkeleton(obstacle);
   }
-  world->setGravity(Eigen::Vector3d::Zero());
+  world->setGravity(State3d::Zero());
 
   auto robot1 = MakeRobot<KukaRobotTaskSpace>(world, obstacles);
   auto robot2 = MakeRobot<KukaRobotTaskSpace>(world, obstacles);
@@ -54,15 +54,15 @@ int main(int argc, char* argv[]) {
   auto point2 = MakeRobot<SphereRobot>(world, obstacles);
 
   Eigen::Isometry3d transform1(Eigen::Isometry3d::Identity());
-  transform1.translation() = Eigen::Vector3d{0.0, -0.5*kRobotRobotDistance, 0};
+  transform1.translation() = State3d{0.0, -0.5*kRobotRobotDistance, 0};
   robot1->GetSkeleton()->getRootBodyNode()->getParentJoint()->setTransformFromParentBodyNode(transform1);
 
   Eigen::Isometry3d transform2(Eigen::Isometry3d::Identity());
-  transform2.translation() = Eigen::Vector3d{0.0, +0.5*kRobotRobotDistance, 0};
+  transform2.translation() = State3d{0.0, +0.5*kRobotRobotDistance, 0};
   robot2->GetSkeleton()->getRootBodyNode()->getParentJoint()->setTransformFromParentBodyNode(transform2);
 
-  const auto limits1 = std::make_pair(Eigen::Vector3d(0.38, -0.5, 0.0), Eigen::Vector3d(0.42, +0.5, 2.0));
-  const auto limits2 = std::make_pair(Eigen::Vector3d(0.38, -0.5, 0.0), Eigen::Vector3d(0.42, +0.5, 2.0));
+  const auto limits1 = std::make_pair(State3d(0.38, -0.5, 0.0), State3d(0.42, +0.5, 2.0));
+  const auto limits2 = std::make_pair(State3d(0.38, -0.5, 0.0), State3d(0.42, +0.5, 2.0));
   point1->SetLimits(limits1);
   point2->SetLimits(limits2);
 
@@ -117,10 +117,10 @@ int main(int argc, char* argv[]) {
   //////Create start/goal states and propagate them upwards (lift through the
   //complete fibration trees hierarchy)
   //////////////////////////////////////////////////////////////////////////////////
-  auto task_start1_eigen = Eigen::Vector3d(0.4, -0.2, 1.0);
-  auto task_goal1_eigen = Eigen::Vector3d(0.4, +0.1, 0.7); //was -0.3
-  auto task_start2_eigen = Eigen::Vector3d(0.4, +0.0, 1.0);
-  auto task_goal2_eigen = Eigen::Vector3d(0.4, -0.2, 0.6); //was +0.5
+  auto task_start1_eigen = State3d(0.4, -0.2, 1.0);
+  auto task_goal1_eigen = State3d(0.4, +0.1, 0.7); //was -0.3
+  auto task_start2_eigen = State3d(0.4, +0.0, 1.0);
+  auto task_goal2_eigen = State3d(0.4, -0.2, 0.6); //was +0.5
 
   auto task_start1 = child1->allocState();
   auto task_start2 = child2->allocState();

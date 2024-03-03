@@ -73,7 +73,7 @@ void Visualizer::AddPlanner(const RobotPtr& robot, const ompl::base::PlannerPtr&
       const auto tcps = robot->GetFK(config);
       std::cout << "EndEffector position is " <<std::endl;
       for(const auto& tcp : tcps) {
-        std::cout << "\t" << tcp.format(CommaFmt) << std::endl;
+        std::cout << "\t" << tcp << std::endl;
       }
     }
     OMPL_INFORM("Interpolate path...");
@@ -83,7 +83,7 @@ void Visualizer::AddPlanner(const RobotPtr& robot, const ompl::base::PlannerPtr&
   }
 }
 
-void Visualizer::AddPath(const RobotPtr& robot, const ompl::base::PathPtr& path, const Eigen::Vector3d& color) {
+void Visualizer::AddPath(const RobotPtr& robot, const ompl::base::PathPtr& path, const State3d& color) {
   world_node->AddPath(robot, path, color);
 }
 

@@ -8,7 +8,7 @@ dart::dynamics::SkeletonPtr SphereRobot::MakeSkeleton() {
   return createSphere(0.01);
 }
 
-void SphereRobot::SetLimits(const std::pair<Eigen::Vector3d, Eigen::Vector3d>& limits) {
+void SphereRobot::SetLimits(const std::pair<State3d, State3d>& limits) {
   const auto& lb = limits.first;
   const auto& ub = limits.second;
   ompl::base::RealVectorBounds bounds(3);

@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
   std::vector<dart::dynamics::SkeletonPtr> obstacles;
   dart::dynamics::SkeletonPtr floor = createFloor(-0.255);
-  dart::dynamics::SkeletonPtr box = createBox(Eigen::Vector3d(0,0,0), 0.3, 0.3, 0.5);
+  dart::dynamics::SkeletonPtr box = createBox(State3d(0,0,0), 0.3, 0.3, 0.5);
   obstacles.push_back(floor);
   obstacles.push_back(box);
 
@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
   for(const auto& obstacle: obstacles) {
     world->addSkeleton(obstacle);
   }
-  world->setGravity(Eigen::Vector3d::Zero());
+  world->setGravity(State3d::Zero());
 
   ////////////////////////////////////////////////////////////////////////////////
   ////OMPL Setup
@@ -80,21 +80,21 @@ int main(int argc, char* argv[]) {
   ////Setup state spaces for projection robots
   ////////////////////////////////////////////////////////////////////////////////
   auto point1 = MakeRobot<SphereRobot>(world, obstacles);
-  const auto limits1 = std::make_pair(Eigen::Vector3d(-1.5, 0.0-kAccuracy, kZheight - kAccuracy), Eigen::Vector3d(1.5, 0.0+kAccuracy, kZheight + kAccuracy));
+  const auto limits1 = std::make_pair(State3d(-1.5, 0.0-kAccuracy, kZheight - kAccuracy), State3d(1.5, 0.0+kAccuracy, kZheight + kAccuracy));
   point1->SetLimits(limits1);
   auto child1 = point1->GetSpaceInformation();
   auto projection1 = std::make_shared<TaskSpaceProjection>(factor1, child1, robot1);
   factor1->addChild(child1, projection1);
 
   auto point2 = MakeRobot<SphereRobot>(world, obstacles);
-  const auto limits2 = std::make_pair(Eigen::Vector3d(0.0-kAccuracy, -1.5, kZheight - kAccuracy), Eigen::Vector3d(0.0+kAccuracy, 1.5, kZheight + kAccuracy));
+  const auto limits2 = std::make_pair(State3d(0.0-kAccuracy, -1.5, kZheight - kAccuracy), State3d(0.0+kAccuracy, 1.5, kZheight + kAccuracy));
   point2->SetLimits(limits2);
   auto child2 = point2->GetSpaceInformation();
   auto projection2 = std::make_shared<TaskSpaceProjection>(factor2, child2, robot2);
   factor2->addChild(child2, projection2);
 
   auto point3 = MakeRobot<SphereRobot>(world, obstacles);
-  const auto limits3 = std::make_pair(Eigen::Vector3d(-1.5, -1.5, kZheight - kAccuracy), Eigen::Vector3d(1.5, 1.5, kZheight + kAccuracy));
+  const auto limits3 = std::make_pair(State3d(-1.5, -1.5, kZheight - kAccuracy), State3d(1.5, 1.5, kZheight + kAccuracy));
   point3->SetLimits(limits3);
   auto child3 = point3->GetSpaceInformation();
   auto projection3 = std::make_shared<TaskSpaceProjection>(factor3, child3, robot3);
@@ -135,12 +135,12 @@ int main(int argc, char* argv[]) {
   auto task_start3 = child3->allocState();
   auto task_goal3 = child3->allocState();
 
-  auto task_start1_eigen = MakeEigen({-1.3, -0.0, kZheight});
-  auto task_goal1_eigen = MakeEigen({+1.3, +0.0, kZheight});
-  auto task_start2_eigen = MakeEigen({-0.0, -1.3, kZheight});
-  auto task_goal2_eigen = MakeEigen({+0.0, +1.3, kZheight});
-  auto task_start3_eigen = MakeEigen({+1.3, +1.3, kZheight});
-  auto task_goal3_eigen = MakeEigen({-1.3, -1.3, kZheight});
+  auto task_start1_eigen = MakeState({-1.3, -0.0, kZheight});
+  auto task_goal1_eigen = MakeState({+1.3, +0.0, kZheight});
+  auto task_start2_eigen = MakeState({-0.0, -1.3, kZheight});
+  auto task_goal2_eigen = MakeState({+0.0, +1.3, kZheight});
+  auto task_start3_eigen = MakeState({+1.3, +1.3, kZheight});
+  auto task_goal3_eigen = MakeState({-1.3, -1.3, kZheight});
 
   point1->EigenToState(task_start1_eigen, task_start1);
   point1->EigenToState(task_goal1_eigen, task_goal1);

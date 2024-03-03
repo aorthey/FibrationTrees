@@ -104,7 +104,7 @@ RobotToObstaclesCollisionChecker::RobotToObstaclesCollisionChecker(
 
 bool RobotToObstaclesCollisionChecker::isValid(const ompl::base::State *state) const
 {
-  auto config = robot_->StateToEigen(state);
+  auto config = robot_->StateToEigen(state).configuration;
   auto lb = robot_->GetSkeleton()->getPositionLowerLimits();
   auto ub = robot_->GetSkeleton()->getPositionUpperLimits();
   for(size_t k = 0; k < config.size(); k++) {
@@ -171,7 +171,7 @@ bool DartMultiRobotCollisionChecker::isValid(const ompl::base::State *state) con
   for(const auto& robot : robots_) {
     const auto& name = robot->GetSpaceInformation()->getName();
     const auto& state = tmp_skeleton_states_.at(name);
-    const auto config = robot->StateToEigen(state);
+    const auto config = robot->StateToEigen(state).configuration;
     const auto lb = robot->GetSkeleton()->getPositionLowerLimits();
     const auto ub = robot->GetSkeleton()->getPositionUpperLimits();
     for(size_t k = 0; k < config.size(); k++) {

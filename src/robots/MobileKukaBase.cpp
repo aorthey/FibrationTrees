@@ -18,7 +18,7 @@ dart::dynamics::SkeletonPtr MobileKukaBase::MakeSkeleton() {
   skeleton->setAdjacentBodyCheck(true);
 
   Eigen::Isometry3d transform(Eigen::Isometry3d::Identity());
-  transform.translation() = Eigen::Vector3d{0.0, 0.0, -0.2};
+  transform.translation() = State3d{0.0, 0.0, -0.2};
   skeleton->getRootBodyNode()->getParentJoint()->setTransformFromParentBodyNode(transform);
 
   //Disable friction. This was causing an assert error in ContactConstraint.cpp

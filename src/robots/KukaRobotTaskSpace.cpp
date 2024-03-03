@@ -8,7 +8,6 @@ ompl::multilevel::FactoredSpaceInformationPtr KukaRobotTaskSpace::MakeSpaceInfor
   KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(robot->GetSkeleton());
   ompl::base::StateSpacePtr space(new TaskSpace(robot));
   auto factor = std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space);
-
   return factor;
 }
 

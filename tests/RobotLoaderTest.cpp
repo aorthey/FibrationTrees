@@ -42,7 +42,7 @@ TYPED_TEST(RobotLoaderTest, DefaultLoaderTest) {
   const auto Ndim = si->getStateDimension();
 
   std::cout << "Created robot " << robot->GetSpaceInformation()->getName() << " with " << Ndim << " dimensions." << std::endl;
-  Eigen::VectorXd v(Ndim);
+  StateXd v(Ndim);
   for(size_t k = 0; k < Ndim; k++) {
     v[k] = k+1;
   }
@@ -99,7 +99,7 @@ TYPED_TEST(RobotLoaderTest, ObstacleLoaderTest) {
   const auto Ndim = factor->getStateDimension();
 
   auto q = factor->allocState();
-  Eigen::VectorXd v(Ndim);
+  StateXd v(Ndim);
   ////////////////////////////////////////////////////////////////////////////////
   std::cout << "Test IsValid" << std::endl;
   ////////////////////////////////////////////////////////////////////////////////

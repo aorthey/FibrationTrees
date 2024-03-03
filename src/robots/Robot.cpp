@@ -30,26 +30,26 @@ void Robot::SetCollisionChecker(const CollisionCheckerPtr& collision_checker) {
   collision_checker_ = collision_checker;
 }
 
-std::vector<Eigen::Vector3d> Robot::GetFK(const ompl::base::State* state) const {
+std::vector<State3d> Robot::GetFK(const ompl::base::State* state) const {
   return GetFK(StateToEigen(state));
 }
 
-std::vector<Eigen::Vector3d> Robot::GetFK(const Eigen::VectorXd& config) const {
+std::vector<State3d> Robot::GetFK(const StateXd& config) const {
   auto endeffector = skeleton_->getBodyNode(skeleton_->getNumBodyNodes() - 1)->getName();
-  skeleton_->setConfiguration(config);
-  return std::vector<Eigen::Vector3d>({skeleton_->getBodyNode(endeffector)->getTransform().translation()});
+  skeleton_->setConfiguration(config.configuration);
+  return std::vector<State3d>({skeleton_->getBodyNode(endeffector)->getTransform().translation()});
 }
 
 std::string Robot::GetName() const {
   return factor_->getName();
 }
 
-void Robot::SetConfiguration(const Eigen::VectorXd& config) {
-  skeleton_->setConfiguration(config);
+void Robot::SetConfiguration(const StateXd& config) {
+  skeleton_->setConfiguration(config.configuration);
 }
 
 bool Robot::IsValid(const ompl::base::State* state) const {
-  auto config = this->StateToEigen(state);
+  auto config = this->StateToEigen(state).configuration;
   auto lb = skeleton_->getPositionLowerLimits();
   auto ub = skeleton_->getPositionUpperLimits();
   for(size_t k = 0; k < config.size(); k++) {

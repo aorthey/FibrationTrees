@@ -1,15 +1,16 @@
 #pragma once
 
-#include "dart/dart.hpp"
+#include <dart/dart.hpp>
 
-#include "ompl/util/ClassForward.h"
-#include "ompl/base/StateValidityChecker.h"
+#include <ompl/util/ClassForward.h>
+#include <ompl/base/StateValidityChecker.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
+#include "State.hpp"
 
 OMPL_CLASS_FORWARD(CollisionChecker);
 OMPL_CLASS_FORWARD(Robot);
 
-const Eigen::Vector3d kCollisionColor = Eigen::Vector3d(0.8, 0.3, 0.3);
+const State3d kCollisionColor = State3d(0.8, 0.3, 0.3);
 
 class CollisionChecker {
 
@@ -27,7 +28,7 @@ class CollisionChecker {
   dart::simulation::WorldPtr world_;
   std::vector<dart::dynamics::SkeletonPtr> group1_;
   std::vector<dart::dynamics::SkeletonPtr> group2_;
-  std::unordered_map<const dart::dynamics::ShapeNode*, Eigen::Vector3d> default_colors_;
+  std::unordered_map<const dart::dynamics::ShapeNode*, State3d> default_colors_;
 };
 
 class MultiCollisionChecker : public CollisionChecker {

@@ -34,16 +34,16 @@ void PrintSkeletonInfo(const dart::dynamics::SkeletonPtr& skeleton) {
   for(size_t k = 0; k < config.size(); k++) {
     std::cout << lb[k] << " <= " << config[k] << " <= " << ub[k] << std::endl;
   }
-  std::cout << config.format(CommaFmt) << std::endl;
+  std::cout << config << std::endl;
 }
 
-Eigen::VectorXd GetRandomPosition(const dart::dynamics::SkeletonPtr& skeleton) {
+StateXd GetRandomPosition(const dart::dynamics::SkeletonPtr& skeleton) {
   auto lb = skeleton->getPositionLowerLimits();
   auto ub = skeleton->getPositionUpperLimits();
-  return dart::math::Random::uniform(lb, ub);
+  return MakeState(dart::math::Random::uniform(lb, ub));
 }
 
-dart::dynamics::SimpleFramePtr createSphereFrame(const Eigen::Vector3d& position, const float radius, const Eigen::Vector3d& color) {
+dart::dynamics::SimpleFramePtr createSphereFrame(const State3d& position, const float radius, const State3d& color) {
   Eigen::Isometry3d tf = Eigen::Isometry3d::Identity();
   tf.translation() = position;
 
@@ -56,20 +56,20 @@ dart::dynamics::SimpleFramePtr createSphereFrame(const Eigen::Vector3d& position
   return target;
 }
 
-dart::dynamics::SimpleFramePtr createLineSegmentFrame(const Eigen::Vector3d& s1, const Eigen::Vector3d& s2, const Eigen::Vector3d& color, float line_width) {
+dart::dynamics::SimpleFramePtr createLineSegmentFrame(const State3d& s1, const State3d& s2, const State3d& color, float line_width) {
   static int counter = 0;
   Eigen::Isometry3d tf = Eigen::Isometry3d::Identity();
   tf.translation() = s1;
 
   auto lineFrame = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "line_segment_"+std::to_string(counter++), tf);
-  auto line = std::make_shared<dart::dynamics::LineSegmentShape>(Eigen::Vector3d::Zero(3), (s2-s1), line_width);
+  auto line = std::make_shared<dart::dynamics::LineSegmentShape>(State3d::Zero(3), (s2-s1), line_width);
   lineFrame->setShape(line);
   lineFrame->createVisualAspect();
   lineFrame->getVisualAspect(true)->setColor(color);
   return lineFrame;
 }
 
-dart::dynamics::SimpleFramePtr createLineSegmentFrame(const std::vector<Eigen::Vector3d>& vertices, const Eigen::Vector3d& color, float line_width) {
+dart::dynamics::SimpleFramePtr createLineSegmentFrame(const std::vector<State3d>& vertices, const State3d& color, float line_width) {
   static int counter = 0;
   auto lineFrame = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "line_segments_"+std::to_string(counter++));
   auto line = std::make_shared<dart::dynamics::LineSegmentShape>(line_width);
@@ -90,20 +90,20 @@ dart::dynamics::SkeletonPtr createFloor(float z_position) {
     constexpr double floorWidth = 3.0;
     constexpr double floorHeight = 0.1;
     auto box = std::make_shared<dart::dynamics::BoxShape>(
-        Eigen::Vector3d{floorWidth, floorWidth, floorHeight});
+        State3d{floorWidth, floorWidth, floorHeight});
     auto shapeNode = body->createShapeNodeWith<dart::dynamics::VisualAspect, dart::dynamics::CollisionAspect, dart::dynamics::DynamicsAspect>(box);
-    shapeNode->getVisualAspect()->setColor(Eigen::Vector3d(0.9, 0.9, 0.9));
+    shapeNode->getVisualAspect()->setColor(State3d(0.9, 0.9, 0.9));
 
     /* Put the floor into position */
     Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
-    tf.translation() = Eigen::Vector3d{0.0, 0.0, z_position + (-floorHeight/2.0 - floorHeight/100.0)};
+    tf.translation() = State3d{0.0, 0.0, z_position + (-floorHeight/2.0 - floorHeight/100.0)};
     body->getParentJoint()->setTransformFromParentBodyNode(tf);
     body->setName("floor");
 
     return floor;
 }
 
-dart::dynamics::SkeletonPtr createBox(const Eigen::Vector3d& position, float length_x, float length_y, float length_z) {
+dart::dynamics::SkeletonPtr createBox(const State3d& position, float length_x, float length_y, float length_z) {
     static int counter = 0;
     std::string name = "box_"+std::to_string(counter++);
     dart::dynamics::SkeletonPtr box = dart::dynamics::Skeleton::create(name);
@@ -111,9 +111,9 @@ dart::dynamics::SkeletonPtr createBox(const Eigen::Vector3d& position, float len
         box->createJointAndBodyNodePair<dart::dynamics::WeldJoint>(nullptr).second;
 
     auto box_shape = std::make_shared<dart::dynamics::BoxShape>(
-        Eigen::Vector3d{length_x, length_y, length_z});
+        State3d{length_x, length_y, length_z});
     auto shapeNode = body->createShapeNodeWith<dart::dynamics::VisualAspect, dart::dynamics::CollisionAspect, dart::dynamics::DynamicsAspect>(box_shape);
-    shapeNode->getVisualAspect()->setColor(Eigen::Vector3d(0.9, 0.9, 0.9));
+    shapeNode->getVisualAspect()->setColor(State3d(0.9, 0.9, 0.9));
 
     Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
     tf.translation() = position;
@@ -122,7 +122,7 @@ dart::dynamics::SkeletonPtr createBox(const Eigen::Vector3d& position, float len
     return box;
 }
 
-dart::dynamics::SkeletonPtr createCylinder(const Eigen::Vector3d& position, float radius, float height) {
+dart::dynamics::SkeletonPtr createCylinder(const State3d& position, float radius, float height) {
     static int counter = 0;
     std::string name = "cylinder_"+std::to_string(counter++);
     dart::dynamics::SkeletonPtr cylinder = dart::dynamics::Skeleton::create(name);
@@ -132,7 +132,7 @@ dart::dynamics::SkeletonPtr createCylinder(const Eigen::Vector3d& position, floa
     dart::dynamics::ShapePtr shape = std::make_shared<dart::dynamics::CylinderShape>(radius, height);
 
     auto shapeNode = body->createShapeNodeWith<dart::dynamics::VisualAspect, dart::dynamics::CollisionAspect, dart::dynamics::DynamicsAspect>(shape);
-    shapeNode->getVisualAspect()->setColor(Eigen::Vector3d(0.9, 0.9, 0.9));
+    shapeNode->getVisualAspect()->setColor(State3d(0.9, 0.9, 0.9));
 
     Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
     tf.translation() = position;
@@ -152,19 +152,19 @@ dart::dynamics::SkeletonPtr createSphere(float radius) {
     dart::dynamics::ShapePtr shape = std::make_shared<dart::dynamics::SphereShape>(radius);
 
     auto shapeNode = body->createShapeNodeWith<dart::dynamics::VisualAspect, dart::dynamics::CollisionAspect, dart::dynamics::DynamicsAspect>(shape);
-    shapeNode->getVisualAspect()->setColor(Eigen::Vector3d(0.5, 0.0, 0.5));
+    shapeNode->getVisualAspect()->setColor(State3d(0.5, 0.0, 0.5));
 
-    auto ll = MakeEigen(ReadConfigVariable<std::vector<double>>("sphere_robot_lower_limit"));
-    auto ul = MakeEigen(ReadConfigVariable<std::vector<double>>("sphere_robot_upper_limit"));
-    sphere->setPositionLowerLimits(ll);
-    sphere->setPositionUpperLimits(ul);
+    auto ll = MakeState(ReadConfigVariable<std::vector<double>>("sphere_robot_lower_limit"));
+    auto ul = MakeState(ReadConfigVariable<std::vector<double>>("sphere_robot_upper_limit"));
+    sphere->setPositionLowerLimits(ll.configuration);
+    sphere->setPositionUpperLimits(ul.configuration);
 
     body->setName(name);
 
     return sphere;
 }
 
-dart::dynamics::SkeletonPtr createFromURDF(const std::string& urdf_name, const Eigen::Vector3d& position)
+dart::dynamics::SkeletonPtr createFromURDF(const std::string& urdf_name, const State3d& position)
 {
     dart::utils::DartLoader loader;
     dart::utils::DartLoader::Options options;
@@ -192,14 +192,14 @@ void addCoordinateFrameToWorld(const dart::simulation::WorldPtr& world) {
   auto frame_z = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "coordinate_frame_z");
 
   const float kCoordinateFrameLength = 0.5;
-  Eigen::Vector3d origin(-0.0, -0.0, 0.0);
-  Eigen::Vector3d ex(kCoordinateFrameLength, 0, 0);
-  Eigen::Vector3d ey(0, kCoordinateFrameLength, 0);
-  Eigen::Vector3d ez(0, 0, kCoordinateFrameLength);
+  State3d origin(-0.0, -0.0, 0.0);
+  State3d ex(kCoordinateFrameLength, 0, 0);
+  State3d ey(0, kCoordinateFrameLength, 0);
+  State3d ez(0, 0, kCoordinateFrameLength);
 
-  Eigen::Vector3d color_ex(1, 0, 0);
-  Eigen::Vector3d color_ey(0, 1, 0);
-  Eigen::Vector3d color_ez(0, 0, 1);
+  State3d color_ex(1, 0, 0);
+  State3d color_ey(0, 1, 0);
+  State3d color_ez(0, 0, 1);
 
   const float line_width = 5.0;
 

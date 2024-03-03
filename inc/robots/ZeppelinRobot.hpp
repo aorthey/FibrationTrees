@@ -10,6 +10,6 @@ class ZeppelinRobot : public Robot {
     dart::dynamics::SkeletonPtr MakeSkeleton() override;
     ompl::multilevel::FactoredSpaceInformationPtr MakeSpaceInformation(const RobotPtr& robot) override;
 
-    Eigen::VectorXd StateToEigen(const ompl::base::State* state) const override;
-    void EigenToState(const Eigen::VectorXd& v, ompl::base::State* state) const override;
+    StateXd StateToEigen(const ompl::base::State* state) const override;
+    void EigenToState(const StateXd& v, ompl::base::State* state) const override;
 };

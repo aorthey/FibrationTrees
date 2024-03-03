@@ -19,6 +19,7 @@ using namespace ompl::multilevel;
 const float kLowerBound{-1};
 const float kUpperBound{+1};
 const size_t kMaximumIterations = 50;
+
 int main()
 {
   const size_t kDimension = 2;

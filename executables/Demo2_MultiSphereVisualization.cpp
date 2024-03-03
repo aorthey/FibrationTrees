@@ -42,21 +42,21 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
 
   dart::simulation::WorldPtr world(new dart::simulation::World);
-  world->setGravity(Eigen::Vector3d::Zero());
+  world->setGravity(State3d::Zero());
   addCoordinateFrameToWorld(world);
 
   auto robot1 = MakeRobot<BallRobot>(world);
-  const auto limits1 = std::make_pair(Eigen::Vector3d(-1.0, 0.0, 0.0), Eigen::Vector3d(1.0, 0.0, 0.0));
+  const auto limits1 = std::make_pair(State3d(-1.0, 0.0, 0.0), State3d(1.0, 0.0, 0.0));
   robot1->SetLimits(limits1);
   auto space1 = robot1->GetSpaceInformation();
 
   auto robot2 = MakeRobot<BallRobot>(world);
-  const auto limits2 = std::make_pair(Eigen::Vector3d(0.0, -1.0, 0.0), Eigen::Vector3d(0.0, 1.0, 0.0));
+  const auto limits2 = std::make_pair(State3d(0.0, -1.0, 0.0), State3d(0.0, 1.0, 0.0));
   robot2->SetLimits(limits2);
   auto space2 = robot2->GetSpaceInformation();
 
   auto robot3 = MakeRobot<BallRobot>(world);
-  const auto limits3 = std::make_pair(Eigen::Vector3d(0.0, 0.0, -1.0), Eigen::Vector3d(0.0, 0.0, 1.0));
+  const auto limits3 = std::make_pair(State3d(0.0, 0.0, -1.0), State3d(0.0, 0.0, 1.0));
   robot3->SetLimits(limits3);
   auto space3 = robot3->GetSpaceInformation();
 
@@ -82,8 +82,8 @@ int main(int argc, char* argv[]) {
   //////////////////////////////////////////////////////////////////////////////////
   //////Create problem definition
   //////////////////////////////////////////////////////////////////////////////////
-  auto start_config = MakeEigen({-1,0,0,0,-1,0,0,0,-1});
-  auto goal_config = MakeEigen({+1,0,0,0,+1,0,0,0,+1});
+  auto start_config = MakeState({-1,0,0,0,-1,0,0,0,-1});
+  auto goal_config = MakeState({+1,0,0,0,+1,0,0,0,+1});
   auto start = factor->allocState();
   auto goal = factor->allocState();
   robot->EigenToState(start_config, start);

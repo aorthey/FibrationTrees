@@ -50,11 +50,11 @@ ompl::base::ProblemDefinitionPtr CreateMultiDroneProblemDefinition(
       z = 0.3;
       y = -yoffset;
     }
-    auto start = MakeEigen({x, y + 0.5 *yoffset, z, yaw});
+    auto start = MakeState({x, y + 0.5 *yoffset, z, yaw});
     auto start_state = AllocStateFromEigen(robot, start);
     startStates[name] = start_state;
 
-    auto goal = MakeEigen({-1.5, y + 0.5 *yoffset, z, yaw});
+    auto goal = MakeState({-1.5, y + 0.5 *yoffset, z, yaw});
     auto goal_state = AllocStateFromEigen(robot, goal);
     goalStates[name] = goal_state;
 
@@ -86,11 +86,11 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
   std::vector<dart::dynamics::SkeletonPtr> obstacles;
   dart::dynamics::SkeletonPtr floor = createFloor(-0.25);
-  dart::dynamics::SkeletonPtr o1 = createCylinder(Eigen::Vector3d(-0.5, 0.0, 0.0), 0.2, 1.5);
-  dart::dynamics::SkeletonPtr o2 = createCylinder(Eigen::Vector3d(-0.0, 0.2, 0.0), 0.15, 1.0);
-  dart::dynamics::SkeletonPtr o3 = createCylinder(Eigen::Vector3d(-0.5, -0.3, 0.0), 0.3, 1.5);
-  dart::dynamics::SkeletonPtr o4 = createCylinder(Eigen::Vector3d(-1.0, 0.8, 0.0), 0.05, 2.5);
-  dart::dynamics::SkeletonPtr o5 = createCylinder(Eigen::Vector3d(-0.6, 1.2, 0.0), 0.08, 0.8);
+  dart::dynamics::SkeletonPtr o1 = createCylinder(State3d(-0.5, 0.0, 0.0), 0.2, 1.5);
+  dart::dynamics::SkeletonPtr o2 = createCylinder(State3d(-0.0, 0.2, 0.0), 0.15, 1.0);
+  dart::dynamics::SkeletonPtr o3 = createCylinder(State3d(-0.5, -0.3, 0.0), 0.3, 1.5);
+  dart::dynamics::SkeletonPtr o4 = createCylinder(State3d(-1.0, 0.8, 0.0), 0.05, 2.5);
+  dart::dynamics::SkeletonPtr o5 = createCylinder(State3d(-0.6, 1.2, 0.0), 0.08, 0.8);
   obstacles.push_back(floor);
   obstacles.push_back(o1);
   obstacles.push_back(o2);
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
   for(const auto& obstacle: obstacles) {
     world->addSkeleton(obstacle);
   }
-  world->setGravity(Eigen::Vector3d::Zero());
+  world->setGravity(State3d::Zero());
   addCoordinateFrameToWorld(world);
 
   ////////////////////////////////////////////////////////////////////////////////

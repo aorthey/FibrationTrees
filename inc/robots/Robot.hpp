@@ -5,6 +5,7 @@
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 
 #include "CollisionChecker.hpp"
+#include "State.hpp"
 
 class Robot {
   public:
@@ -18,8 +19,8 @@ class Robot {
         const std::vector<dart::dynamics::SkeletonPtr>& obstacles);
     virtual ompl::base::MotionValidatorPtr MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& robot);
 
-    virtual Eigen::VectorXd StateToEigen(const ompl::base::State* state) const = 0;
-    virtual void EigenToState(const Eigen::VectorXd& v, ompl::base::State* state) const = 0;
+    virtual StateXd StateToEigen(const ompl::base::State* state) const = 0;
+    virtual void EigenToState(const StateXd& v, ompl::base::State* state) const = 0;
 
     const std::shared_ptr<dart::dynamics::Skeleton>& GetSkeleton();
     const std::shared_ptr<ompl::multilevel::FactoredSpaceInformation>& GetSpaceInformation();
@@ -28,7 +29,7 @@ class Robot {
     size_t GetDimension() const;
 
     std::string GetName() const;
-    virtual void SetConfiguration(const Eigen::VectorXd& config);
+    virtual void SetConfiguration(const StateXd& config);
 
     void SetSkeleton(const dart::dynamics::SkeletonPtr& skeleton);
     void SetSpaceInformation(const ompl::multilevel::FactoredSpaceInformationPtr& factor);
@@ -36,9 +37,9 @@ class Robot {
 
     bool IsValid(const ompl::base::State* state) const;
 
-    virtual std::vector<Eigen::Vector3d> GetFK(const Eigen::VectorXd& config) const;
+    virtual std::vector<State3d> GetFK(const StateXd& config) const;
 
-    std::vector<Eigen::Vector3d> GetFK(const ompl::base::State* state) const;
+    std::vector<State3d> GetFK(const ompl::base::State* state) const;
 
   protected:
     dart::dynamics::SkeletonPtr skeleton_;

@@ -16,20 +16,16 @@ ompl::multilevel::FactoredSpaceInformationPtr EuclideanRobot::MakeSpaceInformati
   return std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space);
 }
 
-Eigen::VectorXd EuclideanRobot::StateToEigen(const ompl::base::State* state) const {
+StateXd EuclideanRobot::StateToEigen(const ompl::base::State* state) const {
   double *state_R = state->as<ompl::base::RealVectorStateSpace::StateType>()->values;
   auto N = GetDimension();
-  Eigen::VectorXd v(N);
-  for(size_t k = 0; k < N; k++) {
-    v[k] = state_R[k];
-  }
-  return v;
+  return MakeState(N, state_R);
 }
 
-void EuclideanRobot::EigenToState(const Eigen::VectorXd& v, ompl::base::State* state) const {
+void EuclideanRobot::EigenToState(const StateXd& v, ompl::base::State* state) const {
   double *state_R = state->as<ompl::base::RealVectorStateSpace::StateType>()->values;
-  for(size_t k = 0; k < v.size(); k++) {
-    state_R[k] = v[k];
+  for(size_t k = 0; k < v.configuration.size(); k++) {
+    state_R[k] = v.configuration[k];
   }
 }
 

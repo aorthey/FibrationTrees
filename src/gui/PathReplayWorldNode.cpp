@@ -20,10 +20,10 @@ PathReplayWorldNode::~PathReplayWorldNode() {
 
 const float kVisualizationStepSize = 0.01; //was 0.01
 
-std::vector<Eigen::Vector3d> MakeEdgeVertices(const RobotPtr& robot, const ompl::base::SpaceInformationPtr& si, const ompl::base::State* s1, const ompl::base::State* s2, std::vector<Eigen::VectorXd>& configs) {
+std::vector<State3d> MakeEdgeVertices(const RobotPtr& robot, const ompl::base::SpaceInformationPtr& si, const ompl::base::State* s1, const ompl::base::State* s2, std::vector<StateXd>& configs) {
   const auto L = si->distance(s1, s2);
 
-  std::vector<Eigen::Vector3d> vertices;
+  std::vector<State3d> vertices;
   if(L < kVisualizationStepSize) {
     return vertices;
   }
@@ -43,7 +43,7 @@ std::vector<Eigen::Vector3d> MakeEdgeVertices(const RobotPtr& robot, const ompl:
 }
 
 void PathReplayWorldNode::AddPath(const RobotPtr& robot, const ompl::base::PathPtr& ompl_path, 
-    const Eigen::Vector3d& color) {
+    const State3d& color) {
   if(ompl_path == nullptr) {
     return;
   }
@@ -51,11 +51,11 @@ void PathReplayWorldNode::AddPath(const RobotPtr& robot, const ompl::base::PathP
 
   const float L = path->GetLength();
 
-  std::vector<std::vector<Eigen::Vector3d>> vertices;
+  std::vector<std::vector<State3d>> vertices;
   const auto s = path->GetConfigAt(0.0);
   const auto frames = robot->GetFK(s);
   for(size_t k = 0; k < frames.size(); k++) {
-    std::vector<Eigen::Vector3d> vector;
+    std::vector<State3d> vector;
     vertices.push_back(vector);
   }
 
@@ -86,7 +86,7 @@ void PathReplayWorldNode::AddPlannerData(const RobotPtr& robot, const ompl::base
       const auto s1 = data.getVertex(vindex).getState();
       const auto s2 = data.getVertex(windex).getState();
 
-      std::vector<Eigen::VectorXd> configs;
+      std::vector<StateXd> configs;
       auto vertices = MakeEdgeVertices(robot, si, s1, s2, configs);
       auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices, kRoadmapColorVertex, kRoadmapLineWidth));
       planner_data_frames_.push_back(frame_line);
@@ -192,10 +192,7 @@ std::string PathReplayWorldNode::getCurrentJointConfiguration() const {
   std::string delim = "";
   for(const auto& [_, path] : robot_and_path_) {
     auto config = path->GetConfigAt(path_position_);
-    for(size_t k =0; k < config.size();k++) {
-      s+= delim + std::to_string(config[k]);
-      delim = ", \n";
-    }
+    s += std::to_string(config);
   }
   return s;
 }

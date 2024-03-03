@@ -57,7 +57,7 @@ ompl::multilevel::FactoredSpaceInformationPtr ZeppelinRobot::MakeSpaceInformatio
   return std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space);
 }
 
-Eigen::VectorXd ZeppelinRobot::StateToEigen(const ompl::base::State* state) const {
+StateXd ZeppelinRobot::StateToEigen(const ompl::base::State* state) const {
   auto N = GetDimension();
   Eigen::VectorXd v(N);
   const auto *state_RN = state->as<ompl::base::CompoundState>()->as<ompl::base::RealVectorStateSpace::StateType>(0);
@@ -72,10 +72,10 @@ Eigen::VectorXd ZeppelinRobot::StateToEigen(const ompl::base::State* state) cons
       // }
   }
   v[N-1] = state_SO2->value;
-  return v;
+  return MakeState(v);
 }
 
-void ZeppelinRobot::EigenToState(const Eigen::VectorXd& v, ompl::base::State* state) const {
+void ZeppelinRobot::EigenToState(const StateXd& v, ompl::base::State* state) const {
   auto N = v.size();
   auto *state_RN = state->as<ompl::base::CompoundState>()->as<ompl::base::RealVectorStateSpace::StateType>(0);
   auto *state_SO2 = state->as<ompl::base::CompoundState>()->as<ompl::base::SO2StateSpace::StateType>(1);

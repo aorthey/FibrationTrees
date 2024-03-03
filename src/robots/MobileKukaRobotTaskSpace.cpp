@@ -17,7 +17,7 @@ ompl::base::MotionValidatorPtr MobileKukaRobotTaskSpace::MakeMotionValidator(con
   return std::make_shared<TranslationTaskSpaceMotionValidator>(factor, robot);
 }
 
-Eigen::VectorXd MobileKukaRobotTaskSpace::StateToEigen(const ompl::base::State* state) const {
+StateXd MobileKukaRobotTaskSpace::StateToEigen(const ompl::base::State* state) const {
   auto N = GetDimension();
   Eigen::VectorXd v(N);
   const auto *state_R2 = state->as<ompl::base::CompoundState>()->as<ompl::base::RealVectorStateSpace::StateType>(0);
@@ -32,10 +32,10 @@ Eigen::VectorXd MobileKukaRobotTaskSpace::StateToEigen(const ompl::base::State* 
   {
       v[k + 3] = state_RN->values[k];
   }
-  return v;
+  return MakeState(v);
 }
 
-void MobileKukaRobotTaskSpace::EigenToState(const Eigen::VectorXd& v, ompl::base::State* state) const {
+void MobileKukaRobotTaskSpace::EigenToState(const StateXd& v, ompl::base::State* state) const {
   auto N = v.size();
   auto *state_R2 = state->as<ompl::base::CompoundState>()->as<ompl::base::RealVectorStateSpace::StateType>(0);
   auto *state_SO2 = state->as<ompl::base::CompoundState>()->as<ompl::base::SO2StateSpace::StateType>(1);

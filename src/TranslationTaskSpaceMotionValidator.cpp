@@ -54,8 +54,8 @@ bool TranslationTaskSpaceMotionValidator::checkMotion(const ompl::base::State *s
   //  return FillLastStateOnNoProgressAndReturn(lastValidState_, lastValid);
   //}
   //std::cout << "Interpolated " << configs.size() << " states." << std::endl;
-  //std::cout << "First config: " << configs.front().format(CommaFmt) << std::endl;
-  //std::cout << "Last  config: " << configs.back().format(CommaFmt) << std::endl;
+  //std::cout << "First config: " << configs.front() << std::endl;
+  //std::cout << "Last  config: " << configs.back() << std::endl;
 
   //si_->copyState(lastValidState_, s1);
   //EigenPath path(configs);
@@ -109,7 +109,7 @@ std::vector<ompl::base::State*> TranslationTaskSpaceMotionValidator::propagateMo
       return result;
     }
     //Do not add too many states, only every X spaced
-    if((config - last_config).norm() < kMinimumSpacing) {
+    if( Distance(config, last_config) < kMinimumSpacing) {
       continue;
     }
     auto state = si_->allocState();

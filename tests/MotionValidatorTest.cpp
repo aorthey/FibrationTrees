@@ -65,13 +65,12 @@ TEST(MotionValidatorTest, EarlyStoppageLineDistanceTest) {
     //Set obstacle to mid point along task space straight line
     ////////////////////////////////////////////////////////////////////////////////
     const auto mid = s1_tcp + 0.5 * (s2_tcp - s1_tcp);
-    Eigen::VectorXd mid_config(3);
-    mid_config << mid[0], mid[1], mid[2];
+    auto mid_config = MakeState({mid[0], mid[1], mid[2]});
     obstacle->GetSkeleton()->setConfiguration(mid_config);
 
     auto configs = motion_validator->propagateMotion(s1, s2);
     if(configs.empty()) {
-      std::cout << "Could not make progress on " << random_s1.format(CommaFmt) << std::endl;
+      std::cout << "Could not make progress on " << random_s1 << std::endl;
       continue;
     }
     EXPECT_GT(configs.size(), 0);
@@ -81,13 +80,13 @@ TEST(MotionValidatorTest, EarlyStoppageLineDistanceTest) {
     EXPECT_GE(d_total, 0.0);
 
     auto config = robot->StateToEigen(configs.back());
-    std::cout << "Reached config " << config.format(CommaFmt) << std::endl;
+    std::cout << "Reached config " << config << std::endl;
     const auto s3_tcp = robot->GetFK(config).front();
 
-    std::cout << "  Tcp[start]   " << s1_tcp.format(CommaFmt) << std::endl;
-    std::cout << "  Tcp[goal]    " << s2_tcp.format(CommaFmt) << std::endl;
-    std::cout << "  Tcp[reached] " << s3_tcp.format(CommaFmt) << std::endl;
-    std::cout << "  Tcp[mid]     " << mid.format(CommaFmt) << std::endl;
+    std::cout << "  Tcp[start]   " << s1_tcp << std::endl;
+    std::cout << "  Tcp[goal]    " << s2_tcp << std::endl;
+    std::cout << "  Tcp[reached] " << s3_tcp << std::endl;
+    std::cout << "  Tcp[mid]     " << mid << std::endl;
     std::cout << std::string(80,'-') << std::endl;
     auto d_mid = LineDistance(s1_tcp, s2_tcp, mid_config);
     auto d = LineDistance(s1_tcp, s2_tcp, s3_tcp);

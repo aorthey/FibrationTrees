@@ -18,7 +18,7 @@ TaskSpaceProjection::TaskSpaceProjection(const ompl::base::SpaceInformationPtr& 
 
   //Create default return states
   defaultBundleReturnState_ = getBundle()->allocState();
-  Eigen::VectorXd nan_config = Eigen::VectorXd::Constant(getBundle()->getDimension(), std::numeric_limits<float>::quiet_NaN());
+  auto nan_config = MakeState(Eigen::VectorXd::Constant(getBundle()->getDimension(), std::numeric_limits<float>::quiet_NaN()));
   robot->EigenToState(nan_config, defaultBundleReturnState_);
 
   defaultBaseReturnState_ = getBase()->allocState();
@@ -53,7 +53,7 @@ void TaskSpaceProjection::project(const ompl::base::State *xBundle, ompl::base::
 void TaskSpaceProjection::lift(const ompl::base::State *xBase, ompl::base::State *xBundle) const
 {
     double *xBaseValues = xBase->as<ompl::base::RealVectorStateSpace::StateType>()->values;
-    Eigen::Vector3d frame;
+    State3d frame;
     frame[0] = xBaseValues[0];
     frame[1] = xBaseValues[1];
     frame[2] = xBaseValues[2];

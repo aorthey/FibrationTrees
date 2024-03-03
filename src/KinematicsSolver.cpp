@@ -1,13 +1,13 @@
 #include "KinematicsSolver.hpp"
 #include "Common.hpp"
 
-struct State {
-  Eigen::VectorXd config;
-  Eigen::Vector3d tcp;
+struct StateAndTcp {
+  StateXd config;
+  State3d tcp;
   float error{0.0f};
 };
 
-float ComputeError(const State& start, const State& goal) {
+float ComputeError(const StateAndTcp& start, const StateAndTcp& goal) {
   // return (goal.tcp - start.tcp).norm() + (goal.config - start.config).norm();
   return (goal.tcp - start.tcp).norm();
 }
@@ -27,11 +27,9 @@ KinematicsSolver::KinematicsSolver(const dart::dynamics::SkeletonPtr& skeleton)
 
 }
 
-std::optional<Eigen::VectorXd> KinematicsSolver::solve_ik(const Eigen::Vector3d& frame, size_t max_iterations) {
+std::optional<StateXd> KinematicsSolver::solve_ik(const State3d& frame, size_t max_iterations) {
   const auto& lb = skeleton_->getPositionLowerLimits();
   const auto& ub = skeleton_->getPositionUpperLimits();
-
-  Eigen::VectorXd zero = Eigen::VectorXd::Constant(lb.size(), -Inf);
 
   if(skeleton_->getBodyNode(endeffector_)==nullptr) 
   {
@@ -49,19 +47,20 @@ std::optional<Eigen::VectorXd> KinematicsSolver::solve_ik(const Eigen::Vector3d&
 
     if(ik->solveAndApply(config, true))
     {
-      return ik->getPositions();
+      return MakeState(ik->getPositions());
     }
   }
   return std::nullopt;
 }
 
-std::optional<Eigen::Vector3d> KinematicsSolver::solve_fk(const Eigen::VectorXd& config) {
+std::optional<State3d> KinematicsSolver::solve_fk(const StateXd& state) {
+  auto config = state.configuration;
   auto lb = skeleton_->getPositionLowerLimits();
   auto ub = skeleton_->getPositionUpperLimits();
   for(size_t k = 0; k < config.size(); k++) {
     if(config[k] < (lb[k] - kOutOfBoundsJointLimitPadding) || config[k] > (ub[k] + kOutOfBoundsJointLimitPadding) || config[k] != config[k]) {
       // std::cout << "Out of limits of " << k << "-th dof : " << lb[k] << "<" << config[k] << "<" << ub[k] << std::endl;
-      // std::cout << "Rejecting config " << config.format(CommaFmt) << std::endl;
+      // std::cout << "Rejecting config " << config << std::endl;
       // exit(0);
       return std::nullopt;
     }
@@ -69,25 +68,25 @@ std::optional<Eigen::Vector3d> KinematicsSolver::solve_fk(const Eigen::VectorXd&
   skeleton_->setConfiguration(config);
   auto t = skeleton_->getBodyNode(endeffector_)->getTransform().translation();
   // if(std::abs(t[0]-0.4) > 0.2) {
-  //   std::cout << "Rejecting config " << config.format(CommaFmt) << std::endl;
-  //   std::cout << "Rejecting config " << t.format(CommaFmt) << std::endl;
+  //   std::cout << "Rejecting config " << config << std::endl;
+  //   std::cout << "Rejecting config " << t << std::endl;
   //   exit(0);
   // }
   return skeleton_->getBodyNode(endeffector_)->getTransform().translation();
 }
 
 //Avoid duplicates, add additional configs during joint flips
-bool KinematicsSolver::AddConfig(const Eigen::VectorXd& config, std::vector<Eigen::VectorXd>& configs) {
+bool KinematicsSolver::AddConfig(const StateXd& config, std::vector<StateXd>& configs) {
   if(configs.empty()) {
     configs.push_back(config);
     return true;
   }
   const auto last_config = configs.back();
-  const auto dist = (last_config-config).norm();
+  const auto dist = Distance(last_config, config);
   if(dist > M_PI) {
     // std::cout << "Detected joint flip" << std::endl;
-    // std::cout << "Current config : " << config.format(CommaFmt) << std::endl;
-    // std::cout << "Last    config : " << last_config.format(CommaFmt) << std::endl;
+    // std::cout << "Current config : " << config << std::endl;
+    // std::cout << "Last    config : " << last_config << std::endl;
     return false;
   }
 
@@ -104,16 +103,16 @@ bool KinematicsSolver::AddConfig(const Eigen::VectorXd& config, std::vector<Eige
 }
 
 
-Eigen::VectorXd KinematicsSolver::ForwardStep(const Eigen::VectorXd& config, const Eigen::VectorXd& dx) const {
-  Eigen::VectorXd next = config + kStepSize * dx;
-  return next;
+StateXd KinematicsSolver::ForwardStep(const StateXd& config, const TangentVector& dx) const {
+  return config + (kStepSize * dx);
 }
 
-Eigen::VectorXd KinematicsSolver::ComputeJointLimitForce(const Eigen::VectorXd& config) const {
+TangentVector KinematicsSolver::ComputeJointLimitForce(const StateXd& state) const {
   const auto& lb = skeleton_->getPositionLowerLimits();
   const auto& ub = skeleton_->getPositionUpperLimits();
 
-  Eigen::VectorXd dx(config.size());
+  auto config = state.configuration;
+  TangentVector dx(config.size());
   dx.setZero();
   const float kThreshold = 0.5;
   for(size_t k = 0; k < config.size(); k++) {
@@ -130,9 +129,9 @@ Eigen::VectorXd KinematicsSolver::ComputeJointLimitForce(const Eigen::VectorXd& 
   return dx;
 }
 
-std::vector<Eigen::VectorXd> KinematicsSolver::solve_edge_ik_with_config(const Eigen::VectorXd& start_config, const Eigen::VectorXd& goal_config) {
+std::vector<StateXd> KinematicsSolver::solve_edge_ik_with_config(const StateXd& start_config, const StateXd& goal_config) {
   success_ = false;
-  std::vector<Eigen::VectorXd> configs;
+  std::vector<StateXd> configs;
 
   ////////////////////////////////////////////////////////////////////////////////
   // Get Tcp at start and goal
@@ -149,23 +148,23 @@ std::vector<Eigen::VectorXd> KinematicsSolver::solve_edge_ik_with_config(const E
     return configs;
   }
 
-  const State start{start_config, maybe_tcp_start.value()};
-  const State goal{goal_config, maybe_tcp_goal.value()};
+  const StateAndTcp start{start_config, maybe_tcp_start.value()};
+  const StateAndTcp goal{goal_config, maybe_tcp_goal.value()};
 
   if(kDebugInfo) {
     std::cout << std::string(80, '-') << std::endl;
     std::cout << "Solving Edge IK" << std::endl;
     std::cout << std::string(80, '-') << std::endl;
-    std::cout << "Start config: " << start.config.format(CommaFmt) << std::endl;
-    std::cout << "Goal  config: " << goal.config.format(CommaFmt) << std::endl;
-    std::cout << "Start tcp   : " << start.tcp.format(CommaFmt) << std::endl;
-    std::cout << "Goal  tcp   : " << goal.tcp.format(CommaFmt) << std::endl;
+    std::cout << "Start config: " << start.config << std::endl;
+    std::cout << "Goal  config: " << goal.config << std::endl;
+    std::cout << "Start tcp   : " << start.tcp << std::endl;
+    std::cout << "Goal  tcp   : " << goal.tcp << std::endl;
   }
   ////////////////////////////////////////////////////////////////////////////////
   //generate force into direction of target
   ////////////////////////////////////////////////////////////////////////////////
 
-  State current{start};
+  StateAndTcp current{start};
 
   current.error = ComputeError(start, goal);
   if(current.error <= Epsilon) {
@@ -184,7 +183,7 @@ std::vector<Eigen::VectorXd> KinematicsSolver::solve_edge_ik_with_config(const E
     //Compute direction
     ////////////////////////////////////////////////////////////////////////////////
 
-    skeleton_->setConfiguration(current.config);
+    skeleton_->setConfiguration(current.config.configuration);
     const auto J = body_tcp->getLinearJacobian();
     const auto J_T = J.transpose();
     const auto J_PI = ComputePseudoInverse(J);
@@ -199,7 +198,7 @@ std::vector<Eigen::VectorXd> KinematicsSolver::solve_edge_ik_with_config(const E
     // auto dx = J_PI * direction_task_space + (I - J_T * J_PI.transpose()) * direction_joint_limit;
 
     //Add joint config force in nullspace
-    const auto direction_joint_space = (goal.config - current.config);
+    const auto direction_joint_space = (goal.config.configuration - current.config.configuration);
     auto N2 = N1 * (I - J_T * J_PI.transpose());
     // auto dx = J_PI * direction_task_space + (I - J_T * J_PI.transpose()) * direction_joint_space;
     auto dx = J_PI * direction_task_space + N1 * direction_joint_limit + N2 * direction_joint_space;
@@ -207,12 +206,12 @@ std::vector<Eigen::VectorXd> KinematicsSolver::solve_edge_ik_with_config(const E
     ////////////////////////////////////////////////////////////////////////////////
     //Move along cspace direction and create a new state
     ////////////////////////////////////////////////////////////////////////////////
-    State next;
+    StateAndTcp next;
     next.config = ForwardStep(current.config, dx);
 
     auto maybe_fk = solve_fk(next.config);
     if(!maybe_fk.has_value()) {
-      if(kDebugInfo) std::cout << "Could not solve FK for " << next.config.format(CommaFmt) << std::endl;
+      if(kDebugInfo) std::cout << "Could not solve FK for " << next.config << std::endl;
       success_ = true;
       return configs;
     }
@@ -234,16 +233,16 @@ std::vector<Eigen::VectorXd> KinematicsSolver::solve_edge_ik_with_config(const E
           std::cout << "Error not decreasing: " << next.error << ">=" << current.error << " for " 
           << non_increasing_iteration << " iterations. Terminating." << std::endl;
           std::cout << "Epsilon is " << Epsilon << std::endl;
-          std::cout << " Start was         : " << start_config.format(CommaFmt) << std::endl;
-          std::cout << " Goal to reach was : " << goal_config.format(CommaFmt) << std::endl;
-          std::cout << " Last dx was       : " << dx.format(CommaFmt) << std::endl;
+          std::cout << " Start was         : " << start_config << std::endl;
+          std::cout << " Goal to reach was : " << goal_config << std::endl;
+          std::cout << " Last dx was       : " << dx << std::endl;
         }
         break;
       }
     }
 
     if(kDebugInfo) {
-      std::cout << "Current error: " << next.error << " at Tcp " << next.tcp.format(CommaFmt) << " and config " << next.config.format(CommaFmt) << std::endl;
+      std::cout << "Current error: " << next.error << " at Tcp " << next.tcp << " and config " << next.config << std::endl;
     }
 
     current = next;

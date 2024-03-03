@@ -22,7 +22,7 @@ dart::dynamics::SkeletonPtr MobileKukaRobot::MakeSkeleton() {
   manipulator->setAdjacentBodyCheck(true);
 
   Eigen::Isometry3d transform(Eigen::Isometry3d::Identity());
-  transform.translation() = Eigen::Vector3d{0.0, 0.0, -0.2};
+  transform.translation() = State3d{0.0, 0.0, -0.2};
   manipulator->getRootBodyNode()->getParentJoint()->setTransformFromParentBodyNode(transform);
 
   //Disable friction. This was causing an assert error in ContactConstraint.cpp
@@ -72,7 +72,7 @@ ompl::multilevel::FactoredSpaceInformationPtr MobileKukaRobot::MakeSpaceInformat
   return factor;
 }
 
-Eigen::VectorXd MobileKukaRobot::StateToEigen(const ompl::base::State* state) const {
+StateXd MobileKukaRobot::StateToEigen(const ompl::base::State* state) const {
   auto N = GetDimension();
   Eigen::VectorXd v(N);
   const auto *state_SE2 = state->as<ompl::base::CompoundState>()->as<ompl::base::SE2StateSpace::StateType>(0);
@@ -85,20 +85,20 @@ Eigen::VectorXd MobileKukaRobot::StateToEigen(const ompl::base::State* state) co
   {
       v[k + 3] = state_RN->values[k];
   }
-  return v;
+  return MakeState(v);
 }
 
-void MobileKukaRobot::EigenToState(const Eigen::VectorXd& v, ompl::base::State* state) const {
-  auto N = v.size();
+void MobileKukaRobot::EigenToState(const StateXd& v, ompl::base::State* state) const {
+  auto N = v.configuration.size();
   auto *state_SE2 = state->as<ompl::base::CompoundState>()->as<ompl::base::SE2StateSpace::StateType>(0);
   auto *state_RN = state->as<ompl::base::CompoundState>()->as<ompl::base::RealVectorStateSpace::StateType>(1);
 
-  state_SE2->setX(v[0]);
-  state_SE2->setY(v[1]);
-  state_SE2->setYaw(v[2]);
+  state_SE2->setX(v.configuration[0]);
+  state_SE2->setY(v.configuration[1]);
+  state_SE2->setYaw(v.configuration[2]);
 
   for (unsigned int k = 0; k < N-3; k++)
   {
-      state_RN->values[k] = v[k + 3];
+      state_RN->values[k] = v.configuration[k + 3];
   }
 }

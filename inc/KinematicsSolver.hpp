@@ -4,6 +4,8 @@
 #include <ompl/util/ClassForward.h>
 #include <optional>
 
+#include "State.hpp"
+
 OMPL_CLASS_FORWARD(KinematicsSolver);
 
 const bool kDebugInfo = false;
@@ -17,15 +19,15 @@ class KinematicsSolver {
   public:
     KinematicsSolver(const dart::dynamics::SkeletonPtr& skeleton);
 
-    std::optional<Eigen::VectorXd> solve_ik(const Eigen::Vector3d& frame, size_t max_iterations = kDefaultMaxIKIterations);
-    std::optional<Eigen::Vector3d> solve_fk(const Eigen::VectorXd& config);
-    std::vector<Eigen::VectorXd> solve_edge_ik_with_config(const Eigen::VectorXd& start_config, const Eigen::VectorXd& goal_config);
+    std::optional<StateXd> solve_ik(const State3d& frame, size_t max_iterations = kDefaultMaxIKIterations);
+    std::optional<State3d> solve_fk(const StateXd& config);
+    std::vector<StateXd> solve_edge_ik_with_config(const StateXd& start_config, const StateXd& goal_config);
 
     bool lastSolveWasSuccessful();
-    Eigen::VectorXd ForwardStep(const Eigen::VectorXd& config, const Eigen::VectorXd& dx) const;
+    StateXd ForwardStep(const StateXd& config, const TangentVector& dx) const;
 
-    Eigen::VectorXd ComputeJointLimitForce(const Eigen::VectorXd& config) const;
-    bool AddConfig(const Eigen::VectorXd& config, std::vector<Eigen::VectorXd>& configs);
+    TangentVector ComputeJointLimitForce(const StateXd& config) const;
+    bool AddConfig(const StateXd& config, std::vector<StateXd>& configs);
 
   private:
     dart::dynamics::SkeletonPtr skeleton_;
