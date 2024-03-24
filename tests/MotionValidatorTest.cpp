@@ -66,7 +66,7 @@ TEST(MotionValidatorTest, EarlyStoppageLineDistanceTest) {
     ////////////////////////////////////////////////////////////////////////////////
     const auto mid = s1_tcp + 0.5 * (s2_tcp - s1_tcp);
     auto mid_config = MakeState({mid[0], mid[1], mid[2]});
-    obstacle->GetSkeleton()->setConfiguration(mid_config);
+    obstacle->GetSkeleton()->setConfiguration(mid_config.configuration);
 
     auto configs = motion_validator->propagateMotion(s1, s2);
     if(configs.empty()) {
@@ -88,7 +88,7 @@ TEST(MotionValidatorTest, EarlyStoppageLineDistanceTest) {
     std::cout << "  Tcp[reached] " << s3_tcp << std::endl;
     std::cout << "  Tcp[mid]     " << mid << std::endl;
     std::cout << std::string(80,'-') << std::endl;
-    auto d_mid = LineDistance(s1_tcp, s2_tcp, mid_config);
+    auto d_mid = LineDistance(s1_tcp, s2_tcp, mid_config.configuration);
     auto d = LineDistance(s1_tcp, s2_tcp, s3_tcp);
     EXPECT_LT(d_mid, kLineAccuracy);
     EXPECT_LT(d, kLineAccuracy);

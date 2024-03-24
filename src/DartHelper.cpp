@@ -56,6 +56,10 @@ dart::dynamics::SimpleFramePtr createSphereFrame(const State3d& position, const 
   return target;
 }
 
+dart::dynamics::SimpleFramePtr createSphereFrame(const StateXd& position, const float radius, const State3d& color) {
+  return createSphereFrame(position.configuration, radius, color);
+}
+
 dart::dynamics::SimpleFramePtr createLineSegmentFrame(const State3d& s1, const State3d& s2, const State3d& color, float line_width) {
   static int counter = 0;
   Eigen::Isometry3d tf = Eigen::Isometry3d::Identity();

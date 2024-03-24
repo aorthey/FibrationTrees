@@ -42,7 +42,7 @@ TYPED_TEST(RobotLoaderTest, DefaultLoaderTest) {
   const auto Ndim = si->getStateDimension();
 
   std::cout << "Created robot " << robot->GetSpaceInformation()->getName() << " with " << Ndim << " dimensions." << std::endl;
-  StateXd v(Ndim);
+  StateXd v = MakeConstantState(Ndim, 0.0f);
   for(size_t k = 0; k < Ndim; k++) {
     v[k] = k+1;
   }
@@ -99,15 +99,12 @@ TYPED_TEST(RobotLoaderTest, ObstacleLoaderTest) {
   const auto Ndim = factor->getStateDimension();
 
   auto q = factor->allocState();
-  StateXd v(Ndim);
+  StateXd v = MakeConstantState(Ndim, std::numeric_limits<double>::quiet_NaN());
+
   ////////////////////////////////////////////////////////////////////////////////
   std::cout << "Test IsValid" << std::endl;
   ////////////////////////////////////////////////////////////////////////////////
 
-  //NaN is invalid
-  for(size_t k = 0; k < Ndim; k++) {
-    v[k] = std::numeric_limits<double>::quiet_NaN();
-  }
   robot->EigenToState(v, q);
   EXPECT_FALSE(factor->isValid(q));
 

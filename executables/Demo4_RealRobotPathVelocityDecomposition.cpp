@@ -25,7 +25,7 @@
 #include <ompl/multilevel/datastructures/projections/SubspaceProjection.h>
 
 std::optional<ompl::base::State*> TaskToTotal(const RobotPtr& root_robot, 
-  const RobotPtr& leaf_robot, const State3d& vector) {
+  const RobotPtr& leaf_robot, const StateXd& vector) {
   auto root = root_robot->GetSpaceInformation();
   auto leaf = leaf_robot->GetSpaceInformation();
   ompl::base::State *leaf_state = leaf->allocState();

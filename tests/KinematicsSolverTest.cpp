@@ -67,8 +67,8 @@ void CheckFrontAndBackConfigs(const KinematicsSolverPtr& kinematics_solver, cons
   std::cout << "Goal Tcp (Desired): " << goal_frame << std::endl;
   std::cout << "Goal Tcp (Actual) : " << config2_frame << std::endl;
 
-  EXPECT_NEAR((config1_frame - start_frame).norm(), 0.0f, kAccuracyGoal);
-  EXPECT_NEAR((config2_frame - goal_frame).norm(), 0.0f, kAccuracyGoal);
+  EXPECT_NEAR(Distance(config1_frame, start_frame), 0.0f, kAccuracyGoal);
+  EXPECT_NEAR(Distance(config2_frame, goal_frame), 0.0f, kAccuracyGoal);
 }
 
 void EdgeIKTestFromFrames(const KinematicsSolverPtr& kinematics_solver, 
@@ -98,7 +98,7 @@ void EdgeIKTestFromFrames(const KinematicsSolverPtr& kinematics_solver,
 
   std::cout << "Start (Desired): " << start << ", Goal (Desired): " << goal << std::endl;
   std::cout << "Start (Actual) : " << configs.front() << ", Goal (Actual) : " << configs.back() << std::endl;
-  EXPECT_NEAR((start - configs.front()).norm(), 0.0f, Epsilon);
+  EXPECT_NEAR(Distance(start, configs.front()), 0.0f, Epsilon);
   EXPECT_TRUE(CheckStraightLineAccuracy(kinematics_solver, configs));
 }
 
@@ -132,7 +132,7 @@ TEST(KinematicsSolverTest, ConfigEdgeIKSameFrameTest) {
   EXPECT_TRUE(maybe_goal_ik.has_value());
   auto goal = maybe_goal_ik.value();
 
-  EXPECT_GT((start-goal).norm(), Epsilon);
+  EXPECT_GT(Distance(start, goal), Epsilon);
 
   const auto maybe_tcp_start = kinematics_solver->solve_fk(start);
   EXPECT_TRUE(maybe_tcp_start.has_value());
@@ -142,8 +142,8 @@ TEST(KinematicsSolverTest, ConfigEdgeIKSameFrameTest) {
   EXPECT_TRUE(maybe_tcp_goal.has_value());
   auto goal_tcp = maybe_tcp_goal.value();
 
-  EXPECT_NEAR((start_tcp - start_frame).norm(), 0.0f, kAccuracyGoal);
-  EXPECT_NEAR((goal_tcp - start_frame).norm(), 0.0f, kAccuracyGoal);
+  EXPECT_NEAR(Distance(start_tcp, start_frame), 0.0f, kAccuracyGoal);
+  EXPECT_NEAR(Distance(goal_tcp, start_frame), 0.0f, kAccuracyGoal);
 
   auto configs = kinematics_solver->solve_edge_ik_with_config(start, goal);
   EXPECT_GT(configs.size(), 2u);

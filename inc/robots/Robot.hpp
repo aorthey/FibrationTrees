@@ -37,6 +37,7 @@ class Robot {
 
     bool IsValid(const ompl::base::State* state) const;
 
+    //Returns a vector of State3d, one for each internal robot
     virtual std::vector<State3d> GetFK(const StateXd& config) const;
 
     std::vector<State3d> GetFK(const ompl::base::State* state) const;

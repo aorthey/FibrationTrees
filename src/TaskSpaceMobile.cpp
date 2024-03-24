@@ -75,5 +75,5 @@ double TaskSpaceMobile::distance(const ompl::base::State *from, const ompl::base
     return Inf;
   }
   const auto to_tcp = maybe_to_tcp.value();
-  return (from_tcp - to_tcp).norm();
+  return Distance(from_tcp, to_tcp);
 }

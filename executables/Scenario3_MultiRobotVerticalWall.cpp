@@ -117,10 +117,10 @@ int main(int argc, char* argv[]) {
   //////Create start/goal states and propagate them upwards (lift through the
   //complete fibration trees hierarchy)
   //////////////////////////////////////////////////////////////////////////////////
-  auto task_start1_eigen = State3d(0.4, -0.2, 1.0);
-  auto task_goal1_eigen = State3d(0.4, +0.1, 0.7); //was -0.3
-  auto task_start2_eigen = State3d(0.4, +0.0, 1.0);
-  auto task_goal2_eigen = State3d(0.4, -0.2, 0.6); //was +0.5
+  auto task_start1_eigen = MakeState({0.4, -0.2, 1.0});
+  auto task_goal1_eigen = MakeState({0.4, +0.1, 0.7});
+  auto task_start2_eigen = MakeState({0.4, +0.0, 1.0});
+  auto task_goal2_eigen = MakeState({0.4, -0.2, 0.6});
 
   auto task_start1 = child1->allocState();
   auto task_start2 = child2->allocState();

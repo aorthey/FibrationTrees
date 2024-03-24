@@ -8,8 +8,7 @@ struct StateAndTcp {
 };
 
 float ComputeError(const StateAndTcp& start, const StateAndTcp& goal) {
-  // return (goal.tcp - start.tcp).norm() + (goal.config - start.config).norm();
-  return (goal.tcp - start.tcp).norm();
+  return Distance(goal.tcp, start.tcp);
 }
 
 Eigen::MatrixXd ComputePseudoInverse(const Eigen::MatrixXd& J) {

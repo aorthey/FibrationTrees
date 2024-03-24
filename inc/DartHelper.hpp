@@ -38,6 +38,7 @@ void show(const dart::dynamics::SkeletonPtr& skeleton);
 ////////////////////////////////////////////////////////////////////////////////
 // Simple frame constructors
 ////////////////////////////////////////////////////////////////////////////////
+dart::dynamics::SimpleFramePtr createSphereFrame(const StateXd& position, const float radius = kPathSphereSize, const State3d& color = kPathColor);
 dart::dynamics::SimpleFramePtr createSphereFrame(const State3d& position, const float radius = kPathSphereSize, const State3d& color = kPathColor);
 dart::dynamics::SimpleFramePtr createLineSegmentFrame(const State3d& s1, const State3d& s2, const State3d& color = kPathColor, float line_width= kDefaultLineWidth);
 dart::dynamics::SimpleFramePtr createLineSegmentFrame(const std::vector<State3d>& vertices, const State3d& color = kPathColor, float line_width= kDefaultLineWidth);

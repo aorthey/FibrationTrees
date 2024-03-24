@@ -113,8 +113,8 @@ void CheckMultiRobotEdge(
   EXPECT_EQ(tcp_start.size(), 2u);
   std::cout << "Tcp start[1] " << tcp_start.at(0) << std::endl;
   std::cout << "Tcp start[2] " << tcp_start.at(1) << std::endl;
-  EXPECT_NEAR((tcp_start.at(0) - task_start1_eigen).norm(), 0.0, kIKSolutionAccuracy);
-  EXPECT_NEAR((tcp_start.at(1) - task_start2_eigen).norm(), 0.0, kIKSolutionAccuracy);
+  EXPECT_NEAR(Distance(tcp_start.at(0), task_start1_eigen.configuration), 0.0, kIKSolutionAccuracy);
+  EXPECT_NEAR(Distance(tcp_start.at(1), task_start2_eigen.configuration), 0.0, kIKSolutionAccuracy);
 
   ////////////////////////////////////////////////////////////////////////////////
   // Compute IK solution for goal
@@ -133,8 +133,8 @@ void CheckMultiRobotEdge(
   EXPECT_EQ(tcp_goal.size(), 2u);
   std::cout << "Tcp goal[1] " << tcp_goal.at(0) << std::endl;
   std::cout << "Tcp goal[2] " << tcp_goal.at(1) << std::endl;
-  EXPECT_NEAR((tcp_goal.at(0) - task_goal1_eigen).norm(), 0.0, kIKSolutionAccuracy);
-  EXPECT_NEAR((tcp_goal.at(1) - task_goal2_eigen).norm(), 0.0, kIKSolutionAccuracy);
+  EXPECT_NEAR(Distance(tcp_goal.at(0), task_goal1_eigen.configuration), 0.0, kIKSolutionAccuracy);
+  EXPECT_NEAR(Distance(tcp_goal.at(1), task_goal2_eigen.configuration), 0.0, kIKSolutionAccuracy);
 
   ////////////////////////////////////////////////////////////////////////////////
   // Motion propagation
@@ -271,9 +271,9 @@ protected:
       factor->project(state, children_states);
 
       auto config1 = robot1->StateToEigen(children_states.at(name1));
-      robot1->GetSkeleton()->setConfiguration(config1);
+      robot1->GetSkeleton()->setConfiguration(config1.configuration);
       auto config2 = robot2->StateToEigen(children_states.at(name2));
-      robot2->GetSkeleton()->setConfiguration(config2);
+      robot2->GetSkeleton()->setConfiguration(config2.configuration);
 
       EXPECT_EQ(collision_checker->GetCollisionChecker()->IsInCollision(), desired_result);
     }

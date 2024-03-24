@@ -46,6 +46,21 @@ StateXd MakeState(const size_t dimension, const double *values) {
   return MakeState(v);
 }
 
+StateXd MakeConstantState(const size_t dimension, const double value) {
+  Eigen::VectorXd v(dimension);
+  for(size_t k = 0; k < dimension; k++) {
+    v[k] = value;
+  }
+  return MakeState(v);
+}
+
+StateXd CwiseMin(const StateXd& lhs, const StateXd& rhs) {
+  return MakeState(lhs.configuration.cwiseMin(rhs.configuration));
+}
+StateXd CwiseMax(const StateXd& lhs, const StateXd& rhs) {
+  return MakeState(lhs.configuration.cwiseMax(rhs.configuration));
+}
+
 namespace std {
   std::string to_string(const StateXd& state) {
     std::stringstream tmp;
@@ -57,6 +72,10 @@ namespace std {
 float Distance(const StateXd& lhs, const StateXd& rhs) {
   return (lhs.configuration - rhs.configuration).norm();
 }
+float Distance(const State3d& lhs, const State3d& rhs) {
+  return (lhs - rhs).norm();
+}
+
 StateXd operator + (const StateXd& lhs, const TangentVector& rhs) {
   return MakeState(lhs.configuration + rhs);
 }
