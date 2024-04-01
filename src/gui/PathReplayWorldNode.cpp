@@ -51,6 +51,8 @@ void PathReplayWorldNode::AddPath(const RobotPtr& robot, const ompl::base::PathP
 
   const float L = path->GetLength();
 
+  //Move along path, and compute Tcp positions. Then create line segments from them to display.
+
   std::vector<std::vector<State3d>> vertices;
   const auto s = path->GetConfigAt(0.0);
   const auto frames = robot->GetFK(s);
@@ -269,40 +271,6 @@ PathReplayEventHandler::PathReplayEventHandler(PathReplayWorldNode* world_node)
 bool PathReplayEventHandler::handle(
     const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter&) 
 {
-  // if(ea.getUnmodifiedKey() > 128) {
-  //   return true;
-  // }
-  // std::cout << " key       : " << ea.getUnmodifiedKey() << std::endl;
-  // std::cout << " mod       : " << ea.getModKeyMask() << std::endl;
-  // std::cout << " event type: " << ea.getEventType() << std::endl;
-  // if(ea.getModKeyMask() == osgGA::GUIEventAdapter::ModKeyMask::MODKEY_META) {
-  //   return true;
-  // }
-  // if(ea.getModKeyMask() == osgGA::GUIEventAdapter::ModKeyMask::MODKEY_SUPER) {
-  //   return true;
-  // }
-  // if(ea.getModKeyMask() == osgGA::GUIEventAdapter::ModKeyMask::MODKEY_HYPER) {
-  //   return true;
-  // }
-  // if(ea.getModKeyMask() == osgGA::GUIEventAdapter::ModKeyMask::MODKEY_SHIFT) {
-  //   return true;
-  // }
-  // if(ea.getModKeyMask() == osgGA::GUIEventAdapter::ModKeyMask::MODKEY_CTRL) {
-  //   return true;
-  // }
-  // if(ea.getModKeyMask() == osgGA::GUIEventAdapter::ModKeyMask::MODKEY_ALT) {
-  //   return true;
-  // }
-  // if(ea.getKey() == osgGA::GUIEventAdapter::KeySymbol::KEY_Alt_L) {
-  //   return true;
-  // }
-  // if(ea.getKey() == osgGA::GUIEventAdapter::KeySymbol::KEY_Alt_R) {
-  //   return true;
-  // }
-
-  // if (ea.getEventType() == osgGA::GUIEventAdapter::RESIZE) {
-  //   return true;
-  // }
   if (ea.getEventType() == osgGA::GUIEventAdapter::KEYDOWN)
   {
     const auto events = world_node_->GetKeyPressEvents();

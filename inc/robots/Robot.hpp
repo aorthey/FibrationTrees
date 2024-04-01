@@ -20,6 +20,7 @@ class Robot {
     virtual ompl::base::MotionValidatorPtr MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& robot);
 
     virtual StateXd StateToEigen(const ompl::base::State* state) const = 0;
+    virtual float StateToTime(const ompl::base::State* state) const;
     virtual void EigenToState(const StateXd& v, ompl::base::State* state) const = 0;
 
     const std::shared_ptr<dart::dynamics::Skeleton>& GetSkeleton();
@@ -41,6 +42,9 @@ class Robot {
     virtual std::vector<State3d> GetFK(const StateXd& config) const;
 
     std::vector<State3d> GetFK(const ompl::base::State* state) const;
+
+    void Hide();
+    void Show();
 
   protected:
     dart::dynamics::SkeletonPtr skeleton_;

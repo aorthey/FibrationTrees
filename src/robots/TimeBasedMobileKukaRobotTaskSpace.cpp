@@ -19,11 +19,11 @@ void TimeBasedMobileKukaRobotTaskSpace::SetSpaceInformationFromRobot(const Robot
     const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles) {
   ompl::base::StateSpacePtr space_time(new ompl::base::SpaceTimeStateSpace(robot->GetSpaceInformation()->getStateSpace()));
   auto factor = std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space_time);
+  //auto motion_validator = std::make_shared<TranslationTaskSpaceMotionValidator>(factor, robot);
+  factor->setMotionValidator(robot->GetSpaceInformation()->getMotionValidator());//motion_validator);
   SetSpaceInformation(factor);
   auto collision_checker = MakeCollisionChecker(factor, world, obstacles);
   SetCollisionChecker(collision_checker);
-  // auto motion_validator = robot->GetMotionValidator();
-  // factor->setMotionValidator(motion_validator);
 }
 
 // ompl::base::MotionValidatorPtr TimeBasedMobileKukaRobotTaskSpace::MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& robot) {
@@ -50,12 +50,16 @@ StateXd TimeBasedMobileKukaRobotTaskSpace::StateToEigen(const ompl::base::State*
 
   // const double time = std::static_pointer_cast<ompl::base::SpaceTimeStateSpace>(factor_->getStateSpace())->getStateTime(state);
   // v[N-1] = time;
-  std::cout << "StateToEigen: " << v << std::endl;
+  //std::cout << "StateToEigen: " << v << std::endl;
   return MakeState(v);
 }
 
+float TimeBasedMobileKukaRobotTaskSpace::StateToTime(const ompl::base::State* state) const {
+  return state->as<ompl::base::CompoundState>()->as<ompl::base::TimeStateSpace::StateType>(1)->position;
+}
+
 void TimeBasedMobileKukaRobotTaskSpace::EigenToState(const StateXd& v, ompl::base::State* state) const {
-  std::cout << "EigenToState" << std::endl;
+  //std::cout << "EigenToState" << std::endl;
   auto N = v.configuration.size();
 
   auto *state_position = state->as<ompl::base::CompoundState>()->as<ompl::base::State>(0)->as<ompl::base::CompoundState>();
@@ -76,5 +80,5 @@ void TimeBasedMobileKukaRobotTaskSpace::EigenToState(const StateXd& v, ompl::bas
   }
 
   state->as<ompl::base::CompoundState>()->as<ompl::base::TimeStateSpace::StateType>(1)->position = v[N-1];
-  std::cout << "EigenToState" << std::endl;
+  //std::cout << "EigenToState" << std::endl;
 }

@@ -10,6 +10,28 @@ const std::shared_ptr<dart::dynamics::Skeleton>& Robot::GetSkeleton() {
   return skeleton_;
 }
 
+void Robot::Hide() {
+  for(const auto& body_node : skeleton_->getBodyNodes()) {
+    auto shapeNodes = body_node->getShapeNodesWith<dart::dynamics::VisualAspect>();
+    for(const auto& node : shapeNodes) {
+      auto properties(node->getVisualAspect()->getProperties());
+      properties.mHidden = true;
+      node->getVisualAspect()->setProperties(properties);
+    }
+  }
+}
+
+void Robot::Show() {
+  for(const auto& body_node : skeleton_->getBodyNodes()) {
+    auto shapeNodes = body_node->getShapeNodesWith<dart::dynamics::VisualAspect>();
+    for(const auto& node : shapeNodes) {
+      auto properties(node->getVisualAspect()->getProperties());
+      properties.mHidden = false;
+      node->getVisualAspect()->setProperties(properties);
+    }
+  }
+}
+
 const std::shared_ptr<ompl::multilevel::FactoredSpaceInformation>& Robot::GetSpaceInformation() {
   return factor_;
 }
@@ -28,6 +50,10 @@ void Robot::SetSpaceInformation(const ompl::multilevel::FactoredSpaceInformation
 
 void Robot::SetCollisionChecker(const CollisionCheckerPtr& collision_checker) {
   collision_checker_ = collision_checker;
+}
+
+float Robot::StateToTime(const ompl::base::State* state) const {
+  return -1.0f;
 }
 
 std::vector<State3d> Robot::GetFK(const ompl::base::State* state) const {

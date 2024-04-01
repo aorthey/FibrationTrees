@@ -102,6 +102,7 @@ class EigenPath {
 
   private:
     std::vector<StateXd> configs_;
+    std::vector<float> time_at_configs_;
     std::vector<float> lengths_;
     float total_length_{0.0f};
 };

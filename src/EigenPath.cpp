@@ -14,6 +14,7 @@ EigenPath::EigenPath(const RobotPtr& robot, const ompl::base::PathPtr& path) {
   ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
   auto states = pgeo.getStates();
   configs_.clear();
+  time_at_configs_.clear();
 
   std::cout << "Create EigenPath from " << states.size() << " states." << std::endl;
   for(size_t k = 0; k < states.size(); k++) {
@@ -28,6 +29,13 @@ EigenPath::EigenPath(const RobotPtr& robot, const ompl::base::PathPtr& path) {
       }
     }
     configs_.push_back(config);
+
+    float time = robot->StateToTime(states.at(k));
+    if(time < 0) {
+      time_at_configs_.push_back((float)k/((float)states.size()-1.0f));
+    } else {
+      time_at_configs_.push_back(time);
+    }
   }
   InitLengthFromConfigs(configs_);
 }

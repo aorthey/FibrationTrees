@@ -49,7 +49,6 @@ int main(int argc, char* argv[]) {
   dart::dynamics::SkeletonPtr floor = createFloor(-0.255);
   dart::dynamics::SkeletonPtr box = createBox(State3d(0,0,0), 0.3, 0.3, 0.8);
   obstacles.push_back(floor);
-  //obstacles.push_back(box);
   dart::math::Random::setSeed(0);
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -62,50 +61,28 @@ int main(int argc, char* argv[]) {
   world->setGravity(State3d::Zero());
   addCoordinateFrameToWorld(world);
 
-  auto robot = MakeRobot<MobileKukaRobotTaskSpace>(world, obstacles);
-  robot->Hide();
-
   auto robot_in_time = MakeRobot<TimeBasedMobileKukaRobotTaskSpace>(world, obstacles);
-  robot_in_time->SetSpaceInformationFromRobot(robot, world, obstacles);
-
-  auto point = MakeRobot<SphereRobot>(world, obstacles);
-  point->Hide();
-
-  const auto limits = std::make_pair(State3d(-1.5, -1.5, kZheight - kAccuracy), State3d(1.5, +1.5, kZheight + kAccuracy));
-  point->SetLimits(limits);
 
   ////////////////////////////////////////////////////////////////////////////////
   ////OMPL Setup
   ////////////////////////////////////////////////////////////////////////////////
   auto factor1 = robot_in_time->GetSpaceInformation();
-  auto factor2 = robot->GetSpaceInformation();
-  auto factor3 = point->GetSpaceInformation();
-
-  auto projection_1_2 = std::make_shared<ompl::multilevel::Projection_Subspace>(factor1, factor2, 0);
-  auto projection_2_3 = std::make_shared<TaskSpaceProjection>(factor2, factor3, robot);
-
-  ReturnIntOnFalse(factor1->addChild(factor2, projection_1_2));
-  ReturnIntOnFalse(factor2->addChild(factor3, projection_2_3));
-
   factor1->printFactorization(std::cout);
 
   ////////////////////////////////////////////////////////////////////////////////
   ////Create planning problem
   ////////////////////////////////////////////////////////////////////////////////
 
-  auto point_start = MakeState({+1.2, +1.2, kZheight});
-  auto point_goal = MakeState({-1.2, -1.2, kZheight});
-  ValueOrReturnInt(goal, TaskToTotal(robot_in_time, point, point_goal));
-  ValueOrReturnInt(start, TaskToTotal(robot_in_time, point, point_start));
+  auto start = factor1->allocState();
+  auto goal = factor1->allocState();
+
+  robot_in_time->EigenToState(GetRandomPosition(robot_in_time->GetSkeleton()), start);
+  robot_in_time->EigenToState(GetRandomPosition(robot_in_time->GetSkeleton()), goal);
 
   factor1->printState(start);
-  factor1->printState(goal);
 
   ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(factor1);
   pdef->setStartAndGoalStates(start, goal, 0.1);
-
-  world->addSimpleFrame(createSphereFrame(point_start, 0.01));
-  world->addSimpleFrame(createSphereFrame(point_goal, 0.01));
 
    ////////////////////////////////////////////////////////////////////////////////
    ////Planning
@@ -116,7 +93,7 @@ int main(int argc, char* argv[]) {
    planner->setRange(+Inf);
    planner->setSmoothIntermediateSolutions();
 
-   float timeout = 1000.0;
+   float timeout = 10.0;
 
    auto ptc = ompl::base::plannerOrTerminationCondition(
            ompl::base::exactSolnPlannerTerminationCondition(pdef),
@@ -128,7 +105,9 @@ int main(int argc, char* argv[]) {
   Visualizer visualizer(world);
   visualizer.AddPlanner(robot_in_time, planner);
   visualizer.SetCollisionChecker(robot_in_time->GetCollisionChecker());
-  visualizer.AddPath(point, planner->getProblemDefinition(factor3->getName())->getSolutionPath(), State3d(1, 1, 0));
   visualizer.Run();
+
+  factor1->freeState(start);
+  factor1->freeState(goal);
   return 0;
 }
