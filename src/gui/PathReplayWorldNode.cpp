@@ -18,7 +18,7 @@ PathReplayWorldNode::PathReplayWorldNode(dart::simulation::WorldPtr world)
 PathReplayWorldNode::~PathReplayWorldNode() {
 }
 
-const float kVisualizationStepSize = 0.01; //was 0.01
+const float kVisualizationStepSize = 0.1; //was 0.01
 
 std::vector<State3d> MakeEdgeVertices(const RobotPtr& robot, const ompl::base::SpaceInformationPtr& si, const ompl::base::State* s1, const ompl::base::State* s2, std::vector<StateXd>& configs) {
   const auto L = si->distance(s1, s2);

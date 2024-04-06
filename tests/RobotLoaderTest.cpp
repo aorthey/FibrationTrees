@@ -1,13 +1,14 @@
 #include <gtest/gtest.h>
-#include "robots/MobileKukaRobot.hpp"
 #include "robots/KukaRobot.hpp"
-#include "robots/MobileKukaRobotTaskSpace.hpp"
-#include "robots/MobileKukaBase.hpp"
 #include "robots/KukaRobotTaskSpace.hpp"
+#include "robots/MobileKukaBase.hpp"
+#include "robots/MobileKukaRobot.hpp"
+#include "robots/MobileKukaRobotTaskSpace.hpp"
 #include "robots/SphereRobot.hpp"
-#include "robots/MultiRobot.hpp"
-#include "robots/ZeppelinRobot.hpp"
+#include "robots/TimeBasedMobileKukaRobotTaskSpace.hpp"
+#include "robots/TimeBasedSphereRobot.hpp"
 #include "robots/ZeppelinInnerSphereRobot.hpp"
+#include "robots/ZeppelinRobot.hpp"
 #include "robots/RobotFactory.hpp"
 
 #include "OmplHelper.hpp"
@@ -16,20 +17,18 @@
 template <class T>
 class RobotLoaderTest : public testing::Test {};
 
-// struct MultiRobotTest : public MultiRobot {
-//   MultiRobotTest() : MultiRobot(std::vector<RobotPtr>({MakeRobot<SphereRobot>(), MakeRobot<SphereRobot>()})) {
-//   };
-// };
-
 using RobotTypes = ::testing::Types<
-    MobileKukaRobot, 
-    MobileKukaRobotTaskSpace, 
     KukaRobot, 
     KukaRobotTaskSpace, 
+    MobileKukaBase,
+    MobileKukaRobot, 
+    MobileKukaRobotTaskSpace, 
     SphereRobot, 
-    ZeppelinRobot, 
+    //TimeBasedMobileKukaRobotTaskSpace, 
+    //TimeBasedSphereRobot, 
     ZeppelinInnerSphereRobot,
-    MobileKukaBase>;
+    ZeppelinRobot
+>;
 
 TYPED_TEST_SUITE(RobotLoaderTest, RobotTypes);
 
@@ -40,6 +39,7 @@ TYPED_TEST(RobotLoaderTest, DefaultLoaderTest) {
   auto si = robot->GetSpaceInformation();
 
   const auto Ndim = si->getStateDimension();
+  //const auto Ndim = robot->GetSkeleton()->getNumDofs();
 
   std::cout << "Created robot " << robot->GetSpaceInformation()->getName() << " with " << Ndim << " dimensions." << std::endl;
   StateXd v = MakeConstantState(Ndim, 0.0f);

@@ -1,18 +1,18 @@
 #pragma once
 
-#include <ompl/base/StateSpace.h>
-
+#include <ompl/base/spaces/RealVectorStateSpace.h>
+#include "projections/ProjectionTaskSpace.hpp"
+#include "OmplHelper.hpp"
 #include "robots/Robot.hpp"
-#include "KinematicsSolver.hpp"
 
 OMPL_CLASS_FORWARD(TaskSpace);
 
-class TaskSpaceMobile : public ompl::base::CompoundStateSpace {
+class TaskSpace : public ompl::base::RealVectorStateSpace {
  public:
 
-  explicit TaskSpaceMobile(const RobotPtr& robot);
+  explicit TaskSpace(const RobotPtr& robot);
 
-  ~TaskSpaceMobile();
+  ~TaskSpace();
 
   void interpolate(const ompl::base::State *from, const ompl::base::State *to, double t, ompl::base::State *state) const override;
 

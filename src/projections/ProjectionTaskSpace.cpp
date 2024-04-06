@@ -1,11 +1,11 @@
-#include "TaskSpaceProjection.hpp"
+#include "projections/ProjectionTaskSpace.hpp"
 
 #include <ompl/base/SpaceInformation.h>
 
 #include "dart/math/Random.hpp"
 #include "KinematicsSolver.hpp"
 
-TaskSpaceProjection::TaskSpaceProjection(const ompl::base::SpaceInformationPtr& bundle, 
+ProjectionTaskSpace::ProjectionTaskSpace(const ompl::base::SpaceInformationPtr& bundle, 
     const ompl::base::SpaceInformationPtr& base, 
     const RobotPtr& robot)
   : ompl::multilevel::Projection(bundle->getStateSpace(), base->getStateSpace()), robot_(robot) {
@@ -28,12 +28,12 @@ TaskSpaceProjection::TaskSpaceProjection(const ompl::base::SpaceInformationPtr& 
       base_values[k] = std::numeric_limits<double>::quiet_NaN();
   }
 }
-TaskSpaceProjection::~TaskSpaceProjection() {
+ProjectionTaskSpace::~ProjectionTaskSpace() {
   getBundle()->freeState(defaultBundleReturnState_);
   getBase()->freeState(defaultBaseReturnState_);
 }
 
-void TaskSpaceProjection::project(const ompl::base::State *xBundle, ompl::base::State *xBase) const
+void ProjectionTaskSpace::project(const ompl::base::State *xBundle, ompl::base::State *xBase) const
 {
     auto config = robot_->StateToEigen(xBundle);
     const auto maybe_frame = kinematics_solver_->solve_fk(config);
@@ -50,7 +50,7 @@ void TaskSpaceProjection::project(const ompl::base::State *xBundle, ompl::base::
     values[2] = frame[2];
 }
 
-void TaskSpaceProjection::lift(const ompl::base::State *xBase, ompl::base::State *xBundle) const
+void ProjectionTaskSpace::lift(const ompl::base::State *xBase, ompl::base::State *xBundle) const
 {
     double *xBaseValues = xBase->as<ompl::base::RealVectorStateSpace::StateType>()->values;
     State3d frame;

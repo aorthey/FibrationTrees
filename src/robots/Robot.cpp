@@ -55,6 +55,8 @@ void Robot::SetCollisionChecker(const CollisionCheckerPtr& collision_checker) {
 float Robot::StateToTime(const ompl::base::State* state) const {
   return -1.0f;
 }
+void Robot::TimeToState(const float /*time*/, ompl::base::State* /*state*/) const {
+}
 
 std::vector<State3d> Robot::GetFK(const ompl::base::State* state) const {
   return GetFK(StateToEigen(state));

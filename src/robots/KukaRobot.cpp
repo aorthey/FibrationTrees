@@ -1,7 +1,7 @@
 #include "robots/KukaRobot.hpp"
 
 #include <ompl/base/spaces/RealVectorStateSpace.h>
-#include "TaskSpace.hpp"
+#include "spaces/TaskSpace.hpp"
 #include "KinematicsSolver.hpp"
 
 dart::dynamics::SkeletonPtr KukaRobot::MakeSkeleton() {

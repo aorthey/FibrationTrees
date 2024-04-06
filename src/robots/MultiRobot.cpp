@@ -1,5 +1,5 @@
 #include "robots/MultiRobot.hpp"
-#include "TaskSpaceMultiRobotMotionValidator.hpp"
+#include "validators/MotionValidatorTaskSpaceMultiRobot.hpp"
 #include "DartHelper.hpp"
 
 MultiRobot::MultiRobot(const std::vector<RobotPtr>& robots) 

@@ -3,6 +3,11 @@
 #include "EigenPath.hpp"
 #include "OmplHelper.hpp"
 #include "Common.hpp"
+#include "robots/SphereRobot.hpp"
+#include "robots/TimeBasedMobileKukaRobotTaskSpace.hpp"
+#include "robots/RobotFactory.hpp"
+
+const float kPathAccuracy = 1e-6;
 
 TEST(EigenPathTest, EmptyTest) {
   std::vector<StateXd> configs;
@@ -19,24 +24,24 @@ TEST(EigenPathTest, StraightLineTest) {
   EigenPath path(configs);
 
   auto x = path.GetConfigAt(0.0);
-  EXPECT_NEAR(x[0], 0.0, Epsilon);
-  EXPECT_NEAR(x[1], 0.0, Epsilon);
+  EXPECT_NEAR(x[0], 0.0, kPathAccuracy);
+  EXPECT_NEAR(x[1], 0.0, kPathAccuracy);
 
   x = path.GetConfigAt(0.25);
-  EXPECT_NEAR(x[0], 0.0, Epsilon);
-  EXPECT_NEAR(x[1], 0.75, Epsilon);
+  EXPECT_NEAR(x[0], 0.0, kPathAccuracy);
+  EXPECT_NEAR(x[1], 0.75, kPathAccuracy);
 
   x = path.GetConfigAt(0.5);
-  EXPECT_NEAR(x[0], 0.0, Epsilon);
-  EXPECT_NEAR(x[1], 1.5, Epsilon);
+  EXPECT_NEAR(x[0], 0.0, kPathAccuracy);
+  EXPECT_NEAR(x[1], 1.5, kPathAccuracy);
 
   x = path.GetConfigAt(0.75);
-  EXPECT_NEAR(x[0], 0.0, Epsilon);
-  EXPECT_NEAR(x[1], 2.25, Epsilon);
+  EXPECT_NEAR(x[0], 0.0, kPathAccuracy);
+  EXPECT_NEAR(x[1], 2.25, kPathAccuracy);
 
   x = path.GetConfigAt(1.0);
-  EXPECT_NEAR(x[0], 0.0, Epsilon);
-  EXPECT_NEAR(x[1], 3.0, Epsilon);
+  EXPECT_NEAR(x[0], 0.0, kPathAccuracy);
+  EXPECT_NEAR(x[1], 3.0, kPathAccuracy);
 
   EXPECT_EQ(path.GetLength(), 3.0);
 }
@@ -51,28 +56,28 @@ TEST(EigenPathTest, BendLineTest) {
   EigenPath path(configs);
 
   auto x = path.GetConfigAt(0.0);
-  EXPECT_NEAR(x[0], 0.0, Epsilon);
-  EXPECT_NEAR(x[1], 0.0, Epsilon);
+  EXPECT_NEAR(x[0], 0.0, kPathAccuracy);
+  EXPECT_NEAR(x[1], 0.0, kPathAccuracy);
 
   x = path.GetConfigAt(0.25);
-  EXPECT_NEAR(x[0], 0.75, Epsilon);
-  EXPECT_NEAR(x[1], 0.0, Epsilon);
+  EXPECT_NEAR(x[0], 0.75, kPathAccuracy);
+  EXPECT_NEAR(x[1], 0.0, kPathAccuracy);
 
   x = path.GetConfigAt(0.5);
-  EXPECT_NEAR(x[0], 1.0, Epsilon);
-  EXPECT_NEAR(x[1], 0.5, Epsilon);
+  EXPECT_NEAR(x[0], 1.0, kPathAccuracy);
+  EXPECT_NEAR(x[1], 0.5, kPathAccuracy);
 
   x = path.GetConfigAt(0.75);
-  EXPECT_NEAR(x[0], 1.25, Epsilon);
-  EXPECT_NEAR(x[1], 1.0, Epsilon);
+  EXPECT_NEAR(x[0], 1.25, kPathAccuracy);
+  EXPECT_NEAR(x[1], 1.0, kPathAccuracy);
 
   x = path.GetConfigAt(1.0);
-  EXPECT_NEAR(x[0], 2.0, Epsilon);
-  EXPECT_NEAR(x[1], 1.0, Epsilon);
+  EXPECT_NEAR(x[0], 2.0, kPathAccuracy);
+  EXPECT_NEAR(x[1], 1.0, kPathAccuracy);
 
   x = path.GetConfigAt(1.5);
-  EXPECT_NEAR(x[0], 2.0, Epsilon);
-  EXPECT_NEAR(x[1], 1.0, Epsilon);
+  EXPECT_NEAR(x[0], 2.0, kPathAccuracy);
+  EXPECT_NEAR(x[1], 1.0, kPathAccuracy);
   EXPECT_EQ(path.GetLength(), 3.0);
 }
 
@@ -87,28 +92,28 @@ TEST(EigenPathTest, SquareTest) {
   EigenPath path(configs);
 
   auto x = path.GetConfigAt(0.0);
-  EXPECT_NEAR(x[0], 0.0, Epsilon);
-  EXPECT_NEAR(x[1], 0.0, Epsilon);
+  EXPECT_NEAR(x[0], 0.0, kPathAccuracy);
+  EXPECT_NEAR(x[1], 0.0, kPathAccuracy);
 
   x = path.GetConfigAt(0.25);
-  EXPECT_NEAR(x[0], 1.0, Epsilon);
-  EXPECT_NEAR(x[1], 0.0, Epsilon);
+  EXPECT_NEAR(x[0], 1.0, kPathAccuracy);
+  EXPECT_NEAR(x[1], 0.0, kPathAccuracy);
 
   x = path.GetConfigAt(0.5);
-  EXPECT_NEAR(x[0], 1.0, Epsilon);
-  EXPECT_NEAR(x[1], 1.0, Epsilon);
+  EXPECT_NEAR(x[0], 1.0, kPathAccuracy);
+  EXPECT_NEAR(x[1], 1.0, kPathAccuracy);
 
   x = path.GetConfigAt(0.75);
-  EXPECT_NEAR(x[0], 0.0, Epsilon);
-  EXPECT_NEAR(x[1], 1.0, Epsilon);
+  EXPECT_NEAR(x[0], 0.0, kPathAccuracy);
+  EXPECT_NEAR(x[1], 1.0, kPathAccuracy);
 
   x = path.GetConfigAt(1.0);
-  EXPECT_NEAR(x[0], 0.0, Epsilon);
-  EXPECT_NEAR(x[1], 0.0, Epsilon);
+  EXPECT_NEAR(x[0], 0.0, kPathAccuracy);
+  EXPECT_NEAR(x[1], 0.0, kPathAccuracy);
 
   x = path.GetConfigAt(1.5);
-  EXPECT_NEAR(x[0], 0.0, Epsilon);
-  EXPECT_NEAR(x[1], 0.0, Epsilon);
+  EXPECT_NEAR(x[0], 0.0, kPathAccuracy);
+  EXPECT_NEAR(x[1], 0.0, kPathAccuracy);
   EXPECT_EQ(path.GetLength(), 4.0);
 }
 
@@ -165,9 +170,123 @@ TEST(EigenPathTest, EigenSplitTest) {
   auto v = MakeState({0, 1, 2, 3, 4, 5});
   EXPECT_EQ(v.size(), 6);
   auto v1 = v.configuration.segment(0, 3);
-  std::cout << v1 << std::endl;
   EXPECT_EQ(v1.size(), 3);
   auto v2 = v.configuration.segment(3, 3);
-  std::cout << v2 << std::endl;
   EXPECT_EQ(v2.size(), 3);
+}
+
+TEST(EigenPathTest, EmptyOmplPath) {
+  auto robot = MakeRobot<SphereRobot>();
+  auto si = robot->GetSpaceInformation();
+  auto ompl_path = std::make_shared<ompl::geometric::PathGeometric>(si);
+  EXPECT_THROW(auto path = EigenPath(robot, ompl_path), std::length_error);
+}
+
+TEST(EigenPathTest, OmplPathWithoutTiming) {
+  auto robot = MakeRobot<SphereRobot>();
+  auto si = robot->GetSpaceInformation();
+
+  auto space = si->getStateSpace();
+  ompl::base::ScopedState<> t1(space);
+  t1[0] = 0;
+  t1[1] = 0;
+  t1[2] = 0;
+
+  ompl::base::ScopedState<> t2(space);
+  t2[0] = 0;
+  t2[1] = 0.5;
+  t2[2] = 0.0;
+
+  ompl::base::ScopedState<> t3(space);
+  t3[0] = 0;
+  t3[1] = 1.0;
+  t3[2] = 0.0;
+
+  auto ompl_path = std::make_shared<ompl::geometric::PathGeometric>(si);
+  ompl_path->append(t1.get());
+  ompl_path->append(t2.get());
+  ompl_path->append(t3.get());
+
+  auto path = EigenPath(robot, ompl_path);
+
+  {
+    auto x = path.GetConfigAt(0.0);
+    EXPECT_EQ(x.size(), 3u);
+    EXPECT_NEAR(x[0], 0.0, kPathAccuracy);
+    EXPECT_NEAR(x[1], 0.0, kPathAccuracy);
+    EXPECT_NEAR(x[2], 0.0, kPathAccuracy);
+  }
+
+  {
+    auto x = path.GetConfigAt(0.5);
+    EXPECT_NEAR(x[0], 0.0, kPathAccuracy);
+    EXPECT_NEAR(x[1], 0.5, kPathAccuracy);
+    EXPECT_NEAR(x[2], 0.0, kPathAccuracy);
+  }
+
+  {
+    auto x = path.GetConfigAt(1.0);
+    EXPECT_NEAR(x[0], 0.0, kPathAccuracy);
+    EXPECT_NEAR(x[1], 1.0, kPathAccuracy);
+    EXPECT_NEAR(x[2], 0.0, kPathAccuracy);
+  }
+}
+
+
+TEST(EigenPathTest, OmplPathWithTiming) {
+  auto robot = MakeRobot<TimeBasedMobileKukaRobotTaskSpace>();
+  auto si = robot->GetSpaceInformation();
+  auto space = si->getStateSpace();
+
+  auto ompl_path = std::make_shared<ompl::geometric::PathGeometric>(si);
+
+  ompl::base::ScopedState<> t1(space);
+  auto v1 = MakeState({0, 0, 0, 0});
+  v1.time = 0.0;
+  robot->EigenToState(v1, t1.get());
+  ompl_path->append(t1.get());
+
+  ompl::base::ScopedState<> t2(space);
+  auto v2 = MakeState({0, 1, 0, 0});
+  v2.time = 2.0;
+  robot->EigenToState(v2, t2.get());
+  ompl_path->append(t2.get());
+
+  ompl::base::ScopedState<> t3(space);
+  auto v3 = MakeState({0, 2, 0, 0});
+  v3.time = 10.0;
+  robot->EigenToState(v3, t3.get());
+  ompl_path->append(t3.get());
+
+  auto path = EigenPath(robot, ompl_path);
+  {
+    auto x = path.GetConfigAt(0.0);
+    EXPECT_NEAR(x.time, 0.0, Epsilon);
+    EXPECT_NEAR(x[0], 0.0, Epsilon);
+    EXPECT_NEAR(x[1], 0.0, Epsilon);
+  }
+  {
+    auto x = path.GetConfigAt(0.1);
+    EXPECT_NEAR(x.time, 1.0, Epsilon);
+    EXPECT_NEAR(x[0], 0.0, Epsilon);
+    EXPECT_NEAR(x[1], 0.5, Epsilon);
+  }
+  {
+    auto x = path.GetConfigAt(0.2);
+    EXPECT_NEAR(x.time, 2.0, Epsilon);
+    EXPECT_NEAR(x[0], 0.0, Epsilon);
+    EXPECT_NEAR(x[1], 1.0, Epsilon);
+  }
+  {
+    auto x = path.GetConfigAt(0.6);
+    EXPECT_NEAR(x.time, 6.0, Epsilon);
+    EXPECT_NEAR(x[0], 0.0, Epsilon);
+    EXPECT_NEAR(x[1], 1.5, Epsilon);
+  }
+  {
+    auto x = path.GetConfigAt(1.1);
+    EXPECT_NEAR(x.time, 10.0, Epsilon);
+    EXPECT_NEAR(x[0], 0.0, Epsilon);
+    EXPECT_NEAR(x[1], 2.0, Epsilon);
+  }
 }

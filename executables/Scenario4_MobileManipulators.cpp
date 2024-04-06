@@ -4,12 +4,12 @@
 #include "DartHelper.hpp"
 #include "OmplHelper.hpp"
 #include "gui/Visualizer.hpp"
-#include "TaskSpaceMultiRobotMotionValidator.hpp"
+#include "validators/MotionValidatorTaskSpaceMultiRobot.hpp"
 #include "robots/MobileKukaRobotTaskSpace.hpp"
 #include "robots/SphereRobot.hpp"
 #include "robots/RobotFactory.hpp"
 #include "robots/MultiRobot.hpp"
-#include "TaskSpaceProjection.hpp"
+#include "projections/ProjectionTaskSpace.hpp"
 
 #include <dart/dart.hpp>
 
@@ -83,21 +83,21 @@ int main(int argc, char* argv[]) {
   const auto limits1 = std::make_pair(State3d(-1.5, 0.0-kAccuracy, kZheight - kAccuracy), State3d(1.5, 0.0+kAccuracy, kZheight + kAccuracy));
   point1->SetLimits(limits1);
   auto child1 = point1->GetSpaceInformation();
-  auto projection1 = std::make_shared<TaskSpaceProjection>(factor1, child1, robot1);
+  auto projection1 = std::make_shared<ProjectionTaskSpace>(factor1, child1, robot1);
   factor1->addChild(child1, projection1);
 
   auto point2 = MakeRobot<SphereRobot>(world, obstacles);
   const auto limits2 = std::make_pair(State3d(0.0-kAccuracy, -1.5, kZheight - kAccuracy), State3d(0.0+kAccuracy, 1.5, kZheight + kAccuracy));
   point2->SetLimits(limits2);
   auto child2 = point2->GetSpaceInformation();
-  auto projection2 = std::make_shared<TaskSpaceProjection>(factor2, child2, robot2);
+  auto projection2 = std::make_shared<ProjectionTaskSpace>(factor2, child2, robot2);
   factor2->addChild(child2, projection2);
 
   auto point3 = MakeRobot<SphereRobot>(world, obstacles);
   const auto limits3 = std::make_pair(State3d(-1.5, -1.5, kZheight - kAccuracy), State3d(1.5, 1.5, kZheight + kAccuracy));
   point3->SetLimits(limits3);
   auto child3 = point3->GetSpaceInformation();
-  auto projection3 = std::make_shared<TaskSpaceProjection>(factor3, child3, robot3);
+  auto projection3 = std::make_shared<ProjectionTaskSpace>(factor3, child3, robot3);
   factor3->addChild(child3, projection3);
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
   auto pairwise_collision_checker = std::make_shared<DartMultiRobotCollisionChecker>(factor, world, robots);
   factor->setStateValidityChecker(pairwise_collision_checker);
 
-  ompl::base::MotionValidatorPtr motion_validator = std::make_shared<TaskSpaceMultiRobotMotionValidator>(factor);
+  ompl::base::MotionValidatorPtr motion_validator = std::make_shared<MotionValidatorTaskSpaceMultiRobot>(factor);
   factor->setMotionValidator(motion_validator);
 
   factor->printFactorization(std::cout);

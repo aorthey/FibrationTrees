@@ -22,6 +22,7 @@ class Robot {
     virtual StateXd StateToEigen(const ompl::base::State* state) const = 0;
     virtual float StateToTime(const ompl::base::State* state) const;
     virtual void EigenToState(const StateXd& v, ompl::base::State* state) const = 0;
+    virtual void TimeToState(const float time, ompl::base::State* state) const;
 
     const std::shared_ptr<dart::dynamics::Skeleton>& GetSkeleton();
     const std::shared_ptr<ompl::multilevel::FactoredSpaceInformation>& GetSpaceInformation();

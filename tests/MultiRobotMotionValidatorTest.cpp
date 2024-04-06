@@ -13,9 +13,9 @@
 #include "DartHelper.hpp"
 #include "OmplHelper.hpp"
 #include "KinematicsSolver.hpp"
-#include "TranslationTaskSpaceMotionValidator.hpp"
-#include "TaskSpaceProjection.hpp"
-#include "TaskSpaceMultiRobotMotionValidator.hpp"
+#include "validators/MotionValidatorTaskSpaceTranslation.hpp"
+#include "projections/ProjectionTaskSpace.hpp"
+#include "validators/MotionValidatorTaskSpaceMultiRobot.hpp"
 #include "robots/KukaRobotTaskSpace.hpp"
 #include "robots/MultiRobot.hpp"
 #include "robots/SphereRobot.hpp"
@@ -62,13 +62,13 @@ void CheckMultiRobotEdge(
   const auto limits = std::make_pair(State3d(-1.5, -0.1, 0.0), State3d(1.5, 0.1, 2.0));
   point1->SetLimits(limits);
   auto grand_child1 = point1->GetSpaceInformation();
-  auto projection1 = std::make_shared<TaskSpaceProjection>(child1, grand_child1, robot1);
+  auto projection1 = std::make_shared<ProjectionTaskSpace>(child1, grand_child1, robot1);
   child1->addChild(grand_child1, projection1);
 
   auto point2 = MakeRobot<SphereRobot>(world);
   point2->SetLimits(limits);
   auto grand_child2 = point2->GetSpaceInformation();
-  auto projection2 = std::make_shared<TaskSpaceProjection>(child2, grand_child2, robot2);
+  auto projection2 = std::make_shared<ProjectionTaskSpace>(child2, grand_child2, robot2);
   child2->addChild(grand_child2, projection2);
   ////////////////////////////////////////////////////////////////////////////////
   ////Add subspace projections
@@ -83,7 +83,7 @@ void CheckMultiRobotEdge(
   auto pairwise_collision_checker = std::make_shared<DartMultiRobotCollisionChecker>(factor, world, robots);
   factor->setStateValidityChecker(pairwise_collision_checker);
 
-  auto motion_validator = std::make_shared<TaskSpaceMultiRobotMotionValidator>(factor);
+  auto motion_validator = std::make_shared<MotionValidatorTaskSpaceMultiRobot>(factor);
   factor->setMotionValidator(motion_validator);
 
   auto task_start1 = grand_child1->allocState();

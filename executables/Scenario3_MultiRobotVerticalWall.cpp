@@ -2,10 +2,10 @@
 #include <dart/gui/osg/osg.hpp>
 #include <dart/utils/urdf/urdf.hpp>
 
-#include "TaskSpace.hpp"
+#include "spaces/TaskSpace.hpp"
 #include "TaskSpaceGoal.hpp"
-#include "TaskSpaceProjection.hpp"
-#include "TaskSpaceMultiRobotMotionValidator.hpp"
+#include "projections/ProjectionTaskSpace.hpp"
+#include "validators/MotionValidatorTaskSpaceMultiRobot.hpp"
 #include "Common.hpp"
 #include "CollisionChecker.hpp"
 #include "DartHelper.hpp"
@@ -88,13 +88,10 @@ int main(int argc, char* argv[]) {
   auto child1 = point1->GetSpaceInformation();
   auto child2 = point2->GetSpaceInformation();
 
-  KinematicsSolverPtr kinematics_solver1 = std::make_shared<KinematicsSolver>(robot1->GetSkeleton());
-
-  ompl::multilevel::ProjectionPtr projection_child1 = std::make_shared<TaskSpaceProjection>(factor1, child1, robot1);
+  ompl::multilevel::ProjectionPtr projection_child1 = std::make_shared<ProjectionTaskSpace>(factor1, child1, robot1);
   factor1->addChild(child1, projection_child1);
 
-  KinematicsSolverPtr kinematics_solver2 = std::make_shared<KinematicsSolver>(robot2->GetSkeleton());
-  ompl::multilevel::ProjectionPtr projection_child2 = std::make_shared<TaskSpaceProjection>(factor2, child2, robot2);
+  ompl::multilevel::ProjectionPtr projection_child2 = std::make_shared<ProjectionTaskSpace>(factor2, child2, robot2);
   factor2->addChild(child2, projection_child2);
 
   auto factor = multi_robot->GetSpaceInformation();
@@ -106,8 +103,8 @@ int main(int argc, char* argv[]) {
   ReturnOnFalse(factor->addChild(factor1, projection1, computer_fiber_space), 1);
   ReturnOnFalse(factor->addChild(factor2, projection2, computer_fiber_space), 1);
 
-  // ompl::base::MotionValidatorPtr motion_validator = std::make_shared<TaskSpaceMultiRobotMotionValidator>(factor);
-  // factor->setMotionValidator(motion_validator);
+  ompl::base::MotionValidatorPtr motion_validator = std::make_shared<MotionValidatorTaskSpaceMultiRobot>(factor);
+  factor->setMotionValidator(motion_validator);
 
   auto pairwise_collision_checker = std::make_shared<DartMultiRobotCollisionChecker>(factor, world, robots);
   factor->setStateValidityChecker(pairwise_collision_checker);
@@ -189,6 +186,8 @@ int main(int argc, char* argv[]) {
   //////////////////////////////////////////////////////////////////////////////////
   //////Planning
   //////////////////////////////////////////////////////////////////////////////////
+  factor->printFactorization(std::cout);
+
   auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
   planner->setProblemDefinition(pdef);
   planner->setup();

@@ -1,10 +1,10 @@
-#include "TranslationTaskSpaceMotionValidator.hpp"
+#include "validators/MotionValidatorTaskSpaceTranslation.hpp"
 
 #include "EigenPath.hpp"
 #include "OmplHelper.hpp"
 #include "Common.hpp"
 
-TranslationTaskSpaceMotionValidator::TranslationTaskSpaceMotionValidator(
+MotionValidatorTaskSpaceTranslation::MotionValidatorTaskSpaceTranslation(
     const ompl::base::SpaceInformationPtr &si, const RobotPtr& robot) 
   : ompl::multilevel::TaskSpaceMotionValidator(si), robot_(robot)
 {
@@ -13,12 +13,12 @@ TranslationTaskSpaceMotionValidator::TranslationTaskSpaceMotionValidator(
   lastValidState_ = si->allocState();
 }
 
-TranslationTaskSpaceMotionValidator::~TranslationTaskSpaceMotionValidator() {
+MotionValidatorTaskSpaceTranslation::~MotionValidatorTaskSpaceTranslation() {
   si_->freeState(tmpState_);
   si_->freeState(lastValidState_);
 }
 
-bool TranslationTaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
+bool MotionValidatorTaskSpaceTranslation::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
   OMPL_ERROR("NYI. Please use propagateMotion.");
   return TaskSpaceMotionValidator::checkMotion(s1, s2);
   // std::pair<ompl::base::State *, double> lastValid;
@@ -27,7 +27,7 @@ bool TranslationTaskSpaceMotionValidator::checkMotion(const ompl::base::State *s
   // return checkMotion(s1, s2, lastValid);
 }
 
-// bool TranslationTaskSpaceMotionValidator::FillLastStateOnNoProgressAndReturn(
+// bool MotionValidatorTaskSpaceTranslation::FillLastStateOnNoProgressAndReturn(
 //     const ompl::base::State *state, std::pair<ompl::base::State *, double> &lastValid) const {
 //   if(lastValid.first != nullptr) {
 //     si_->copyState(lastValid.first, state);
@@ -36,7 +36,7 @@ bool TranslationTaskSpaceMotionValidator::checkMotion(const ompl::base::State *s
 //   return false;
 // }
 
-bool TranslationTaskSpaceMotionValidator::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const {
+bool MotionValidatorTaskSpaceTranslation::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const {
   OMPL_ERROR("NYI. Please use propagateMotion.");
   return TaskSpaceMotionValidator::checkMotion(s1, s2, lastValid);
   //const auto from_vector = robot_->StateToEigen(s1);
@@ -85,7 +85,7 @@ bool TranslationTaskSpaceMotionValidator::checkMotion(const ompl::base::State *s
   //return false;
 }
 
-std::vector<ompl::base::State*> TranslationTaskSpaceMotionValidator::propagateMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
+std::vector<ompl::base::State*> MotionValidatorTaskSpaceTranslation::propagateMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
 
   std::vector<ompl::base::State*> result;
   ////////////////////////////////////////////////////////////////////////////////

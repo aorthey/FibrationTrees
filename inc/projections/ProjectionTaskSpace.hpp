@@ -7,13 +7,13 @@
 #include "KinematicsSolver.hpp"
 #include "robots/Robot.hpp"
 
-OMPL_CLASS_FORWARD(TaskSpaceProjection);
+OMPL_CLASS_FORWARD(ProjectionTaskSpace);
 
-class TaskSpaceProjection : public ompl::multilevel::Projection
+class ProjectionTaskSpace : public ompl::multilevel::Projection
 {
  public:
-  TaskSpaceProjection(const ompl::base::SpaceInformationPtr& bundle, const ompl::base::SpaceInformationPtr& base, const RobotPtr& robot);
-  ~TaskSpaceProjection();
+  ProjectionTaskSpace(const ompl::base::SpaceInformationPtr& bundle, const ompl::base::SpaceInformationPtr& base, const RobotPtr& robot);
+  ~ProjectionTaskSpace();
 
   void project(const ompl::base::State *xBundle, ompl::base::State *xBase) const;
   void lift(const ompl::base::State *xBase, ompl::base::State *xBundle) const;

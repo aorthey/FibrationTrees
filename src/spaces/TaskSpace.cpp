@@ -1,4 +1,4 @@
-#include "TaskSpace.hpp"
+#include "spaces/TaskSpace.hpp"
 
 #include "EigenPath.hpp"
 #include "Common.hpp"

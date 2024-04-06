@@ -1,7 +1,7 @@
 #include "robots/KukaRobotTaskSpace.hpp"
-#include "TranslationTaskSpaceMotionValidator.hpp"
+#include "validators/MotionValidatorTaskSpaceTranslation.hpp"
 
-#include "TaskSpace.hpp"
+#include "spaces/TaskSpace.hpp"
 #include "KinematicsSolver.hpp"
 
 ompl::multilevel::FactoredSpaceInformationPtr KukaRobotTaskSpace::MakeSpaceInformation(const RobotPtr& robot) {
@@ -12,5 +12,5 @@ ompl::multilevel::FactoredSpaceInformationPtr KukaRobotTaskSpace::MakeSpaceInfor
 }
 
 ompl::base::MotionValidatorPtr KukaRobotTaskSpace::MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& robot) {
-  return std::make_shared<TranslationTaskSpaceMotionValidator>(factor, robot);
+  return std::make_shared<MotionValidatorTaskSpaceTranslation>(factor, robot);
 }

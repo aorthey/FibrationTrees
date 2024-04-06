@@ -1,6 +1,8 @@
 #include "KinematicsSolver.hpp"
 #include "Common.hpp"
 
+#include <ompl/util/Console.h>
+
 struct StateAndTcp {
   StateXd config;
   State3d tcp;
@@ -66,11 +68,6 @@ std::optional<State3d> KinematicsSolver::solve_fk(const StateXd& state) {
   }
   skeleton_->setConfiguration(config);
   auto t = skeleton_->getBodyNode(endeffector_)->getTransform().translation();
-  // if(std::abs(t[0]-0.4) > 0.2) {
-  //   std::cout << "Rejecting config " << config << std::endl;
-  //   std::cout << "Rejecting config " << t << std::endl;
-  //   exit(0);
-  // }
   return skeleton_->getBodyNode(endeffector_)->getTransform().translation();
 }
 
@@ -83,9 +80,9 @@ bool KinematicsSolver::AddConfig(const StateXd& config, std::vector<StateXd>& co
   const auto last_config = configs.back();
   const auto dist = Distance(last_config, config);
   if(dist > M_PI) {
-    // std::cout << "Detected joint flip" << std::endl;
-    // std::cout << "Current config : " << config << std::endl;
-    // std::cout << "Last    config : " << last_config << std::endl;
+    std::cout << "Detected joint flip" << std::endl;
+    std::cout << "Current config : " << config << std::endl;
+    std::cout << "Last    config : " << last_config << std::endl;
     return false;
   }
 

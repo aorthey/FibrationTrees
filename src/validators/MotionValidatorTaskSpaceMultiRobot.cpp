@@ -1,11 +1,11 @@
-#include "TaskSpaceMultiRobotMotionValidator.hpp"
+#include "validators/MotionValidatorTaskSpaceMultiRobot.hpp"
 
 #include "OmplHelper.hpp"
 #include "Common.hpp"
 
 bool kDebug = false;
 
-TaskSpaceMultiRobotMotionValidator::TaskSpaceMultiRobotMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor)
+MotionValidatorTaskSpaceMultiRobot::MotionValidatorTaskSpaceMultiRobot(const ompl::multilevel::FactoredSpaceInformationPtr& factor)
   : ompl::multilevel::TaskSpaceMotionValidator(factor)
 {
   for(const auto& child : factor->getChildren()) {
@@ -23,7 +23,7 @@ TaskSpaceMultiRobotMotionValidator::TaskSpaceMultiRobotMotionValidator(const omp
   tmpStateOnTotalSpace_ = factor->allocState();
 }
 
-TaskSpaceMultiRobotMotionValidator::~TaskSpaceMultiRobotMotionValidator() {
+MotionValidatorTaskSpaceMultiRobot::~MotionValidatorTaskSpaceMultiRobot() {
   auto space = si_->getStateSpace()->as<ompl::base::CompoundStateSpace>();
   for(size_t k = 0; k < space->getSubspaceCount(); k++) {
     space->getSubspace(k)->freeState(lastValids_.at(k));
@@ -31,12 +31,12 @@ TaskSpaceMultiRobotMotionValidator::~TaskSpaceMultiRobotMotionValidator() {
   si_->freeState(tmpStateOnTotalSpace_);
 }
 
-bool TaskSpaceMultiRobotMotionValidator::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
+bool MotionValidatorTaskSpaceMultiRobot::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
   auto lastValid = std::make_pair(tmpStateOnTotalSpace_, 0.0);
-  return TaskSpaceMultiRobotMotionValidator::checkMotion(s1, s2, lastValid);
+  return MotionValidatorTaskSpaceMultiRobot::checkMotion(s1, s2, lastValid);
 }
 
-bool TaskSpaceMultiRobotMotionValidator::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const {
+bool MotionValidatorTaskSpaceMultiRobot::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const {
   OMPL_ERROR("Last valid state is required.");
   throw "NYI";
   if(lastValid.first == nullptr) {
@@ -87,7 +87,7 @@ bool TaskSpaceMultiRobotMotionValidator::checkMotion(const ompl::base::State *s1
   return all_subspaces_are_valid;
 }
 
-std::vector<ompl::base::State*> TaskSpaceMultiRobotMotionValidator::propagateMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
+std::vector<ompl::base::State*> MotionValidatorTaskSpaceMultiRobot::propagateMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
   auto s1_compound = s1->as<ompl::base::CompoundState>();
   auto s2_compound = s2->as<ompl::base::CompoundState>();
   auto space = si_->getStateSpace()->as<ompl::base::CompoundStateSpace>();

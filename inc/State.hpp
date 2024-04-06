@@ -8,7 +8,7 @@ typedef Eigen::VectorXd TangentVector;
 
 struct StateXd {
   Eigen::VectorXd configuration;
-  //float time{0.0f};
+  float time{0.0f};
 
   Eigen::VectorXd::Scalar& operator[](std::size_t idx);
   const Eigen::VectorXd::Scalar& operator[](std::size_t idx) const;

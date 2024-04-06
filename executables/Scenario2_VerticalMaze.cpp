@@ -4,7 +4,7 @@
 #include "DartHelper.hpp"
 #include "OmplHelper.hpp"
 #include "KinematicsSolver.hpp"
-#include "TaskSpaceProjection.hpp"
+#include "projections/ProjectionTaskSpace.hpp"
 #include "gui/Visualizer.hpp"
 #include "robots/KukaRobotTaskSpace.hpp"
 #include "robots/MobileKukaRobotTaskSpace.hpp"
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
   auto factor = robot->GetSpaceInformation();
   auto child = point->GetSpaceInformation();
 
-  ompl::multilevel::ProjectionPtr projection = std::make_shared<TaskSpaceProjection>(factor, child, robot);//, kinematics_solver);
+  ompl::multilevel::ProjectionPtr projection = std::make_shared<ProjectionTaskSpace>(factor, child, robot);//, kinematics_solver);
   factor->addChild(child, projection);
 
   factor->printFactorization(std::cout);

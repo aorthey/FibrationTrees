@@ -63,19 +63,18 @@ void Visualizer::AddPlanner(const RobotPtr& robot, const ompl::base::PlannerPtr&
   if(pdef->hasApproximateSolution() ||
      pdef->hasExactSolution())
   {
-    OMPL_INFORM("Print solution path...");
     auto path = pdef->getSolutionPath();
     ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
     OMPL_INFORM("Found path with %d states.", pgeo.getStateCount());
-    for(const auto& state : pgeo.getStates()) {
-      path->getSpaceInformation()->printState(state);
-      const auto config = robot->StateToEigen(state);
-      const auto tcps = robot->GetFK(config);
-      std::cout << "EndEffector position is " <<std::endl;
-      for(const auto& tcp : tcps) {
-        std::cout << "\t" << tcp << std::endl;
-      }
-    }
+    //for(const auto& state : pgeo.getStates()) {
+      //path->getSpaceInformation()->printState(state);
+      //const auto config = robot->StateToEigen(state);
+      //const auto tcps = robot->GetFK(config);
+      //std::cout << "EndEffector position is " <<std::endl;
+      //for(const auto& tcp : tcps) {
+        //std::cout << "\t" << tcp << std::endl;
+      //}
+    //}
     OMPL_INFORM("Interpolate path...");
     pgeo.interpolate();
     OMPL_INFORM("Add path to visualizer...");

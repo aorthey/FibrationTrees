@@ -2,10 +2,10 @@
 
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/spaces/SE2StateSpace.h>
-#include "TranslationTaskSpaceMotionValidator.hpp"
+#include "validators/MotionValidatorTaskSpaceTranslation.hpp"
 #include "KinematicsSolver.hpp"
-#include "TaskSpaceMobile.hpp"
-#include "TaskSpace.hpp"
+#include "spaces/TaskSpaceMobile.hpp"
+#include "spaces/TaskSpace.hpp"
 
 ompl::multilevel::FactoredSpaceInformationPtr MobileKukaRobotTaskSpace::MakeSpaceInformation(const RobotPtr& robot) {
   ompl::base::StateSpacePtr space(new TaskSpaceMobile(robot));
@@ -14,7 +14,7 @@ ompl::multilevel::FactoredSpaceInformationPtr MobileKukaRobotTaskSpace::MakeSpac
 }
 
 ompl::base::MotionValidatorPtr MobileKukaRobotTaskSpace::MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& robot) {
-  return std::make_shared<TranslationTaskSpaceMotionValidator>(factor, robot);
+  return std::make_shared<MotionValidatorTaskSpaceTranslation>(factor, robot);
 }
 
 StateXd MobileKukaRobotTaskSpace::StateToEigen(const ompl::base::State* state) const {

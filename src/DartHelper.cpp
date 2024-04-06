@@ -34,7 +34,6 @@ void PrintSkeletonInfo(const dart::dynamics::SkeletonPtr& skeleton) {
   for(size_t k = 0; k < config.size(); k++) {
     std::cout << lb[k] << " <= " << config[k] << " <= " << ub[k] << std::endl;
   }
-  std::cout << config << std::endl;
 }
 
 StateXd GetRandomPosition(const dart::dynamics::SkeletonPtr& skeleton) {
