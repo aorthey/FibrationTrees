@@ -21,6 +21,9 @@
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 #include <ompl/multilevel/planners/factor/FibrationRRT.h>
 
+const int kMaxResampleIteration = 100;
+const float kGoalRegion = 0.025;
+
 int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
   ////Creating obstacles
@@ -71,7 +74,6 @@ int main(int argc, char* argv[]) {
   ompl::base::State *start = factor->allocState();
   ompl::base::State *goal = factor->allocState();
 
-  const int kMaxResampleIteration = 100;
   bool has_solution = true;
 
   if(!SampleValidLift(projection, factor, kMaxResampleIteration, task_start, start)) {
@@ -87,7 +89,7 @@ int main(int argc, char* argv[]) {
 
   if(has_solution) {
     auto goal_region = std::make_shared<TaskSpaceGoal>(factor, goal, projection);
-    goal_region->setThreshold(0.01);
+    goal_region->setThreshold(kGoalRegion);
 
     ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(factor);
     pdef->addStartState(start);
@@ -95,8 +97,8 @@ int main(int argc, char* argv[]) {
 
     auto start_vector = point->StateToEigen(task_start);
     auto goal_vector = point->StateToEigen(task_goal);
-    world->addSimpleFrame(createSphereFrame(start_vector.configuration, 0.01));
-    world->addSimpleFrame(createSphereFrame(goal_vector.configuration, 0.01));
+    world->addSimpleFrame(createCylinderFrame(start_vector.configuration, State3d(0.0, M_PI*0.5, 0.0), 0.01, 0.001, State4d(0.1, 0.5, 0.1, 0.5)));
+    world->addSimpleFrame(createCylinderFrame(goal_vector.configuration, State3d(0.0, M_PI*0.5, 0.0), kGoalRegion, 0.001, State4d(0.1, 0.5, 0.1, 0.5)));
 
     ////////////////////////////////////////////////////////////////////////////////
     ////Planning

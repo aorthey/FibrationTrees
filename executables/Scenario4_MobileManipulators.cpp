@@ -204,6 +204,7 @@ int main(int argc, char* argv[]) {
   goal_regions[factor3->getName()] = goal_region3;
 
   auto goal_region = std::make_shared<ompl::base::FactoredGoal>(factor, goal_regions);
+  goal_region->setThreshold(0.5);
   ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(factor);
   pdef->addStartState(start);
   pdef->setGoal(goal_region);

@@ -38,6 +38,8 @@ void show(const dart::dynamics::SkeletonPtr& skeleton);
 ////////////////////////////////////////////////////////////////////////////////
 // Simple frame constructors
 ////////////////////////////////////////////////////////////////////////////////
+dart::dynamics::SimpleFramePtr createCylinderFrame(const StateXd& position, const State3d& rotationXYZ, const float radius, const float height, const State4d& color);
+dart::dynamics::SimpleFramePtr createCylinderFrame(const State3d& position, const State3d& rotationXYZ, const float radius, const float height, const State4d& color);
 dart::dynamics::SimpleFramePtr createSphereFrame(const StateXd& position, const float radius = kPathSphereSize, const State3d& color = kPathColor);
 dart::dynamics::SimpleFramePtr createSphereFrame(const State3d& position, const float radius = kPathSphereSize, const State3d& color = kPathColor);
 dart::dynamics::SimpleFramePtr createLineSegmentFrame(const State3d& s1, const State3d& s2, const State3d& color = kPathColor, float line_width= kDefaultLineWidth);

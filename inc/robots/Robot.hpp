@@ -37,7 +37,7 @@ class Robot {
     void SetSpaceInformation(const ompl::multilevel::FactoredSpaceInformationPtr& factor);
     void SetCollisionChecker(const CollisionCheckerPtr& collision_checker);
 
-    bool IsValid(const ompl::base::State* state) const;
+    virtual bool IsValid(const ompl::base::State* state) const;
 
     //Returns a vector of State3d, one for each internal robot
     virtual std::vector<State3d> GetFK(const StateXd& config) const;

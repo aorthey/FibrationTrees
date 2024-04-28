@@ -90,7 +90,7 @@ class EigenPath {
     explicit EigenPath(const RobotPtr& robot, const ompl::base::PathPtr& path);
 
     /*\brief Get configuration along path at position s in [0,1] */
-    StateXd GetConfigAt(float s);
+    StateXd GetConfigAt(float s) const;
 
     float GetLength() const;
 

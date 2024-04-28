@@ -2,6 +2,9 @@
 
 #include "robots/Robot.hpp"
 
+const auto kDefaultVMax = 1.0;
+const auto kDefaultTMax = 20.0;
+
 class TimeBasedSphereRobot : public Robot {
   public:
     TimeBasedSphereRobot() = default;
@@ -19,5 +22,11 @@ class TimeBasedSphereRobot : public Robot {
     void TimeToState(const float time, ompl::base::State* state) const override;
 
     void SetLimits(const std::pair<State3d, State3d>& limits);
+
+    float GetVMax() const;
+    float GetTMax() const;
+  private:
+    float vMax_{kDefaultVMax};
+    float tMax_{kDefaultTMax};
 };
 

@@ -9,8 +9,11 @@
 #include "robots/KukaRobotTaskSpace.hpp"
 #include "robots/MobileKukaRobotTaskSpace.hpp"
 #include "robots/TimeBasedMobileKukaRobotTaskSpace.hpp"
+#include "robots/TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints.hpp"
 #include "robots/SphereRobot.hpp"
 #include "robots/RobotFactory.hpp"
+#include "TimeGoal.hpp"
+#include "TimeOrSolutionTerminationCondition.hpp"
 
 #include <dart/dart.hpp>
 
@@ -25,6 +28,9 @@
 #include <ompl/multilevel/planners/factor/FibrationRRT.h>
 #include <ompl/multilevel/datastructures/projections/TimeBasedProjection.h>
 
+const State3d kObstacleColor = State3d(0.8, 0.8, 0.8);
+const Eigen::Vector4d kObstacleColor4d(0.8, 0.8, 0.8, 1.0);
+
 std::optional<ompl::base::State*> TaskToTotal(const RobotPtr& root_robot, 
   const RobotPtr& leaf_robot, const StateXd& vector) {
   auto root = root_robot->GetSpaceInformation();
@@ -38,35 +44,120 @@ std::optional<ompl::base::State*> TaskToTotal(const RobotPtr& root_robot,
   return maybe_state;
 }
 
+std::pair<RobotPtr, ompl::base::PathPtr> MakeDynamicObstacle(
+    const std::vector<double>& start_xy,
+    const std::vector<double>& goal_xy,
+    const dart::simulation::WorldPtr& world, 
+    const std::vector<dart::dynamics::SkeletonPtr>& static_obstacles
+    ) {
+  auto robot = MakeRobot<MobileKukaRobot>(world, static_obstacles);
+
+  auto state1 = MakeState({start_xy.at(0), start_xy.at(1), start_xy.at(2), -0.5, 0.0, +0.57, +1, 2, 0.24, -0.21});
+  auto state2 = MakeState({goal_xy.at(0), goal_xy.at(1), goal_xy.at(2), +0.5, 0.0, -0.57, +1, 2, 0.24, +0.21});
+
+  auto si = robot->GetSpaceInformation();
+  auto start = si->allocState();
+  auto goal = si->allocState();
+
+  robot->EigenToState(state1, start);
+  robot->EigenToState(state2, goal);
+
+  auto path = std::make_shared<ompl::geometric::PathGeometric>(si, start, goal);
+
+  //ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(si);
+  //pdef->setStartAndGoalStates(start, goal, 0.5);
+
+  //auto planner = std::make_shared<ompl::geometric::RRTConnect>(si);
+  //planner->setProblemDefinition(pdef);
+  //planner->setup();
+  //planner->setRange(+Inf);
+
+  //float timeout = 10.0;
+  //auto ptc = TimeOrSolutionTerminationCondition(pdef, timeout);
+
+  //ompl::base::PlannerStatus status = planner->solve(ptc);
+
+  //if(!pdef->hasApproximateSolution() &&
+  //   !pdef->hasExactSolution())
+  //{
+  //  throw "Invalid";
+  //}
+  //auto path = pdef->getSolutionPath();
+  //auto geom_path = path->as<ompl::geometric::PathGeometric>();
+  //auto path_simplifier = std::make_shared<ompl::geometric::PathSimplifier>(si);
+  //path_simplifier->simplifyMax(*geom_path);
+  //path_simplifier->smoothBSpline(*geom_path);
+
+  ////DEBUG
+  path->interpolate(100);
+  ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
+   OMPL_INFORM("Found path with %d states.", path->getStateCount());
+   for(const auto& state : path->getStates()) {
+     if(!robot->IsValid(state)) {
+       OMPL_ERROR("%s", std::string(40, '-').c_str());
+       OMPL_ERROR("Invalid state");
+       si->printState(state);
+       OMPL_ERROR("%s", std::string(40, '-').c_str());
+       throw "Invalid";
+     }
+   }
+  return std::make_pair(robot, path);
+}
+
 const float kZheight = 0.7;
 const float kHeightPadding = 0.05;
 
 int main(int argc, char* argv[]) {
+
   ////////////////////////////////////////////////////////////////////////////////
-  ////Creating obstacles
+  ////Create static_obstacles
   ////////////////////////////////////////////////////////////////////////////////
-  std::vector<dart::dynamics::SkeletonPtr> obstacles;
-  dart::dynamics::SkeletonPtr floor = createFloor(-0.255);
-  //dart::dynamics::SkeletonPtr ceiling = createFloor(+kZheight+kHeightPadding);
-  dart::dynamics::SkeletonPtr box = createBox(State3d(0,0,0), 0.3, 0.3, 0.8);
-  obstacles.push_back(floor);
-  obstacles.push_back(box);
-  //obstacles.push_back(ceiling);
+  std::vector<dart::dynamics::SkeletonPtr> static_obstacles;
+  static_obstacles.push_back(createBox(State3d(-1.0,0,0), 0.2, 0.2, 0.8));
+  static_obstacles.push_back(createBox(State3d(+0.0,0,0), 0.2, 0.2, 0.8));
+  static_obstacles.push_back(createBox(State3d(+1.0,0,0), 0.2, 0.2, 0.8));
+
+  auto floor = createFloor(-0.255);
+  static_obstacles.push_back(floor);
   dart::math::Random::setSeed(0);
 
   ////////////////////////////////////////////////////////////////////////////////
   ////World creation
   ////////////////////////////////////////////////////////////////////////////////
   dart::simulation::WorldPtr world(new dart::simulation::World);
-  for(const auto& obstacle : obstacles) {
+  for(const auto& obstacle : static_obstacles) {
     world->addSkeleton(obstacle);
   }
   world->setGravity(State3d::Zero());
   addCoordinateFrameToWorld(world);
 
-  auto robot_in_time = MakeRobot<TimeBasedMobileKukaRobotTaskSpace>(world, obstacles);
-  auto robot = MakeRobot<MobileKukaRobotTaskSpace>(world, obstacles);
-  auto tcp_robot = MakeRobot<SphereRobot>(world, obstacles);
+  ////////////////////////////////////////////////////////////////////////////////
+  ////Create dynamic_obstacles
+  ////////////////////////////////////////////////////////////////////////////////
+
+  std::vector<std::pair<RobotPtr, ompl::base::PathPtr>> dynamic_obstacles;
+  //dynamic_obstacles.push_back(MakeDynamicObstacle({-0.75, +1.0}, {-0.75, -1.0}, world, static_obstacles));
+  dynamic_obstacles.push_back(MakeDynamicObstacle({+0.5, +1.0, -0.5*M_PI}, {+0.5, -1.0, +0.5*M_PI}, world, static_obstacles));
+  dynamic_obstacles.push_back(MakeDynamicObstacle({-0.5, +1.0, 0.5*M_PI}, {-0.5, -1.0, -0.25*M_PI}, world, static_obstacles));
+
+  std::vector<dart::dynamics::SkeletonPtr> all_obstacles;
+  for(const auto& obstacle : static_obstacles) {
+    all_obstacles.push_back(obstacle);
+  }
+  for(const auto& obstacle : dynamic_obstacles) {
+    all_obstacles.push_back(obstacle.first->GetSkeleton());
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  ////Create Robots
+  ////////////////////////////////////////////////////////////////////////////////
+
+  auto robot_in_time = MakeRobot<TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints>(world, all_obstacles);
+  for(const auto& dynamic_obstacle : dynamic_obstacles) {
+    robot_in_time->AddDynamicalObstacle(dynamic_obstacle);
+  }
+  auto robot = MakeRobot<MobileKukaRobotTaskSpace>(world, static_obstacles);
+  auto tcp_robot = MakeRobot<SphereRobot>(world, static_obstacles);
 
   hide(robot->GetSkeleton());
   hide(tcp_robot->GetSkeleton());
@@ -90,11 +181,11 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
   ////Create planning problem
   ////////////////////////////////////////////////////////////////////////////////
-  auto maybe_total_start = TaskToTotal(robot_in_time, tcp_robot, MakeState({-1.0, -1.0, kZheight-kHeightPadding}));
+  auto maybe_total_start = TaskToTotal(robot_in_time, tcp_robot, MakeState({-1.0, -1.0, kZheight-0.5*kHeightPadding}));
   if(!maybe_total_start.has_value()) {
     return 1;
   }
-  auto maybe_total_goal = TaskToTotal(robot_in_time, tcp_robot, MakeState({+1.0, +1.0, kZheight-kHeightPadding}));
+  auto maybe_total_goal = TaskToTotal(robot_in_time, tcp_robot, MakeState({+1.0, +1.0, kZheight-0.5*kHeightPadding}));
   if(!maybe_total_goal.has_value()) {
     return 1;
   }
@@ -102,7 +193,7 @@ int main(int argc, char* argv[]) {
   auto goal = maybe_total_goal.value();
 
   robot_in_time->TimeToState(0.0, start);
-  robot_in_time->TimeToState(5.0, goal);
+  robot_in_time->TimeToState(robot_in_time->GetTMax(), goal);
 
   factor1->printState(start);
   factor1->printState(goal);
@@ -113,31 +204,37 @@ int main(int argc, char* argv[]) {
   world->addSimpleFrame(createSphereFrame(fk_start, 0.01));
   world->addSimpleFrame(createSphereFrame(fk_goal, 0.01));
 
+  auto time_goal = std::make_shared<TimeGoal>(robot_in_time, robot_in_time->GetVMax(), start, goal);
+  time_goal->setThreshold(0.5);
+
   ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(factor1);
-  pdef->setStartAndGoalStates(start, goal, 0.1);
+  pdef->addStartState(start);
+  pdef->setGoal(time_goal);
 
   factor1->printFactorization(std::cout);
 
-   ////////////////////////////////////////////////////////////////////////////////
-   ////Planning
-   ////////////////////////////////////////////////////////////////////////////////
-   auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(factor1);
-   planner->setProblemDefinition(pdef);
-   planner->setup();
-   planner->setRange(+Inf);
-   //planner->setSmoothIntermediateSolutions();
+  ////////////////////////////////////////////////////////////////////////////////
+  ////Planning
+  ////////////////////////////////////////////////////////////////////////////////
+  auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(factor1, 1.0);
+  planner->setProblemDefinition(pdef);
+  planner->setup();
+  planner->setRange(+Inf);
+  float timeout = 1000.0;
 
-   float timeout = 10.0;
+  auto ptc = TimeOrSolutionTerminationCondition(pdef, timeout);
 
-   auto ptc = ompl::base::plannerOrTerminationCondition(
-           ompl::base::exactSolnPlannerTerminationCondition(pdef),
-           ompl::base::timedPlannerTerminationCondition(timeout)
-       );
-
-   ompl::base::PlannerStatus status = planner->solve(ptc);
+  ompl::msg::setLogLevel(ompl::msg::LogLevel::LOG_INFO);
+  ompl::base::PlannerStatus status = planner->solve(ptc);
 
   Visualizer visualizer(world);
   visualizer.AddPlanner(robot_in_time, planner);
+
+  for(const auto& dynamic_obstacle : dynamic_obstacles) {
+    visualizer.AddPath(dynamic_obstacle.first, dynamic_obstacle.second, kObstacleColor);
+    changeBodyColor(dynamic_obstacle.first->GetSkeleton(), kObstacleColor4d);
+  }
+
   visualizer.SetCollisionChecker(robot_in_time->GetCollisionChecker());
   visualizer.Run();
 

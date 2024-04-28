@@ -7,7 +7,8 @@
 #include <ompl/base/spaces/RealVectorBounds.h>
 #include <ompl/base/spaces/TimeStateSpace.h>
 
-EuclideanTimeBased::EuclideanTimeBased(const RobotPtr& robot, double tMax)  {
+EuclideanTimeBased::EuclideanTimeBased(const RobotPtr& robot, double tMax, double vMax) :
+  robot_(robot), vMax_(vMax) {
   auto numDofs = robot->GetSkeleton()->getNumDofs();
   setName("EuclideanTimeBased" + getName());
   auto RN = std::make_shared<ompl::base::RealVectorStateSpace>(numDofs);
@@ -29,6 +30,18 @@ EuclideanTimeBased::EuclideanTimeBased(const RobotPtr& robot, double tMax)  {
   }
   RN->setBounds(bounds);
   lock();
+}
+
+double EuclideanTimeBased::distance(const ompl::base::State *from, const ompl::base::State *to) const {
+  const auto from_vector = robot_->StateToEigen(from);
+  const auto to_vector = robot_->StateToEigen(to);
+  if(!IsReachableInTime(from_vector, to_vector, vMax_)) {
+    return Inf;
+  }
+
+  const auto *cstate_from = from->as<ompl::base::CompoundState>();
+  const auto *cstate_to = to->as<ompl::base::CompoundState>();
+  return ompl::base::CompoundStateSpace::distance(from, to);
 }
 
 EuclideanTimeBased::~EuclideanTimeBased() {

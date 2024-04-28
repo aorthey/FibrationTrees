@@ -20,7 +20,6 @@
 #include <ompl/multilevel/datastructures/projections/RNSO2_RN.h>
 #include <ompl/multilevel/datastructures/projections/SubspaceProjection.h>
 #include <ompl/multilevel/planners/factor/FibrationRRT.h>
-#include <ompl/base/goals/FactoredGoal.h>
 
 #include <ranges>
 

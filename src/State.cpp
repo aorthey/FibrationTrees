@@ -1,6 +1,7 @@
 #include "State.hpp"
 
 #include <iomanip>
+#include "Common.hpp"
 
 const Eigen::IOFormat CommaFmt(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", ", ", "", "", "[", "]");
 
@@ -72,8 +73,26 @@ namespace std {
 float Distance(const StateXd& lhs, const StateXd& rhs) {
   return (lhs.configuration - rhs.configuration).norm();
 }
+
 float Distance(const State3d& lhs, const State3d& rhs) {
   return (lhs - rhs).norm();
+}
+
+float GetMinimumReachableTime(const StateXd& s1, const StateXd& s2, double vMax) {
+  return Distance(s1, s2) / vMax;
+}
+
+bool IsReachableInTime(const StateXd& s1, const StateXd& s2, double vMax) {
+  auto deltaTime = s2.time - s1.time;
+  if(deltaTime <= 0) {
+    return false;
+  }
+  auto deltaSpace = Distance(s1, s2);
+  if (deltaSpace / vMax > deltaTime + Epsilon) {
+    //Cannot physically reach goal
+    return false;
+  }
+  return true;
 }
 
 StateXd operator + (const StateXd& lhs, const TangentVector& rhs) {

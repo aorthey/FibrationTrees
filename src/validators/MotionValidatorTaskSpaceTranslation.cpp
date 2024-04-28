@@ -20,21 +20,13 @@ MotionValidatorTaskSpaceTranslation::~MotionValidatorTaskSpaceTranslation() {
 
 bool MotionValidatorTaskSpaceTranslation::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
   OMPL_ERROR("NYI. Please use propagateMotion.");
+  si_->printSettings(std::cout);
   return TaskSpaceMotionValidator::checkMotion(s1, s2);
   // std::pair<ompl::base::State *, double> lastValid;
   // lastValid.first = nullptr;
   // lastValid.second = 0.0f;
   // return checkMotion(s1, s2, lastValid);
 }
-
-// bool MotionValidatorTaskSpaceTranslation::FillLastStateOnNoProgressAndReturn(
-//     const ompl::base::State *state, std::pair<ompl::base::State *, double> &lastValid) const {
-//   if(lastValid.first != nullptr) {
-//     si_->copyState(lastValid.first, state);
-//     lastValid.second = 0.0f;
-//   }
-//   return false;
-// }
 
 bool MotionValidatorTaskSpaceTranslation::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const {
   OMPL_ERROR("NYI. Please use propagateMotion.");

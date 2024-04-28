@@ -59,6 +59,40 @@ dart::dynamics::SimpleFramePtr createSphereFrame(const StateXd& position, const 
   return createSphereFrame(position.configuration, radius, color);
 }
 
+Eigen::Affine3d create_rotation_matrix(double ax, double ay, double az) {
+  Eigen::Affine3d rx =
+      Eigen::Affine3d(Eigen::AngleAxisd(ax, Eigen::Vector3d(1, 0, 0)));
+  Eigen::Affine3d ry =
+      Eigen::Affine3d(Eigen::AngleAxisd(ay, Eigen::Vector3d(0, 1, 0)));
+  Eigen::Affine3d rz =
+      Eigen::Affine3d(Eigen::AngleAxisd(az, Eigen::Vector3d(0, 0, 1)));
+  return rx * ry * rz;
+}
+
+dart::dynamics::SimpleFramePtr createCylinderFrame(const State3d& translation, const State3d& rotationXYZ, 
+    const float radius, const float height, const State4d& color) {
+
+  Eigen::Isometry3d tf = Eigen::Isometry3d::Identity();
+  tf.translation() = translation;
+  auto R = create_rotation_matrix(rotationXYZ[0],rotationXYZ[1],rotationXYZ[2]);
+  // auto R = Eigen::AngleAxisf(rotationXYZ[0], Eigen::Vector3f::UnitX())
+  // * Eigen::AngleAxisf(rotationXYZ[1], Eigen::Vector3f::UnitY())
+  // * Eigen::AngleAxisf(rotationXYZ[2], Eigen::Vector3f::UnitZ());
+  tf.linear() = R.linear();
+
+  static int counter = 0;
+  auto cylinder_frame = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "cylinder"+std::to_string(counter++), tf);
+  dart::dynamics::ShapePtr cylinder(new dart::dynamics::CylinderShape(radius, height));
+  cylinder_frame->setShape(cylinder);
+  cylinder_frame->getVisualAspect(true)->setColor(color);
+  cylinder_frame->getVisualAspect(true)->show();
+  return cylinder_frame;
+}
+
+dart::dynamics::SimpleFramePtr createCylinderFrame(const StateXd& position, const State3d& rotationXYZ, const float radius, const float height, const State4d& color) {
+  return createCylinderFrame(position.configuration, rotationXYZ, radius, height, color);
+}
+
 dart::dynamics::SimpleFramePtr createLineSegmentFrame(const State3d& s1, const State3d& s2, const State3d& color, float line_width) {
   static int counter = 0;
   Eigen::Isometry3d tf = Eigen::Isometry3d::Identity();

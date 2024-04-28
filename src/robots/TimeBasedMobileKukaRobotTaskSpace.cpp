@@ -10,17 +10,24 @@
 #include "spaces/TaskSpace.hpp"
 #include "Common.hpp"
 
-const auto vMax = 1.0;
-const auto tMax = 10.0;
+TimeBasedMobileKukaRobotTaskSpace::TimeBasedMobileKukaRobotTaskSpace(float vMax, float tMax) :
+  vMax_(vMax), tMax_(tMax) {}
 
 ompl::multilevel::FactoredSpaceInformationPtr TimeBasedMobileKukaRobotTaskSpace::MakeSpaceInformation(const RobotPtr& robot) {
-  ompl::base::StateSpacePtr space_time(new TaskSpaceMobileTimeBased(robot, vMax, tMax));
+  ompl::base::StateSpacePtr space_time(new TaskSpaceMobileTimeBased(robot, vMax_, tMax_));
   return std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space_time);
+}
+
+float TimeBasedMobileKukaRobotTaskSpace::GetVMax() const {
+  return vMax_;
+}
+float TimeBasedMobileKukaRobotTaskSpace::GetTMax() const {
+  return tMax_;
 }
 
 void TimeBasedMobileKukaRobotTaskSpace::SetSpaceInformationFromRobot(const RobotPtr& robot, 
     const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles) {
-  ompl::base::StateSpacePtr space_time(new ompl::base::SpaceTimeStateSpace(robot->GetSpaceInformation()->getStateSpace()));
+  ompl::base::StateSpacePtr space_time(new ompl::base::SpaceTimeStateSpace(robot->GetSpaceInformation()->getStateSpace(), vMax_));
   auto factor = std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space_time);
   auto motion_validator = MakeMotionValidator(factor, robot);
   factor->setMotionValidator(motion_validator);
@@ -30,7 +37,7 @@ void TimeBasedMobileKukaRobotTaskSpace::SetSpaceInformationFromRobot(const Robot
 }
 
 ompl::base::MotionValidatorPtr TimeBasedMobileKukaRobotTaskSpace::MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& robot) {
-  return std::make_shared<MotionValidatorTimeBased>(factor, robot, vMax);
+  return std::make_shared<MotionValidatorTimeBased>(factor, robot, vMax_);
 }
 
 float TimeBasedMobileKukaRobotTaskSpace::StateToTime(const ompl::base::State* state) const {
@@ -38,6 +45,13 @@ float TimeBasedMobileKukaRobotTaskSpace::StateToTime(const ompl::base::State* st
 }
 void TimeBasedMobileKukaRobotTaskSpace::TimeToState(const float time, ompl::base::State* state) const {
   state->as<ompl::base::CompoundState>()->as<ompl::base::TimeStateSpace::StateType>(3)->position = time;
+
+  if(time < 0.0) {
+    state->as<ompl::base::CompoundState>()->as<ompl::base::TimeStateSpace::StateType>(3)->position = 0.0;
+  }
+  if(time > GetTMax()) {
+    state->as<ompl::base::CompoundState>()->as<ompl::base::TimeStateSpace::StateType>(3)->position = GetTMax();
+  }
 }
 
 StateXd TimeBasedMobileKukaRobotTaskSpace::StateToEigen(const ompl::base::State* state) const {

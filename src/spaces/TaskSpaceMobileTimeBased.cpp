@@ -78,13 +78,18 @@ double TaskSpaceMobileTimeBased::getVMax() const {
 
 double TaskSpaceMobileTimeBased::distance(const ompl::base::State *from, const ompl::base::State *to) const {
   const auto from_vector = robot_->StateToEigen(from);
+  const auto to_vector = robot_->StateToEigen(to);
+
+  if(!IsReachableInTime(from_vector, to_vector, vMax_)) {
+    return Inf;
+  }
+
   const auto maybe_from_tcp = kinematics_solver_->solve_fk(from_vector);
   if(!maybe_from_tcp.has_value()) {
     return Inf;
   }
   const auto from_tcp = maybe_from_tcp.value();
 
-  const auto to_vector = robot_->StateToEigen(to);
   const auto maybe_to_tcp = kinematics_solver_->solve_fk(to_vector);
   if(!maybe_to_tcp.has_value()) {
     return Inf;
@@ -92,14 +97,7 @@ double TaskSpaceMobileTimeBased::distance(const ompl::base::State *from, const o
   const auto to_tcp = maybe_to_tcp.value();
 
   const auto deltaSpace = Distance(from_tcp, to_tcp);
-
-  auto deltaTime = std::fabs(to_vector.time - from_vector.time);
-
-  if (deltaSpace / vMax_ > deltaTime + eps_) {
-    return std::numeric_limits<double>::infinity();
-  }
-
-  return deltaSpace + deltaTime;
+  return deltaSpace;
 }
 
 bool TaskSpaceMobileTimeBased::isMetricSpace() const

@@ -18,14 +18,7 @@ bool MotionValidatorTimeBased::checkMotion(const ompl::base::State *s1, const om
   const auto s1_vector = robot_->StateToEigen(s1);
   const auto s2_vector = robot_->StateToEigen(s2);
 
-  auto deltaTime = s2_vector.time - s1_vector.time;
-  if(deltaTime <= 0) {
-    return false;
-  }
-
-  auto deltaSpace = Distance(s1_vector, s2_vector);
-  if (deltaSpace / vMax_ > deltaTime + Epsilon) {
-    //Cannot physically reach goal
+  if(!IsReachableInTime(s1_vector, s2_vector, vMax_)) {
     return false;
   }
   return TaskSpaceMotionValidator::checkMotion(s1, s2);
@@ -35,15 +28,7 @@ bool MotionValidatorTimeBased::checkMotion(const ompl::base::State *s1, const om
   const auto s1_vector = robot_->StateToEigen(s1);
   const auto s2_vector = robot_->StateToEigen(s2);
 
-  auto deltaTime = s2_vector.time - s1_vector.time;
-  if(deltaTime <= 0) {
-    lastValid.second = 0.0;
-    return false;
-  }
-
-  auto deltaSpace = Distance(s1_vector, s2_vector);
-  if (deltaSpace / vMax_ > deltaTime + Epsilon) {
-    //Cannot physically reach goal
+  if(!IsReachableInTime(s1_vector, s2_vector, vMax_)) {
     lastValid.second = 0.0;
     return false;
   }
@@ -64,17 +49,22 @@ std::vector<ompl::base::State*> MotionValidatorTimeBased::propagateMotion(const 
   const auto from_vector = robot_->StateToEigen(s1);
   const auto to_vector = robot_->StateToEigen(s2);
 
-  auto deltaTime = to_vector.time - from_vector.time;
-  if(deltaTime <= 0) {
-    //Cannot propagate backwards in time
+  if(!IsReachableInTime(from_vector, to_vector, vMax_)) {
     return result;
   }
+  //auto deltaTime = to_vector.time - from_vector.time;
+  //if(deltaTime <= 0) {
+  //  std::cout << "[Rejected]: Negative time:" << deltaTime << std::endl;
+  //  //Cannot propagate backwards in time
+  //  return result;
+  //}
 
-  auto deltaSpace = Distance(from_vector, to_vector);
-  if (deltaSpace / vMax_ > deltaTime + Epsilon) {
-    //Cannot physically reach goal
-    return result;
-  }
+  //auto deltaSpace = Distance(from_vector, to_vector);
+  //if (deltaSpace / vMax_ > deltaTime + Epsilon) {
+  //  //Cannot physically reach goal
+  //  std::cout << "[Rejected]: Not enough time:" << deltaTime << " > " << deltaSpace / vMax_ << std::endl;
+  //  return result;
+  //}
 
   auto configs = kinematics_solver_->solve_edge_ik_with_config(from_vector, to_vector);
   if(configs.empty()) {
@@ -88,9 +78,12 @@ std::vector<ompl::base::State*> MotionValidatorTimeBased::propagateMotion(const 
   //Check validities
   ////////////////////////////////////////////////////////////////////////////////
   auto last_config = from_vector;
+  //std::cout << "Edge IK found " << configs.size() << " states." << std::endl;
   for(const auto& config : configs) {
     robot_->EigenToState(config, tmpState_);
     if(!si_->isValid(tmpState_)) {
+      //std::cout << "Invalid state" << std::endl;
+      //si_->printState(tmpState_);
       return result;
     }
     //Do not add too many states, only every X spaced

@@ -75,7 +75,7 @@ void EigenPath::InitLengthFromConfigs(const std::vector<StateXd>& configs) {
   total_length_ = std::accumulate(lengths.begin(), lengths.end(), 0.0f);
 }
 
-StateXd EigenPath::GetConfigAt(float s) {
+StateXd EigenPath::GetConfigAt(float s) const {
   const auto max_time = time_at_configs_.back();
   if(time_at_configs_.empty()) {
     std::cout << "Error: Path contains no configs." << std::endl;

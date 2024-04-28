@@ -4,6 +4,7 @@
 #include <iostream>
 
 typedef Eigen::Vector3d State3d;
+typedef Eigen::Vector4d State4d;
 typedef Eigen::VectorXd TangentVector;
 
 struct StateXd {
@@ -38,6 +39,9 @@ std::ostream& operator << (std::ostream& os, const StateXd& state);
 
 float Distance(const State3d& lhs, const State3d& rhs);
 float Distance(const StateXd& lhs, const StateXd& rhs);
+bool IsReachableInTime(const StateXd& s1, const StateXd& s2, double vMax);
+float GetMinimumReachableTime(const StateXd& s1, const StateXd& s2, double vMax);
+
 StateXd operator + (const StateXd& lhs, const TangentVector& rhs);
 StateXd operator + (const StateXd& lhs, const StateXd& rhs);
 StateXd operator - (const StateXd& lhs, const StateXd& rhs);

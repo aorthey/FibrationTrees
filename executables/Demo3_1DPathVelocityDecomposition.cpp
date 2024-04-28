@@ -10,7 +10,7 @@
 
 #include <ompl/multilevel/planners/factor/FibrationRRT.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
-#include <ompl/multilevel/datastructures/projections/RNTIME_RN.h>
+#include <ompl/multilevel/datastructures/projections/TimeBasedProjection.h>
 #include <ompl/multilevel/datastructures/projections/SubspaceProjection.h>
 
 #include "Common.hpp"
@@ -110,7 +110,7 @@ int main()
   auto child(std::make_shared<FactoredSpaceInformation>(space));
   child->setStateValidityChecker([](const ompl::base::State *state) { return true;});
 
-  auto projection = std::make_shared<ompl::multilevel::Projection_RNTIME_RN>(factor->getStateSpace(), child->getStateSpace());
+  auto projection = std::make_shared<ompl::multilevel::Projection_TimeBased>(factor->getStateSpace(), child->getStateSpace());
   ReturnOnFalse(factor->addChild(child, projection), 1);
 
   ScopedState<> goal_state(space_time);
