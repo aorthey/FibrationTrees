@@ -25,6 +25,8 @@
 #include <ranges>
 
 const auto Nrobots = 6;
+const float kIndividualGoalThreshold = 0.5;
+const float kGlobalGoalThreshold = 2.0 * Nrobots * kIndividualGoalThreshold;
 
 ompl::base::ProblemDefinitionPtr CreateMultiDroneProblemDefinition(
   const ompl::multilevel::FactoredSpaceInformationPtr& factor, 
@@ -64,7 +66,7 @@ ompl::base::ProblemDefinitionPtr CreateMultiDroneProblemDefinition(
 
     auto goal_region = std::make_shared<ompl::base::GoalState>(robot->GetSpaceInformation());
     goal_region->setState(goal_state);
-    goal_region->setThreshold(0.5);
+    goal_region->setThreshold(kIndividualGoalThreshold);
     goals[name] = goal_region;
   }
 
@@ -80,7 +82,7 @@ ompl::base::ProblemDefinitionPtr CreateMultiDroneProblemDefinition(
   auto goal_region = std::make_shared<ompl::base::FactoredGoal>(factor, goals);
   //auto goal_region = std::make_shared<ompl::base::GoalState>(factor);
   //goal_region->setState(goal);
-  goal_region->setThreshold(1.0);
+  goal_region->setThreshold(kGlobalGoalThreshold);
  
   ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(factor);
   pdef->addStartState(start);
