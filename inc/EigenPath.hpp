@@ -90,9 +90,12 @@ class EigenPath {
     explicit EigenPath(const RobotPtr& robot, const ompl::base::PathPtr& path);
 
     /*\brief Get configuration along path at position s in [0,1] */
-    StateXd GetConfigAt(float s) const;
+    StateXd GetConfigAt(const float position) const;
 
     float GetLength() const;
+
+    float GetStartTime() const;
+    float GetEndTime() const;
 
     void InitLengthFromConfigs(const std::vector<StateXd>& configs);
 
@@ -105,4 +108,7 @@ class EigenPath {
     std::vector<float> time_at_configs_;
     //std::vector<float> lengths_;
     float total_length_{0.0f};
+
+    float start_time_{0.0};
+    float end_time_{1.0};
 };

@@ -87,7 +87,7 @@ std::vector<ompl::base::State*> MotionValidatorTimeBased::propagateMotion(const 
       return result;
     }
     //Do not add too many states, only every X spaced
-    if( Distance(config, last_config) < kMinimumSpacing) {
+    if(Distance(config, last_config) < kMinimumSpacing) {
       continue;
     }
     auto state = si_->allocState();

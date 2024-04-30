@@ -3,10 +3,11 @@
 bool TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints::IsValid(const ompl::base::State* state) const {
   auto config = StateToEigen(state);
   auto time = config.time;
-  auto position = time / GetTMax();
+  //std::cout << "ISVALID : "<< config << "," << time << std::endl;
+  //auto position = time / GetTMax();
 
   for(const auto& [obstacle, path] : obstacles_) {
-    auto config = path->GetConfigAt(position);
+    auto config = path->GetConfigAt(time);
     obstacle->SetConfiguration(config);
   }
   return Robot::IsValid(state);

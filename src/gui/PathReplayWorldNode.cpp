@@ -10,7 +10,6 @@ PathReplayWorldNode::PathReplayWorldNode(dart::simulation::WorldPtr world)
 {
   pause_ = true;
   reverse_ = false;
-  path_position_ = 0.0f;
   CreateKeyPressEvents();
   simulate(false);
 }
@@ -49,20 +48,22 @@ void PathReplayWorldNode::AddPath(const RobotPtr& robot, const ompl::base::PathP
   }
   auto path = std::make_shared<EigenPath>(robot, ompl_path);
 
-  const float L = path->GetLength();
+  const float t_start = path->GetStartTime();
+  const float t_end = path->GetEndTime();
 
   //Move along path, and compute Tcp positions. Then create line segments from them to display.
 
   std::vector<std::vector<State3d>> vertices;
-  const auto s = path->GetConfigAt(0.0);
+  const auto s = path->GetConfigAt(t_start);
   const auto frames = robot->GetFK(s);
   for(size_t k = 0; k < frames.size(); k++) {
     std::vector<State3d> vector;
     vertices.push_back(vector);
   }
 
-  for(float d = 0; d < L+kVisualizationStepSize; d+=kVisualizationStepSize) {
-    const auto s1 = path->GetConfigAt(d / L);
+  const float kTimingStepSize = 0.01;
+  for(float t = t_start; t < t_end+kTimingStepSize; t+=kTimingStepSize) {
+    const auto s1 = path->GetConfigAt(t);
     const auto frames = robot->GetFK(s1);
     for(size_t k = 0; k < frames.size(); k++) {
       vertices.at(k).push_back(frames.at(k));
@@ -72,6 +73,14 @@ void PathReplayWorldNode::AddPath(const RobotPtr& robot, const ompl::base::PathP
     auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices_frame, color, kPathLineWidth));
     solution_path_frames_.push_back(frame_line);
   }
+  if(robot_and_path_.empty()) {
+    start_time_ = path->GetStartTime();
+    end_time_ = path->GetEndTime();
+  } else {
+    start_time_ = std::min(start_time_, path->GetStartTime());
+    end_time_ = std::max(end_time_, path->GetEndTime());
+  }
+  current_time_ = start_time_;
   robot_and_path_.push_back(std::make_pair(robot, path));
 }
 
@@ -137,7 +146,7 @@ void PathReplayWorldNode::customPostRefresh()
 void PathReplayWorldNode::customPreStep()
 {
   for(const auto& [robot, path] : robot_and_path_) {
-    auto config = path->GetConfigAt(path_position_);
+    auto config = path->GetConfigAt(current_time_);
     robot->SetConfiguration(config);
   }
   if(collision_checker_ != nullptr) {
@@ -156,15 +165,15 @@ void PathReplayWorldNode::customPostStep()
     return;
   }
 
-  path_position_ += (reverse_ ? -step_size_ : +step_size_);
+  current_time_ += (reverse_ ? -step_size_ : +step_size_);
 
-  if(path_position_ > 1.0f) {
+  if(current_time_ > end_time_) {
     reverse_ = true;
-    path_position_ = 1.0f;
+    current_time_ = end_time_;
   }
-  if(path_position_ < 0.0f) {
+  if(current_time_ < start_time_) {
     reverse_ = false;
-    path_position_ = 0.0f;
+    current_time_ = start_time_;
   }
 }
 
@@ -193,14 +202,14 @@ std::string PathReplayWorldNode::getCurrentJointConfiguration() const {
   std::string s;
   std::string delim = "";
   for(const auto& [_, path] : robot_and_path_) {
-    auto config = path->GetConfigAt(path_position_);
+    auto config = path->GetConfigAt(current_time_);
     s += std::to_string(config);
   }
   return s;
 }
 
 float PathReplayWorldNode::getCurrentPosition() const {
-  return path_position_;
+  return current_time_;
 }
 
 float PathReplayWorldNode::getStepSize() const {
@@ -307,11 +316,13 @@ void TextWidget::render()
     return;
   }
 
-  ImGui::Text("%s", viewer_->getInstructions().c_str());
+  //ImGui::Text("Path position: %.2f (%s)\nPath speed: %f)", 
+      //world_node_->getCurrentPosition(), 
+  //ImGui::Text("%s", viewer_->getInstructions().c_str());
   ImGui::Text("Path position: %.2f (%s)\nPath speed: %f)", 
       world_node_->getCurrentPosition(), 
       (world_node_->isRunning() ? "running" : "pause"),
       world_node_->getStepSize());
-  ImGui::Text("Config : %s", world_node_->getCurrentJointConfiguration().c_str());
+  //ImGui::Text("Config : %s", world_node_->getCurrentJointConfiguration().c_str());
   ImGui::End();
 }

@@ -50,10 +50,12 @@ std::pair<RobotPtr, ompl::base::PathPtr> MakeDynamicObstacle(
     const dart::simulation::WorldPtr& world, 
     const std::vector<dart::dynamics::SkeletonPtr>& static_obstacles
     ) {
-  auto robot = MakeRobot<MobileKukaRobot>(world, static_obstacles);
+  auto robot = MakeRobot<TimeBasedMobileKukaRobotTaskSpace>(world, static_obstacles);
 
   auto state1 = MakeState({start_xy.at(0), start_xy.at(1), start_xy.at(2), -0.5, 0.0, +0.57, +1, 2, 0.24, -0.21});
+  state1.time = 0.0;
   auto state2 = MakeState({goal_xy.at(0), goal_xy.at(1), goal_xy.at(2), +0.5, 0.0, -0.57, +1, 2, 0.24, +0.21});
+  state2.time = 10.0;
 
   auto si = robot->GetSpaceInformation();
   auto start = si->allocState();
@@ -113,9 +115,10 @@ int main(int argc, char* argv[]) {
   ////Create static_obstacles
   ////////////////////////////////////////////////////////////////////////////////
   std::vector<dart::dynamics::SkeletonPtr> static_obstacles;
-  static_obstacles.push_back(createBox(State3d(-1.0,0,0), 0.2, 0.2, 0.8));
-  static_obstacles.push_back(createBox(State3d(+0.0,0,0), 0.2, 0.2, 0.8));
-  static_obstacles.push_back(createBox(State3d(+1.0,0,0), 0.2, 0.2, 0.8));
+  const float kObstacleSize = 0.3;
+  static_obstacles.push_back(createBox(State3d(-1.1,0,0), kObstacleSize, kObstacleSize, 0.8));
+  static_obstacles.push_back(createBox(State3d(+0.0,0,0), kObstacleSize, kObstacleSize, 0.8));
+  static_obstacles.push_back(createBox(State3d(+1.1,0,0), kObstacleSize, kObstacleSize, 0.8));
 
   auto floor = createFloor(-0.255);
   static_obstacles.push_back(floor);

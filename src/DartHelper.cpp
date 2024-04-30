@@ -7,6 +7,9 @@
 #include "OmplHelper.hpp"
 
 void PrintSkeletonInfo(const dart::dynamics::SkeletonPtr& skeleton) {
+  if(skeleton == nullptr) {
+    return;
+  }
 
   std::cout << "Skeleton: " << skeleton->getName() << std::endl;
   std::cout << "  Num joints : " << skeleton->getNumJoints() << std::endl;

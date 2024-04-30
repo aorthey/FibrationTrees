@@ -84,9 +84,6 @@ float GetMinimumReachableTime(const StateXd& s1, const StateXd& s2, double vMax)
 
 bool IsReachableInTime(const StateXd& s1, const StateXd& s2, double vMax) {
   auto deltaTime = s2.time - s1.time;
-  if(deltaTime <= 0) {
-    return false;
-  }
   auto deltaSpace = Distance(s1, s2);
   if (deltaSpace / vMax > deltaTime + Epsilon) {
     //Cannot physically reach goal

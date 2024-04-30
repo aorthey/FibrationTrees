@@ -74,17 +74,12 @@ TEST(TimeBasedPlanning, Simple) {
    ////////////////////////////////////////////////////////////////////////////////
    ////Planning
    ////////////////////////////////////////////////////////////////////////////////
-  //auto planner = std::make_shared<ompl::geometric::RRTstar>(factor1);
-  //auto planner = std::make_shared<ompl::geometric::RRTConnect>(factor1);
-  //auto planner = std::make_shared<ompl::geometric::RRT>(factor1);
   auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(factor1);
   planner->setProblemDefinition(pdef);
   planner->setup();
   planner->setRange(+Inf);
-  //planner->setIntermediateStates(false);
 
   float timeout = 10.0;
-  //timeout =0.01;
   dart::math::Random::setSeed(2);
 
   auto ptc = TimeOrSolutionTerminationCondition(pdef, timeout);

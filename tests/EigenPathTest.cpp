@@ -260,31 +260,43 @@ TEST(EigenPathTest, OmplPathWithTiming) {
 
   auto path = EigenPath(robot, ompl_path);
   {
+    auto x = path.GetConfigAt(-1.0);
+    EXPECT_NEAR(x.time, 0.0, Epsilon);
+    EXPECT_NEAR(x[0], 0.0, Epsilon);
+    EXPECT_NEAR(x[1], 0.0, Epsilon);
+  }
+  {
     auto x = path.GetConfigAt(0.0);
     EXPECT_NEAR(x.time, 0.0, Epsilon);
     EXPECT_NEAR(x[0], 0.0, Epsilon);
     EXPECT_NEAR(x[1], 0.0, Epsilon);
   }
   {
-    auto x = path.GetConfigAt(0.1);
+    auto x = path.GetConfigAt(1.0);
     EXPECT_NEAR(x.time, 1.0, Epsilon);
     EXPECT_NEAR(x[0], 0.0, Epsilon);
     EXPECT_NEAR(x[1], 0.5, Epsilon);
   }
   {
-    auto x = path.GetConfigAt(0.2);
+    auto x = path.GetConfigAt(2.0);
     EXPECT_NEAR(x.time, 2.0, Epsilon);
     EXPECT_NEAR(x[0], 0.0, Epsilon);
     EXPECT_NEAR(x[1], 1.0, Epsilon);
   }
   {
-    auto x = path.GetConfigAt(0.6);
+    auto x = path.GetConfigAt(6.0);
     EXPECT_NEAR(x.time, 6.0, Epsilon);
     EXPECT_NEAR(x[0], 0.0, Epsilon);
     EXPECT_NEAR(x[1], 1.5, Epsilon);
   }
   {
-    auto x = path.GetConfigAt(1.1);
+    auto x = path.GetConfigAt(10.0);
+    EXPECT_NEAR(x.time, 10.0, Epsilon);
+    EXPECT_NEAR(x[0], 0.0, Epsilon);
+    EXPECT_NEAR(x[1], 2.0, Epsilon);
+  }
+  {
+    auto x = path.GetConfigAt(10.0 + 1.0);
     EXPECT_NEAR(x.time, 10.0, Epsilon);
     EXPECT_NEAR(x[0], 0.0, Epsilon);
     EXPECT_NEAR(x[1], 2.0, Epsilon);

@@ -72,7 +72,13 @@ protected:
   CollisionCheckerPtr collision_checker_;
 
   float step_size_{kDefaultStepSize};
-  float path_position_;
+
+  // float path_position_;
+  // float path_position_;
+  float start_time_;
+  float end_time_;
+  float current_time_;
+
   bool pause_;
   bool reverse_;
 };

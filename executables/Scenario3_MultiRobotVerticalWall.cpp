@@ -65,6 +65,8 @@ int main(int argc, char* argv[]) {
   const auto limits2 = std::make_pair(State3d(0.38, -0.5, 0.0), State3d(0.42, +0.5, 2.0));
   point1->SetLimits(limits1);
   point2->SetLimits(limits2);
+  hide(point1->GetSkeleton());
+  hide(point2->GetSkeleton());
 
   std::vector<RobotPtr> robots = {robot1, robot2};
 
@@ -156,10 +158,15 @@ int main(int argc, char* argv[]) {
   OMPL_INFORM("Found goal state:");
   factor->printState(goal);
 
-  world->addSimpleFrame(createSphereFrame(task_start1_eigen, 0.02, color_red));
-  world->addSimpleFrame(createSphereFrame(task_goal1_eigen, 0.02, color_red_light));
-  world->addSimpleFrame(createSphereFrame(task_start2_eigen, 0.02, color_green));
-  world->addSimpleFrame(createSphereFrame(task_goal2_eigen, 0.02, color_green_light));
+  const float kGoalRegionRadius = 0.02;
+  const float kGoalRegionHeight = 0.001;
+  const auto kGoalRegionRotation = State3d(0.0, M_PI*0.5, 0.0);
+
+  world->addSimpleFrame(createCylinderFrame(task_goal1_eigen, kGoalRegionRotation, kGoalRegionRadius, kGoalRegionHeight, State4d(1.0, 0.4, 0.4, 0.5)));
+  world->addSimpleFrame(createCylinderFrame(task_goal2_eigen, kGoalRegionRotation, kGoalRegionRadius, kGoalRegionHeight, State4d(0.4, 1.0, 0.4, 0.5)));
+  world->addSimpleFrame(createCylinderFrame(task_start1_eigen, kGoalRegionRotation, 0.01, kGoalRegionHeight, State4d(0.8, 0.1, 0.1, 1.0)));
+  world->addSimpleFrame(createCylinderFrame(task_start2_eigen, kGoalRegionRotation, 0.01, kGoalRegionHeight, State4d(0.1, 0.8, 0.1, 1.0)));
+
 
   //////////////////////////////////////////////////////////////////////////////////
   //////Create factored task space goals

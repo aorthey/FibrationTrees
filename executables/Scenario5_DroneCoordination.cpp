@@ -13,6 +13,7 @@
 
 #include <ompl/base/SpaceInformation.h>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
+#include <ompl/base/goals/FactoredGoal.h>
 #include <ompl/base/terminationconditions/IterationTerminationCondition.h>
 #include <ompl/util/RandomNumbers.h>
 #include <ompl/geometric/PathSimplifier.h>
@@ -40,7 +41,9 @@ ompl::base::ProblemDefinitionPtr CreateMultiDroneProblemDefinition(
   float yaw = 0.57;
 
   auto startStates = factor->allocChildStates();
-  auto goalStates = factor->allocChildStates();
+  //auto goalStates = factor->allocChildStates();
+
+  std::unordered_map<std::string, ompl::base::GoalSampleableRegionPtr> goals;
 
   for(const auto& robot : robots) {
     const auto name = robot->GetSpaceInformation()->getName();
@@ -55,9 +58,14 @@ ompl::base::ProblemDefinitionPtr CreateMultiDroneProblemDefinition(
 
     auto goal = MakeState({-1.5, y + 0.5 *yoffset, z, yaw});
     auto goal_state = AllocStateFromEigen(robot, goal);
-    goalStates[name] = goal_state;
+    //goalStates[name] = goal_state;
 
     y += y_step;
+
+    auto goal_region = std::make_shared<ompl::base::GoalState>(robot->GetSpaceInformation());
+    goal_region->setState(goal_state);
+    goal_region->setThreshold(0.5);
+    goals[name] = goal_region;
   }
 
   OMPL_INFORM("Lifted start and goal states:");
@@ -65,13 +73,14 @@ ompl::base::ProblemDefinitionPtr CreateMultiDroneProblemDefinition(
   factor->lift(startStates, start);
   factor->printState(start);
 
-  auto goal = factor->allocState();
-  factor->lift(goalStates, goal);
-  factor->printState(goal);
+  // auto goal = factor->allocState();
+  // factor->lift(goalStates, goal);
+  // factor->printState(goal);
 
-  auto goal_region = std::make_shared<ompl::base::GoalState>(factor);
-  goal_region->setState(goal);
-  goal_region->setThreshold(0.05);
+  auto goal_region = std::make_shared<ompl::base::FactoredGoal>(factor, goals);
+  //auto goal_region = std::make_shared<ompl::base::GoalState>(factor);
+  //goal_region->setState(goal);
+  goal_region->setThreshold(1.0);
  
   ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(factor);
   pdef->addStartState(start);
@@ -143,7 +152,7 @@ int main(int argc, char* argv[]) {
 
   auto pairwise_collision_checker = std::make_shared<DartMultiRobotCollisionChecker>(root, world, robots);
   root->setStateValidityChecker(pairwise_collision_checker);
-  root->setStateValidityCheckingResolution(0.0001);
+  //root->setStateValidityCheckingResolution(0.0001);
 
   root->printFactorization(std::cout);
   //////////////////////////////////////////////////////////////////////////////////

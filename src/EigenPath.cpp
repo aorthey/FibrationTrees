@@ -19,28 +19,29 @@ EigenPath::EigenPath(const RobotPtr& robot, const ompl::base::PathPtr& path) {
   for(size_t k = 0; k < states.size(); k++) {
     StateXd config = robot->StateToEigen(states.at(k));
 
-    if(k > 0) {
-      auto d = robot->GetSpaceInformation()->distance(states.at(k), states.at(k-1));
-      if(d > M_PI) {
-        OMPL_ERROR("Configs are far apart.");
-        std::cout << "Last     config: " << configs_.back() << std::endl;
-        std::cout << "Current  config: " << config << std::endl;
-        //continue;
-      }
-    }
+    //if(k > 0) {
+    //  auto d = robot->GetSpaceInformation()->distance(states.at(k), states.at(k-1));
+    //  if(d > M_PI) {
+    //    OMPL_ERROR("Configs are far apart.");
+    //    std::cout << "Last     config: " << configs_.back() << std::endl;
+    //    std::cout << "Current  config: " << config << std::endl;
+    //    //continue;
+    //  }
+    //}
 
     float time = robot->StateToTime(states.at(k));
     if(time < 0) {
       time_at_configs_.push_back((float)k/((float)states.size()-1.0f));
     } else {
-      if(time_at_configs_.empty() && time > 0.0) {
-        std::cout << "Error: First time must be zero, but is " << time << std::endl;
-        throw "InvalidTime";
-      }
+      // if(time_at_configs_.empty() && time > 0.0) {
+      //   std::cout << "Error: First time must be zero, but is " << time << std::endl;
+      //   throw "InvalidTime";
+      // }
       time_at_configs_.push_back(time);
     }
     configs_.push_back(config);
   }
+
   if(!time_at_configs_.empty()) {
     std::cout << "Created path with " << states.size() << " states and time in [" << time_at_configs_.front() <<
        ", " << time_at_configs_.back() << "]" << std::endl;
@@ -64,6 +65,8 @@ void EigenPath::InitLengthFromConfigs(const std::vector<StateXd>& configs) {
   if(configs.size() < 1) {
     throw std::length_error("Cannot initialize an empty path.");
   }
+  start_time_  = time_at_configs_.front();
+  end_time_  = time_at_configs_.back();
 
   std::vector<float> lengths;
   for(size_t k = 1; k < configs.size(); k++) {
@@ -75,21 +78,29 @@ void EigenPath::InitLengthFromConfigs(const std::vector<StateXd>& configs) {
   total_length_ = std::accumulate(lengths.begin(), lengths.end(), 0.0f);
 }
 
-StateXd EigenPath::GetConfigAt(float s) const {
-  const auto max_time = time_at_configs_.back();
+float EigenPath::GetStartTime() const {
+  return start_time_;
+}
+
+float EigenPath::GetEndTime() const {
+  return end_time_;
+}
+
+StateXd EigenPath::GetConfigAt(const float position) const {
+  //const auto max_time = 20.0;//time_at_configs_.back();
   if(time_at_configs_.empty()) {
     std::cout << "Error: Path contains no configs." << std::endl;
     throw "InvalidPath";
   }
 
-  if(s <= 0.0f) {
+  if(position <= start_time_) {
     return configs_.front();
   }
-  if(s >= 1.0f) {
+  if(position >= end_time_) {
     return configs_.back();
   }
 
-  const float position = s * max_time;
+  //const float position = s * max_time;
   float current_position = 0.0f;
   size_t index = 1;
 

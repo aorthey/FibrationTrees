@@ -2,10 +2,10 @@
 
 #include "robots/Robot.hpp"
 
-const auto kDefaultVMax = 1.0;
-const auto kDefaultTMax = 20.0;
-
 class TimeBasedSphereRobot : public Robot {
+  const float kDefaultVMax = 1.0;
+  const float kDefaultTMax = 20.0;
+
   public:
     TimeBasedSphereRobot() = default;
     dart::dynamics::SkeletonPtr MakeSkeleton() override;
