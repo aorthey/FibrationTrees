@@ -22,6 +22,8 @@ class Visualizer {
 
     void Run();
 
+    void SetEndTime(float end_time);
+
   private:
     osg::ref_ptr<dart::gui::osg::ImGuiViewer> viewer;
     osg::ref_ptr<PathReplayWorldNode> world_node;

@@ -25,8 +25,8 @@
 #include <ranges>
 
 const auto Nrobots = 6;
-const float kIndividualGoalThreshold = 0.5;
-const float kGlobalGoalThreshold = 2.0 * Nrobots * kIndividualGoalThreshold;
+const float kIndividualGoalThreshold = 0.25;
+const float kGlobalGoalThreshold = 1.0;
 
 ompl::base::ProblemDefinitionPtr CreateMultiDroneProblemDefinition(
   const ompl::multilevel::FactoredSpaceInformationPtr& factor, 

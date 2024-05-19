@@ -39,7 +39,6 @@ std::optional<ompl::base::State*> ComputeValidTotalState(const ompl::multilevel:
   size_t samples = 0;
   while(samples++ < kMaxResampleIteration) {
     factor->liftLeafStates(leaf_node_states, state);
-    factor->printState(state);
     if(factor->isValid(state)) {
       return state;
     }
@@ -60,4 +59,15 @@ ompl::base::PlannerTerminationCondition TimeOrSolutionPtc(const ompl::base::Prob
   auto solution_ptc = ompl::base::exactSolnPlannerTerminationCondition(pdef);
   auto timed_ptc = ompl::base::timedPlannerTerminationCondition(timeout);
   return ompl::base::plannerOrTerminationCondition(solution_ptc, timed_ptc);
+}
+
+std::vector<ompl::base::State*> MakeInterpolatedPathSegment(const ompl::base::SpaceInformation* si, const ompl::base::State *s1, const ompl::base::State *s2)  {
+  std::vector<ompl::base::State*> result;
+  const unsigned int count = si->getStateSpace()->validSegmentCount(s1, s2);
+  si->getMotionStates(s1, s2, result, count, true, true);
+  return result;
+}
+
+std::vector<ompl::base::State*> MakeInterpolatedPathSegment(const ompl::base::SpaceInformationPtr &si, const ompl::base::State *s1, const ompl::base::State *s2)  {
+  return MakeInterpolatedPathSegment(si.get(), s1, s2);
 }

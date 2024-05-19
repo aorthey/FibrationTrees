@@ -20,61 +20,12 @@ MotionValidatorTaskSpaceTranslation::~MotionValidatorTaskSpaceTranslation() {
 
 bool MotionValidatorTaskSpaceTranslation::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
   OMPL_ERROR("NYI. Please use propagateMotion.");
-  si_->printSettings(std::cout);
   return TaskSpaceMotionValidator::checkMotion(s1, s2);
-  // std::pair<ompl::base::State *, double> lastValid;
-  // lastValid.first = nullptr;
-  // lastValid.second = 0.0f;
-  // return checkMotion(s1, s2, lastValid);
 }
 
 bool MotionValidatorTaskSpaceTranslation::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const {
   OMPL_ERROR("NYI. Please use propagateMotion.");
   return TaskSpaceMotionValidator::checkMotion(s1, s2, lastValid);
-  //const auto from_vector = robot_->StateToEigen(s1);
-  //const auto to_vector = robot_->StateToEigen(s2);
-
-  //////////////////////////////////////////////////////////////////////////////////
-  ////Solve edge ik
-  //////////////////////////////////////////////////////////////////////////////////
-  //const auto configs = kinematics_solver_->solve_edge_ik_with_config(from_vector, to_vector);
-  //if(configs.empty()) {
-  //  return FillLastStateOnNoProgressAndReturn(s1, lastValid);
-  //}
-  //if(!kinematics_solver_->lastSolveWasSuccessful()) {
-  //  robot_->EigenToState(configs.back(), lastValidState_);
-  //  return FillLastStateOnNoProgressAndReturn(lastValidState_, lastValid);
-  //}
-  //std::cout << "Interpolated " << configs.size() << " states." << std::endl;
-  //std::cout << "First config: " << configs.front() << std::endl;
-  //std::cout << "Last  config: " << configs.back() << std::endl;
-
-  //si_->copyState(lastValidState_, s1);
-  //EigenPath path(configs);
-  //float L = path.GetLength();
-  //std::cout << "Path length: " << L << std::endl;
-  //for(float d = 0; d < L; d+= kDeltaCollisionCheckStepSize) {
-  //  robot_->EigenToState(path.GetConfigAt(d/L), tmpState_);
-  //  if(!si_->isValid(tmpState_)) {
-  //    std::cout << "Invalid at " << d/L << std::endl;
-  //    if(lastValid.first != nullptr) {
-  //      si_->copyState(lastValid.first, lastValidState_);
-  //      lastValid.second = si_->distance(s1, lastValid.first);
-  //    }
-  //    return false;
-  //  }
-  //  si_->copyState(lastValidState_, tmpState_);
-  //}
-
-  //if((configs.back() - to_vector).norm() < 1e-3) {
-  //  return true;
-  //}
-
-  //if(lastValid.first != nullptr) {
-  //  si_->copyState(lastValid.first, lastValidState_);
-  //  lastValid.second = si_->distance(s1, lastValid.first);
-  //}
-  //return false;
 }
 
 std::vector<ompl::base::State*> MotionValidatorTaskSpaceTranslation::propagateMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {

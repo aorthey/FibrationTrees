@@ -31,3 +31,6 @@ std::optional<ompl::base::State*> ComputeValidTotalState(const ompl::multilevel:
     const std::unordered_map<std::string, ompl::base::State*>& leaf_node_states);
 
 ompl::base::PlannerTerminationCondition TimeOrSolutionPtc(const ompl::base::ProblemDefinitionPtr &pdef, double timeout);
+
+std::vector<ompl::base::State*> MakeInterpolatedPathSegment(const ompl::base::SpaceInformation* si, const ompl::base::State *s1, const ompl::base::State *s2);
+std::vector<ompl::base::State*> MakeInterpolatedPathSegment(const ompl::base::SpaceInformationPtr &si, const ompl::base::State *s1, const ompl::base::State *s2);

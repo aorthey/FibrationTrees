@@ -22,12 +22,10 @@ std::shared_ptr<MultiRobot> MultiRobot::MakeMultiRobot(const std::vector<RobotPt
 }
 
 ompl::multilevel::FactoredSpaceInformationPtr MultiRobot::MakeSpaceInformation(const RobotPtr& robot_input) {
-  std::cout << "MakeSpaceInformation" << std::endl;
   std::vector<ompl::base::StateSpacePtr> compound_spaces;
   for(const auto& robot : robots_) {
     compound_spaces.push_back(robot->GetSpaceInformation()->getStateSpace());
   }
-  std::cout << "MakeSpaceInformation" << std::endl;
   auto space = std::make_shared<ompl::base::CompoundStateSpace>(compound_spaces, std::vector<double>(compound_spaces.size(), 1.0f));
 
   auto factor(std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space));

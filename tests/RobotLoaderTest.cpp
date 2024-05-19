@@ -4,6 +4,8 @@
 #include "robots/MobileKukaBase.hpp"
 #include "robots/MobileKukaRobot.hpp"
 #include "robots/MobileKukaRobotTaskSpace.hpp"
+#include "robots/MobileCar.hpp"
+#include "robots/MobileCarDisk.hpp"
 #include "robots/SphereRobot.hpp"
 #include "robots/TimeBasedMobileKukaRobotTaskSpace.hpp"
 #include "robots/TimeBasedSphereRobot.hpp"
@@ -20,6 +22,8 @@ class RobotLoaderTest : public testing::Test {};
 using RobotTypes = ::testing::Types<
     KukaRobot, 
     KukaRobotTaskSpace, 
+    MobileCar, 
+    MobileCarDisk, 
     MobileKukaBase,
     MobileKukaRobot, 
     MobileKukaRobotTaskSpace, 
@@ -136,6 +140,9 @@ TYPED_TEST(RobotLoaderTest, JointLimitTest) {
   auto ub = skeleton->getPositionUpperLimits();
 
   for(size_t k = 0; k < lb.size(); k++) {
+    if(!skeleton->getDof(k)->hasPositionLimit()) {
+      continue;
+    }
     EXPECT_LT(lb[k], std::numeric_limits<double>::infinity());
     EXPECT_LT(ub[k], std::numeric_limits<double>::infinity());
     EXPECT_GT(lb[k], -std::numeric_limits<double>::infinity());

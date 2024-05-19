@@ -42,6 +42,8 @@ public:
   void decreaseSpeed();
   void increaseSpeed();
 
+  void setEndTime(float end_time);
+
   void togglePlannerDataVisibility();
   void toggleSolutionPathVisibility();
   void toggleFrameVisibility(const std::vector<std::string>& frame_names);
@@ -73,8 +75,6 @@ protected:
 
   float step_size_{kDefaultStepSize};
 
-  // float path_position_;
-  // float path_position_;
   float start_time_;
   float end_time_;
   float current_time_;

@@ -39,6 +39,16 @@ void PrintSkeletonInfo(const dart::dynamics::SkeletonPtr& skeleton) {
   }
 }
 
+Eigen::Affine3d create_rotation_matrix(double ax, double ay, double az) {
+  Eigen::Affine3d rx =
+      Eigen::Affine3d(Eigen::AngleAxisd(ax, Eigen::Vector3d(1, 0, 0)));
+  Eigen::Affine3d ry =
+      Eigen::Affine3d(Eigen::AngleAxisd(ay, Eigen::Vector3d(0, 1, 0)));
+  Eigen::Affine3d rz =
+      Eigen::Affine3d(Eigen::AngleAxisd(az, Eigen::Vector3d(0, 0, 1)));
+  return rx * ry * rz;
+}
+
 StateXd GetRandomPosition(const dart::dynamics::SkeletonPtr& skeleton) {
   auto lb = skeleton->getPositionLowerLimits();
   auto ub = skeleton->getPositionUpperLimits();
@@ -62,25 +72,12 @@ dart::dynamics::SimpleFramePtr createSphereFrame(const StateXd& position, const 
   return createSphereFrame(position.configuration, radius, color);
 }
 
-Eigen::Affine3d create_rotation_matrix(double ax, double ay, double az) {
-  Eigen::Affine3d rx =
-      Eigen::Affine3d(Eigen::AngleAxisd(ax, Eigen::Vector3d(1, 0, 0)));
-  Eigen::Affine3d ry =
-      Eigen::Affine3d(Eigen::AngleAxisd(ay, Eigen::Vector3d(0, 1, 0)));
-  Eigen::Affine3d rz =
-      Eigen::Affine3d(Eigen::AngleAxisd(az, Eigen::Vector3d(0, 0, 1)));
-  return rx * ry * rz;
-}
-
 dart::dynamics::SimpleFramePtr createCylinderFrame(const State3d& translation, const State3d& rotationXYZ, 
     const float radius, const float height, const State4d& color) {
 
   Eigen::Isometry3d tf = Eigen::Isometry3d::Identity();
   tf.translation() = translation;
   auto R = create_rotation_matrix(rotationXYZ[0],rotationXYZ[1],rotationXYZ[2]);
-  // auto R = Eigen::AngleAxisf(rotationXYZ[0], Eigen::Vector3f::UnitX())
-  // * Eigen::AngleAxisf(rotationXYZ[1], Eigen::Vector3f::UnitY())
-  // * Eigen::AngleAxisf(rotationXYZ[2], Eigen::Vector3f::UnitZ());
   tf.linear() = R.linear();
 
   static int counter = 0;
@@ -160,6 +157,29 @@ dart::dynamics::SkeletonPtr createBox(const State3d& position, float length_x, f
     body->getParentJoint()->setTransformFromParentBodyNode(tf);
     body->setName(name);
     return box;
+}
+
+dart::dynamics::SkeletonPtr createCylinder(const State3d& position, const State3d& rotationXYZ, float radius, float height) {
+    static int counter = 0;
+    std::string name = "rotated_cylinder_"+std::to_string(counter++);
+    dart::dynamics::SkeletonPtr cylinder = dart::dynamics::Skeleton::create(name);
+
+    dart::dynamics::BodyNodePtr body =
+        cylinder->createJointAndBodyNodePair<dart::dynamics::WeldJoint>(nullptr).second;
+    dart::dynamics::ShapePtr shape = std::make_shared<dart::dynamics::CylinderShape>(radius, height);
+
+    auto shapeNode = body->createShapeNodeWith<dart::dynamics::VisualAspect, dart::dynamics::CollisionAspect, dart::dynamics::DynamicsAspect>(shape);
+    shapeNode->getVisualAspect()->setColor(State3d(0.9, 0.9, 0.9));
+
+    Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
+    tf.translation() = position;
+    auto R = create_rotation_matrix(rotationXYZ[0],rotationXYZ[1],rotationXYZ[2]);
+    tf.linear() = R.linear();
+
+    body->getParentJoint()->setTransformFromParentBodyNode(tf);
+    body->setName(name);
+
+    return cylinder;
 }
 
 dart::dynamics::SkeletonPtr createCylinder(const State3d& position, float radius, float height) {

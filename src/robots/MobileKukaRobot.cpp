@@ -2,10 +2,13 @@
 
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/spaces/SE2StateSpace.h>
+
 #include "KinematicsSolver.hpp"
+#include "FilePath.hpp"
+#include "validators/DefaultMotionValidator.hpp"
 
 dart::dynamics::SkeletonPtr MobileKukaRobot::MakeSkeleton() {
-  const auto urdf_name = "/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka_endeffector_mobile.urdf";
+  const auto urdf_name = GetDataFolder() + "robots/kuka_lwr/kuka_endeffector_mobile.urdf";
 
   dart::utils::DartLoader loader;
   dart::utils::DartLoader::Options options;
@@ -101,4 +104,13 @@ void MobileKukaRobot::EigenToState(const StateXd& v, ompl::base::State* state) c
   {
       state_RN->values[k] = v.configuration[k + 3];
   }
+}
+ompl::base::MotionValidatorPtr MobileKukaRobot::MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& /*robot*/) {
+  return std::make_shared<DefaultMotionValidator>(factor);
+}
+
+std::vector<State3d> MobileKukaRobot::GetFK(const StateXd& config) const {
+  auto endeffector = "base_link_robot";
+  skeleton_->setConfiguration(config.configuration);
+  return std::vector<State3d>({skeleton_->getBodyNode(endeffector)->getTransform().translation()});
 }

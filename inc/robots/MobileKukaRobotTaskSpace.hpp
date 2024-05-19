@@ -12,5 +12,7 @@ class MobileKukaRobotTaskSpace : public MobileKukaRobot {
 
     StateXd StateToEigen(const ompl::base::State* state) const override;
     void EigenToState(const StateXd& v, ompl::base::State* state) const override;
+
+    std::vector<State3d> GetFK(const StateXd& config) const override;
 };
 

@@ -17,6 +17,7 @@
   <!-- SE2 Links -->
   <link name="world"/>
   <link name="empty_link_x"/>
+  <link name="empty_link_y"/>
   <link name="base_link_robot">
     <inertial>
       <mass value="0.3"/>
@@ -49,8 +50,14 @@
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
     <parent link="empty_link_x"/>
-    <child link="base_link_robot"/>
+    <child link="empty_link_y"/>
     <limit effort="1" lower="-1.5" upper="1.5" velocity="1"/>
+  </joint>
+  <joint name="joint_rotation_yaw" type="continuous">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="empty_link_y"/>
+    <child link="base_link_robot"/>
   </joint>
 </robot>
 

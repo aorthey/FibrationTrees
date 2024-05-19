@@ -240,6 +240,10 @@ void PathReplayWorldNode::PrintKeyPressEvents() const {
   }
 }
 
+void PathReplayWorldNode::setEndTime(float end_time) {
+  end_time_ = end_time;
+}
+
 void PathReplayWorldNode::CreateKeyPressEvents() {
   events_.push_back({'h', "display key options", [&](){PrintKeyPressEvents();}});
   events_.push_back({'s', "play/pause planned path", [&](){toggleStartStop();}});

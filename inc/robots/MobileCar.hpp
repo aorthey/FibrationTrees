@@ -1,15 +1,14 @@
 #pragma once
 
-#include "robots/Robot.hpp"
+#include "robots/MobileKukaBase.hpp"
 
-class MobileKukaBase : public Robot {
+class MobileCar : public MobileKukaBase {
   public:
-    MobileKukaBase() = default;
+    MobileCar() = default;
     dart::dynamics::SkeletonPtr MakeSkeleton() override;
     ompl::multilevel::FactoredSpaceInformationPtr MakeSpaceInformation(const RobotPtr& robot) override;
     ompl::base::MotionValidatorPtr MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& robot) override;
 
-    StateXd StateToEigen(const ompl::base::State* state) const override;
-    void EigenToState(const StateXd& v, ompl::base::State* state) const override;
+    std::vector<State3d> GetFK(const StateXd& config) const override;
 };
 

@@ -55,7 +55,7 @@ std::pair<RobotPtr, ompl::base::PathPtr> MakeDynamicObstacle(
   auto state1 = MakeState({start_xy.at(0), start_xy.at(1), start_xy.at(2), -0.5, 0.0, +0.57, +1, 2, 0.24, -0.21});
   state1.time = 0.0;
   auto state2 = MakeState({goal_xy.at(0), goal_xy.at(1), goal_xy.at(2), +0.5, 0.0, -0.57, +1, 2, 0.24, +0.21});
-  state2.time = 10.0;
+  state2.time = 20.0;
 
   auto si = robot->GetSpaceInformation();
   auto start = si->allocState();
@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
   const float kObstacleSize = 0.3;
   static_obstacles.push_back(createBox(State3d(-1.1,0,0), kObstacleSize, kObstacleSize, 0.8));
   static_obstacles.push_back(createBox(State3d(+0.0,0,0), kObstacleSize, kObstacleSize, 0.8));
-  static_obstacles.push_back(createBox(State3d(+1.1,0,0), kObstacleSize, kObstacleSize, 0.8));
+  //static_obstacles.push_back(createBox(State3d(+1.1,0,0), kObstacleSize, kObstacleSize, 0.8));
 
   auto floor = createFloor(-0.255);
   static_obstacles.push_back(floor);
@@ -236,6 +236,16 @@ int main(int argc, char* argv[]) {
   for(const auto& dynamic_obstacle : dynamic_obstacles) {
     visualizer.AddPath(dynamic_obstacle.first, dynamic_obstacle.second, kObstacleColor);
     changeBodyColor(dynamic_obstacle.first->GetSkeleton(), kObstacleColor4d);
+  }
+
+  if(pdef) 
+  {
+    auto path = pdef->getSolutionPath();
+    ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
+    auto end_point = pgeo.getStates().back();
+    auto end_time = robot_in_time->StateToTime(end_point);
+    OMPL_INFORM("Found path with end time %f", end_time);
+    visualizer.SetEndTime(end_time);
   }
 
   visualizer.SetCollisionChecker(robot_in_time->GetCollisionChecker());

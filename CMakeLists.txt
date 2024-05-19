@@ -6,6 +6,8 @@ PROJECT(FibrationTrees VERSION 0.1)
 execute_process(COMMAND whoami OUTPUT_VARIABLE current_user OUTPUT_STRIP_TRAILING_WHITESPACE)
 MESSAGE("USER: ${current_user}")
 
+add_compile_definitions("PROGRAM_FOLDER_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
+
 ENABLE_TESTING()
 
 ################################################################################

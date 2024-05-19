@@ -50,3 +50,7 @@ void MobileKukaRobotTaskSpace::EigenToState(const StateXd& v, ompl::base::State*
       state_RN->values[k] = v[k + 3];
   }
 }
+
+std::vector<State3d> MobileKukaRobotTaskSpace::GetFK(const StateXd& config) const {
+  return Robot::GetFK(config);
+}

@@ -2,10 +2,12 @@
 #include <dart/dart.hpp>
 #include <dart/utils/urdf/urdf.hpp>
 
+#include "FilePath.hpp"
+
 TEST(DartLoaderTest, LoadUrdfTest) {
   dart::utils::DartLoader loader;
   dart::dynamics::SkeletonPtr manipulator
-    = loader.parseSkeleton("/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka.urdf");
+    = loader.parseSkeleton(GetDataFolder() + "robots/kuka_lwr/kuka.urdf");
   auto numDofs = manipulator->getNumDofs();
   EXPECT_EQ(numDofs, 13u);
   const auto lb = manipulator->getPositionLowerLimits();

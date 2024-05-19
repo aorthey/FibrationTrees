@@ -32,6 +32,10 @@ Visualizer::Visualizer(const dart::simulation::WorldPtr& world) {
   viewer->simulate(true);
 }
 
+void Visualizer::SetEndTime(float end_time) {
+  world_node->setEndTime(end_time);
+}
+
 void Visualizer::AddPlanner(const RobotPtr& robot, const ompl::base::PlannerPtr& planner, bool displayPlannerData) {
   ////////////////////////////////////////////////////////////////////////////////
   // Visualize Planner data
@@ -76,7 +80,7 @@ void Visualizer::AddPlanner(const RobotPtr& robot, const ompl::base::PlannerPtr&
       //}
     //}
     OMPL_INFORM("Interpolate path...");
-    pgeo.interpolate();
+    //pgeo.interpolate();
     OMPL_INFORM("Add path to visualizer...");
     world_node->AddPath(robot, path, kDefaultPathColor);
   }

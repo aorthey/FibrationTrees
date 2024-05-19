@@ -7,6 +7,7 @@
 #include "gui/Visualizer.hpp"
 #include "robots/RobotFactory.hpp"
 #include "robots/KukaRobot.hpp"
+#include "FilePath.hpp"
 
 #include <dart/dart.hpp>
 
@@ -27,7 +28,7 @@ int main(int argc, char* argv[]) {
   dart::simulation::WorldPtr world(new dart::simulation::World);
 
   std::vector<dart::dynamics::SkeletonPtr> obstacles;
-  obstacles.push_back(createFromURDF("/home/aorthey/git/FibrationTrees/data/objects/maze.urdf", State3d(+0.55, +0.1, 0.85)));
+  obstacles.push_back(createFromURDF(GetDataFolder() + "objects/maze.urdf", State3d(+0.55, +0.1, 0.85)));
   obstacles.push_back(createFloor());
   obstacles.push_back(createBox(State3d(+0.5, +0.0, 0.75), 1.05, 2.0, 1.5)); //0.15, 2.0, 1.5
   for(const auto& obstacle : obstacles) {

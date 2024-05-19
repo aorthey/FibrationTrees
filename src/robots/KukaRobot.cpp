@@ -1,11 +1,13 @@
 #include "robots/KukaRobot.hpp"
 
 #include <ompl/base/spaces/RealVectorStateSpace.h>
+
 #include "spaces/TaskSpace.hpp"
 #include "KinematicsSolver.hpp"
+#include "FilePath.hpp"
 
 dart::dynamics::SkeletonPtr KukaRobot::MakeSkeleton() {
-  const auto urdf_name = "/home/aorthey/git/FibrationTrees/data/robots/kuka_lwr/kuka_endeffector.urdf";
+  const auto urdf_name = GetDataFolder() + "robots/kuka_lwr/kuka_endeffector.urdf";
 
   dart::utils::DartLoader loader;
   dart::utils::DartLoader::Options options;
