@@ -11,6 +11,8 @@
 #include "robots/SphereRobot.hpp"
 #include "robots/RobotFactory.hpp"
 #include "FilePath.hpp"
+#include "RunBenchmark.hpp"
+#include "samplers/TaskSpaceSampler.hpp"
 
 #include <dart/dart.hpp>
 
@@ -22,17 +24,8 @@
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 #include <ompl/multilevel/planners/factor/FibrationRRT.h>
 
-#include <ompl/tools/benchmark/Benchmark.h>
 #include <ompl/geometric/SimpleSetup.h>
 #include <ompl/geometric/planners/rrt/RRT.h>
-
-void addPlanner(ompl::tools::Benchmark& benchmark, const ompl::base::PlannerPtr& planner, double range = 10000)
-{
-    ompl::base::ParamSet& params = planner->params();
-    if (params.hasParam(std::string("range")))
-        params.setParam(std::string("range"), ompl::toString(range));
-    benchmark.addPlanner(planner);
-}
 
 const int kMaxResampleIteration = 100;
 const float kGoalRegion = 0.025;
@@ -60,9 +53,10 @@ int main(int argc, char* argv[]) {
 
   auto robot = MakeRobot<KukaRobotTaskSpace>(world, obstacles);
   auto point = MakeRobot<SphereRobot>(world, obstacles);
+  hide(point->GetSkeleton());
 
-  const auto limits = std::make_pair(State3d(0.39, -0.4, 0), State3d(0.43, +0.4, 2));
-  point->SetLimits(limits);
+  const auto task_space_limits = std::make_pair(State3d(0.39, -0.5, 0), State3d(0.43, +0.5, 2));
+  point->SetLimits(task_space_limits);
 
   ////////////////////////////////////////////////////////////////////////////////
   ////OMPL Setup
@@ -70,7 +64,7 @@ int main(int argc, char* argv[]) {
   auto factor = robot->GetSpaceInformation();
   auto child = point->GetSpaceInformation();
 
-  ompl::multilevel::ProjectionPtr projection = std::make_shared<ProjectionTaskSpace>(factor, child, robot);//, kinematics_solver);
+  ompl::multilevel::ProjectionPtr projection = std::make_shared<ProjectionTaskSpace>(factor, child, robot);
   factor->addChild(child, projection);
 
   factor->printFactorization(std::cout);
@@ -83,8 +77,6 @@ int main(int argc, char* argv[]) {
 
   point->EigenToState(MakeState({0.4, +0.35, 0.95}), task_start);
   point->EigenToState(MakeState({0.4, -0.25, 0.95}), task_goal);
-
-  //ompl::base::State *start = factor->allocState();
 
   ompl::base::ScopedState<> start(factor);
   ompl::base::State *goal = factor->allocState();
@@ -122,51 +114,39 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
   ////Planning
   ////////////////////////////////////////////////////////////////////////////////
-  auto benchmark = true;
-  double timeout = 1.0;
+  double timeout = 600.0;
 
-  if(!benchmark) {
-    auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
-    planner->setProblemDefinition(pdef);
-    planner->setup();
-    planner->setRange(+Inf);
+  ////////////////////////////////////////////////////////////////////////////////
+  //RRTtask
+  ////////////////////////////////////////////////////////////////////////////////
+  factor->getStateSpace()->setStateSamplerAllocator(
+          std::bind(&allocateTaskSpaceSampler, robot, task_space_limits));
+  auto planner1 = std::make_shared<ompl::geometric::RRTtask>(factor);
+  planner1->setProblemDefinition(pdef);
+  planner1->setup();
 
-    auto ptc = ompl::base::plannerOrTerminationCondition(
-            ompl::base::exactSolnPlannerTerminationCondition(pdef),
-            ompl::base::timedPlannerTerminationCondition(timeout)
-        );
+  ////////////////////////////////////////////////////////////////////////////////
+  //FibrationRRT
+  ////////////////////////////////////////////////////////////////////////////////
+  auto planner2 = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
+  planner2->setProblemDefinition(pdef);
+  planner2->setup();
+  planner2->setRange(+Inf);
 
-    ompl::base::PlannerStatus status = planner->solve(ptc);
+  RunBenchmark("Scenario2", factor, start, goal_region, timeout, {planner1, planner2});
+  return 0;
 
-    Visualizer visualizer(world);
-    visualizer.AddPlanner(robot, planner);
-    visualizer.SetCollisionChecker(robot->GetCollisionChecker());
-    visualizer.AddPath(point, planner->getProblemDefinition(child->getName())->getSolutionPath(), State3d(1, 1, 0));
-    visualizer.Run();
-  } else {
+  auto ptc = ompl::base::plannerOrTerminationCondition(
+          ompl::base::exactSolnPlannerTerminationCondition(pdef),
+          ompl::base::timedPlannerTerminationCondition(timeout)
+      );
 
-    ompl::geometric::SimpleSetup setup(factor);
-
-    setup.setStartState(start);
-    setup.setGoal(goal_region);
-
-    double runtime_limit = timeout;
-    double memory_limit = 4096;
-    int run_count = 3;
-
-    //ompl::msg::setLogLevel(ompl::msg::LogLevel::LOG_DEV2);
-    ompl::tools::Benchmark::Request request(runtime_limit, memory_limit, run_count);
-    request.simplify = false;
-    request.timeBetweenUpdates = 0.01;
-    request.displayProgress = true;
-
-    ompl::tools::Benchmark benchmark(setup, "Scenario2");
-
-    //addPlanner(benchmark, std::make_shared<ompl::geometric::RRT>(factor));
-    addPlanner(benchmark, std::make_shared<ompl::multilevel::FibrationRRT>(factor));
-    benchmark.benchmark(request);
-    benchmark.saveResultsToFile("../log/scenario2.log");
-  }
+  ompl::base::PlannerStatus status = planner1->solve(ptc);
+  Visualizer visualizer(world);
+  visualizer.AddPlanner(robot, planner1);
+  visualizer.SetCollisionChecker(robot->GetCollisionChecker());
+  //visualizer.AddPath(point, planner->getProblemDefinition(child->getName())->getSolutionPath(), State3d(1, 1, 0));
+  visualizer.Run();
 
   return 0;
 }

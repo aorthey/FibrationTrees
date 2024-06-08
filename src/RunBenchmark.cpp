@@ -1,0 +1,61 @@
+#include "RunBenchmark.hpp"
+
+#include "Common.hpp"
+
+#include <ompl/tools/benchmark/Benchmark.h>
+#include <ompl/base/Planner.h>
+#include <ompl/geometric/SimpleSetup.h>
+#include <ompl/geometric/planners/rrt/RRTtask.h>
+#include <ompl/multilevel/planners/factor/FibrationRRT.h>
+#include <ompl/tools/benchmark/Benchmark.h>
+
+void RunBenchmark(
+  const std::string name,
+  const ompl::multilevel::FactoredSpaceInformationPtr& factor,
+  const ompl::base::ScopedState<>& start,
+  const ompl::base::GoalPtr& goal,
+  double timeout) {
+
+  auto planner1 = std::make_shared<ompl::geometric::RRTtask>(factor);
+  auto planner2 = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
+  planner2->setRange(+Inf);
+  return RunBenchmark(name, factor, start, goal, timeout, {planner1, planner2});
+}
+
+void RunBenchmark(
+  const std::string name,
+  const ompl::multilevel::FactoredSpaceInformationPtr& factor,
+  const ompl::base::ScopedState<>& start,
+  const ompl::base::GoalPtr& goal,
+  double timeout,
+  const std::initializer_list<ompl::base::PlannerPtr>& planners) {
+
+  ompl::geometric::SimpleSetup setup(factor);
+  setup.setStartState(start);
+  setup.setGoal(goal);
+
+  double runtime_limit = timeout;
+  double memory_limit = 4096*1e4;
+  int run_count = 10;
+
+  ompl::msg::setLogLevel(ompl::msg::LogLevel::LOG_DEV2);
+  ompl::tools::Benchmark::Request request(runtime_limit, memory_limit, run_count);
+  request.simplify = false;
+  request.timeBetweenUpdates = 0.01;
+  request.displayProgress = true;
+
+  ompl::tools::Benchmark benchmark(setup, name);
+
+  for(const auto& planner : planners) {
+    benchmark.addPlanner(planner);
+  }
+
+  benchmark.benchmark(request);
+  std::string filename = "../log/"+name+".log";
+  benchmark.saveResultsToFile(filename.c_str());
+
+  std::string db_filename = "../log/"+name+".db";
+
+  auto cmd_log_to_db = "ompl_benchmark_statistics.py "+filename+" -d "+db_filename;
+  system(cmd_log_to_db.c_str());
+}

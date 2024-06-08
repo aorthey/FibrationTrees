@@ -31,7 +31,7 @@ class DiskRobot : public SphereRobot {
     }
 };
 
-TEST(TimeBasedPlanning, Simple) {
+TEST(TimeBasedPlanningTest, Simple) {
   dart::simulation::WorldPtr world(new dart::simulation::World);
 
   auto robot_in_time = MakeRobot<TimeBasedDiskRobot>(world);

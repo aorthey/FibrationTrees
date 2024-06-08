@@ -201,8 +201,8 @@ int main(int argc, char* argv[]) {
   factor1->printState(start);
   factor1->printState(goal);
 
-  auto fk_start = robot_in_time->GetFK(start).front();
-  auto fk_goal = robot_in_time->GetFK(goal).front();
+  auto fk_start = robot_in_time->GetFK(robot_in_time->StateToEigen(start)).front();
+  auto fk_goal = robot_in_time->GetFK(robot_in_time->StateToEigen(goal)).front();
 
   world->addSimpleFrame(createSphereFrame(fk_start, 0.01));
   world->addSimpleFrame(createSphereFrame(fk_goal, 0.01));

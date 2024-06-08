@@ -56,7 +56,7 @@ std::pair<RobotPtr, ompl::base::PathPtr> MakeStraightRobotPath(
   return std::make_pair(robot, path);
 }
 
-TEST(TimeBasedPlanningKuka, DynamicObstaclePositionTest) {
+TEST(TimeBasedPlanningKukaTest, DynamicObstaclePositionTest) {
   ////////////////////////////////////////////////////////////////////////////////
   ////Create static_obstacles
   ////////////////////////////////////////////////////////////////////////////////
@@ -203,7 +203,7 @@ void TestConnection(
   factor->freeState(start);
 }
 
-TEST(TimeBasedPlanningKuka, MotionValidatorDynamicObstacleTest) {
+TEST(TimeBasedPlanningKukaTest, MotionValidatorDynamicObstacleTest) {
   dart::simulation::WorldPtr world(new dart::simulation::World);
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -244,7 +244,7 @@ TEST(TimeBasedPlanningKuka, MotionValidatorDynamicObstacleTest) {
   TestConnection(robot_in_time, +1.0, +1.0, 0.0, kEndTime, true);
 }
 
-TEST(TimeBasedPlanningKuka, MotionValidatorDynamicObstaclePropagateMotionTest) {
+TEST(TimeBasedPlanningKukaTest, MotionValidatorDynamicObstaclePropagateMotionTest) {
   dart::simulation::WorldPtr world(new dart::simulation::World);
   std::vector<std::pair<RobotPtr, ompl::base::PathPtr>> dynamic_obstacles;
   dynamic_obstacles.push_back(MakeStraightRobotPath({+0.0, -1.0}, {+0.0, +1.0}, kObstacleEndTime, world, {}));
