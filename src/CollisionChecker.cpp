@@ -102,16 +102,29 @@ RobotToObstaclesCollisionChecker::RobotToObstaclesCollisionChecker(
 {
 }
 
+bool HasValidJointLimits(const RobotPtr& robot, const Eigen::VectorXd& config) {
+  auto lb = robot->GetSkeleton()->getPositionLowerLimits();
+  auto ub = robot->GetSkeleton()->getPositionUpperLimits();
+  for(size_t k = 0; k < config.size(); k++) {
+    if(config[k] < lb[k] || config[k] > ub[k] || config[k] != config[k]) {
+      OMPL_WARN("Robot %s is out of bounds: [%f] < [%f] < [%f] (index %d).", robot->GetName().c_str(), lb[k], ub[k], config[k], k);
+      return false;
+    }
+  }
+  //for(size_t k = 0; k < config.size(); k++) {
+  //  if(config[k] < (lb[k] - 1e-5) || config[k] > (ub[k] + 1e-5) || config[k] != config[k]) {
+  //    //std::cout <<"Out of bounds: " << config[k] << " not in ["<< lb[k] << "," << ub[k] <<"]" << std::endl;
+  //    return false;
+  //  }
+  //}
+  return true;
+}
+
 bool RobotToObstaclesCollisionChecker::isValid(const ompl::base::State *state) const
 {
   auto config = robot_->StateToEigen(state).configuration;
-  auto lb = robot_->GetSkeleton()->getPositionLowerLimits();
-  auto ub = robot_->GetSkeleton()->getPositionUpperLimits();
-  for(size_t k = 0; k < config.size(); k++) {
-    if(config[k] < lb[k] || config[k] > ub[k] || config[k] != config[k]) {
-      OMPL_WARN("Out of limits: %f < %f < %f (index %d).", lb[k], ub[k], config[k], k);
-      return false;
-    }
+  if(!HasValidJointLimits(robot_, config)) {
+    return false;
   }
   //Check collisions
   robot_->GetSkeleton()->setConfiguration(config);
@@ -172,13 +185,10 @@ bool DartMultiRobotCollisionChecker::isValid(const ompl::base::State *state) con
     const auto& name = robot->GetSpaceInformation()->getName();
     const auto& state = tmp_skeleton_states_.at(name);
     const auto config = robot->StateToEigen(state).configuration;
-    const auto lb = robot->GetSkeleton()->getPositionLowerLimits();
-    const auto ub = robot->GetSkeleton()->getPositionUpperLimits();
-    for(size_t k = 0; k < config.size(); k++) {
-      if(config[k] < (lb[k] - 1e-5) || config[k] > (ub[k] + 1e-5) || config[k] != config[k]) {
-        std::cout <<"Out of bounds: " << config[k] << " not in ["<< lb[k] << "," << ub[k] <<"]" << std::endl;
-        return false;
-      }
+    // const auto lb = robot->GetSkeleton()->getPositionLowerLimits();
+    // const auto ub = robot->GetSkeleton()->getPositionUpperLimits();
+    if(!HasValidJointLimits(robot, config)) {
+      return false;
     }
     robot->GetSkeleton()->setConfiguration(config);
   }

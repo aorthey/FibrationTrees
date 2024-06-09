@@ -115,6 +115,7 @@ int main(int argc, char* argv[]) {
   ////Planning
   ////////////////////////////////////////////////////////////////////////////////
   double timeout = 600.0;
+  size_t run_count = 10;
 
   ////////////////////////////////////////////////////////////////////////////////
   //RRTtask
@@ -133,14 +134,15 @@ int main(int argc, char* argv[]) {
   planner2->setup();
   planner2->setRange(+Inf);
 
-  RunBenchmark("Scenario2", factor, start, goal_region, timeout, {planner1, planner2});
-  return 0;
+  // auto name = "Scenario2";
+  // auto benchmark = RunBenchmark(name, factor, start, goal_region, timeout, run_count, {planner1, planner2});
+  // SaveBenchmarkToDatabase(name, benchmark);
+  // return 0;
 
   auto ptc = ompl::base::plannerOrTerminationCondition(
           ompl::base::exactSolnPlannerTerminationCondition(pdef),
           ompl::base::timedPlannerTerminationCondition(timeout)
       );
-
   ompl::base::PlannerStatus status = planner1->solve(ptc);
   Visualizer visualizer(world);
   visualizer.AddPlanner(robot, planner1);

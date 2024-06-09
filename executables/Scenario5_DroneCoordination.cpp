@@ -8,6 +8,7 @@
 #include "robots/MultiRobot.hpp"
 #include "robots/ZeppelinInnerSphereRobot.hpp"
 #include "robots/RobotFactory.hpp"
+#include "RunBenchmark.hpp"
 
 #include <dart/dart.hpp>
 
@@ -166,12 +167,25 @@ int main(int argc, char* argv[]) {
   //////////Planning
   //////////////////////////////////////////////////////////////////////////////////////
   auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(root);
-  planner->setProblemDefinition(pdef);
   planner->setup();
   planner->setRange(Inf);
   planner->setSmoothIntermediateSolutions(true);
  
-  float timeout = 10000.0;
+  //////////////////////////////////////////////////////////////////////////////////////
+  //////////Benchmark
+  //////////////////////////////////////////////////////////////////////////////////////
+  auto planner2 = std::make_shared<ompl::geometric::RRTtask>(root);
+  planner2->setup();
+ 
+  float timeout = 1000.0;
+
+  size_t run_count = 10;
+  auto name = "Scenario5";
+  ompl::base::ScopedState<> scoped_start_state(root);
+  scoped_start_state = pdef->getStartState(0);
+  auto benchmark = RunBenchmark(name, root, scoped_start_state, pdef->getGoal(), timeout, run_count, {planner, planner2});
+  SaveBenchmarkToDatabase(name, benchmark);
+  return 0;
 
   auto ptc = TimeOrSolutionPtc(pdef, timeout);
   ompl::base::PlannerStatus status = planner->solve(ptc);

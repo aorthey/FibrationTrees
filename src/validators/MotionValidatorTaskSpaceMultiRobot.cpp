@@ -37,8 +37,6 @@ bool MotionValidatorTaskSpaceMultiRobot::checkMotion(const ompl::base::State *s1
 }
 
 bool MotionValidatorTaskSpaceMultiRobot::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const {
-  OMPL_ERROR("Last valid state is required.");
-  throw "NYI";
   if(lastValid.first == nullptr) {
     OMPL_ERROR("Last valid state is required.");
     throw "NYI";

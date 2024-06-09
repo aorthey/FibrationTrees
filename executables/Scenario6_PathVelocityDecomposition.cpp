@@ -14,6 +14,7 @@
 #include "robots/RobotFactory.hpp"
 #include "TimeGoal.hpp"
 #include "TimeOrSolutionTerminationCondition.hpp"
+#include "RunBenchmark.hpp"
 
 #include <dart/dart.hpp>
 
@@ -224,6 +225,20 @@ int main(int argc, char* argv[]) {
   planner->setup();
   planner->setRange(+Inf);
   float timeout = 1000.0;
+
+  //////////////////////////////////////////////////////////////////////////////////////
+  //////////Benchmark
+  //////////////////////////////////////////////////////////////////////////////////////
+  auto planner2 = std::make_shared<ompl::geometric::RRTtask>(factor1);
+  planner2->setup();
+
+  size_t run_count = 10;
+  auto name = "Scenario6";
+  ompl::base::ScopedState<> scoped_start_state(factor1);
+  scoped_start_state = pdef->getStartState(0);
+  auto benchmark = RunBenchmark(name, factor1, scoped_start_state, pdef->getGoal(), timeout, run_count, {planner, planner2});
+  SaveBenchmarkToDatabase(name, benchmark);
+  return 0;
 
   auto ptc = TimeOrSolutionTerminationCondition(pdef, timeout);
 

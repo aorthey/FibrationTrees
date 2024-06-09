@@ -10,6 +10,7 @@
 #include "robots/RobotFactory.hpp"
 #include "robots/MultiRobot.hpp"
 #include "projections/ProjectionTaskSpace.hpp"
+#include "RunBenchmark.hpp"
 
 #include <dart/dart.hpp>
 
@@ -217,11 +218,23 @@ int main(int argc, char* argv[]) {
   planner->setup();
   planner->setRange(Inf);
   planner->setSmoothIntermediateSolutions(false);
+
+  auto planner2 = std::make_shared<ompl::geometric::RRTtask>(factor);
+  planner2->setProblemDefinition(pdef);
+  planner2->setup();
  
   float timeout = 1000.0;
 
+  // size_t run_count = 10;
+  // auto name = "Scenario4";
+  // ompl::base::ScopedState<> scoped_start_state(factor);
+  // scoped_start_state = start;
+  // auto benchmark = RunBenchmark(name, factor, scoped_start_state, goal_region, timeout, run_count, {planner, planner2});
+  // SaveBenchmarkToDatabase(name, benchmark);
+
+  ////////////////////////////////////////////////////////////////////////////////
   auto ptc = TimeOrSolutionPtc(pdef, timeout);
-  ompl::base::PlannerStatus status = planner->solve(ptc);
+  ompl::base::PlannerStatus status = planner2->solve(ptc);
  
   ////////////////////////////////////////////////////////////////////////////////
   ////Visualize
@@ -232,7 +245,7 @@ int main(int argc, char* argv[]) {
 
   Visualizer visualizer(world);
   visualizer.SetCollisionChecker(pairwise_collision_checker->GetCollisionChecker());
-  visualizer.AddPlanner(multi_robot, planner);
+  visualizer.AddPlanner(multi_robot, planner2);
 
   visualizer.Run();
 

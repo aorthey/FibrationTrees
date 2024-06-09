@@ -11,7 +11,8 @@
 #include "DartHelper.hpp"
 #include "gui/Visualizer.hpp"
 #include "OmplHelper.hpp"
-#include "KinematicsSolver.hpp"
+#include "samplers/TaskSpaceMultiRobotSampler.hpp"
+#include "RunBenchmark.hpp"
 #include "robots/KukaRobotTaskSpace.hpp"
 #include "robots/MultiRobot.hpp"
 #include "robots/SphereRobot.hpp"
@@ -167,7 +168,6 @@ int main(int argc, char* argv[]) {
   world->addSimpleFrame(createCylinderFrame(task_start1_eigen, kGoalRegionRotation, 0.01, kGoalRegionHeight, State4d(0.8, 0.1, 0.1, 1.0)));
   world->addSimpleFrame(createCylinderFrame(task_start2_eigen, kGoalRegionRotation, 0.01, kGoalRegionHeight, State4d(0.1, 0.8, 0.1, 1.0)));
 
-
   //////////////////////////////////////////////////////////////////////////////////
   //////Create factored task space goals
   //////////////////////////////////////////////////////////////////////////////////
@@ -196,21 +196,42 @@ int main(int argc, char* argv[]) {
   //////////////////////////////////////////////////////////////////////////////////
   factor->printFactorization(std::cout);
 
-  auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
-  planner->setProblemDefinition(pdef);
-  planner->setup();
-  planner->setRange(Inf);
+  std::vector<std::pair<State3d, State3d>> limits;
+  limits.push_back(limits1);
+  limits.push_back(limits2);
 
-  float timeout = 100.0;
+  factor->getStateSpace()->setStateSamplerAllocator(
+          ///std::bind(&allocateTaskSpaceMultiRobotSampler, multi_robot, robots, limits));
+          std::bind(&allocateTaskSpaceMultiRobotSampler, multi_robot, robots, limits));
+
+  float timeout = 600.0;
+
+  auto planner1 = std::make_shared<ompl::geometric::RRTtask>(factor);
+  planner1->setProblemDefinition(pdef);
+  planner1->setup();
+
+  auto planner2 = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
+  planner2->setProblemDefinition(pdef);
+  planner2->setup();
+  planner2->setRange(Inf);
+
+  size_t run_count = 10;
+  auto name = "Scenario3";
+  ompl::base::ScopedState<> scoped_start_state(factor);
+  scoped_start_state = start;
+  auto benchmark = RunBenchmark(name, factor, scoped_start_state, goal_region, timeout, run_count, {planner1, planner2});
+  SaveBenchmarkToDatabase(name, benchmark);
+  return 0;
+
   auto ptc = TimeOrSolutionPtc(pdef, timeout);
-  ompl::base::PlannerStatus status = planner->solve(ptc);
+  ompl::base::PlannerStatus status = planner1->solve(ptc);
 
   //////////////////////////////////////////////////////////////////////////////////
   //////Visualize
   //////////////////////////////////////////////////////////////////////////////////
   Visualizer visualizer(world);
   visualizer.SetCollisionChecker(pairwise_collision_checker->GetCollisionChecker());
-  visualizer.AddPlanner(multi_robot, planner);
+  visualizer.AddPlanner(multi_robot, planner1);
 
   visualizer.Run();
   return 0;

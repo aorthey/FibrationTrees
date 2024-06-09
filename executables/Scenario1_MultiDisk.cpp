@@ -9,6 +9,7 @@
 #include <boost/format.hpp>
 
 #include "robots/MultiRobotDiskEnvironment.hpp"
+#include "RunBenchmark.hpp"
 
 //Problem: All robots start as disks with certain radius. Start position is
 //equally distributed around the unit circle in R2 workspace.
@@ -38,6 +39,24 @@ int main()
   planner->setup();
   planner->setSeed(kDefaultSeed);
 
+  //////////////////////////////////////////////////////////////////////////////////////
+  //////////Benchmark
+  //////////////////////////////////////////////////////////////////////////////////////
+  auto planner2 = std::make_shared<ompl::geometric::RRTtask>(factor);
+  planner2->setup();
+
+  float timeout = 10.0;
+  size_t run_count = 10;
+  auto name = "Scenario1";
+  ompl::base::ScopedState<> scoped_start_state(factor);
+  scoped_start_state = pdef->getStartState(0);
+  auto benchmark = RunBenchmark(name, factor, scoped_start_state, pdef->getGoal(), timeout, run_count, {planner, planner2});
+  SaveBenchmarkToDatabase(name, benchmark);
+  return 0;
+
+  //////////////////////////////////////////////////////////////////////////////////////
+  //////////Planning
+  //////////////////////////////////////////////////////////////////////////////////////
   ompl::base::IterationTerminationCondition itc(kMaximumIterations);
   auto ptc = ompl::base::plannerOrTerminationCondition(itc, exactSolnPlannerTerminationCondition(pdef));
 
