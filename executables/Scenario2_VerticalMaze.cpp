@@ -133,6 +133,8 @@ int main(int argc, char* argv[]) {
   planner2->setProblemDefinition(pdef);
   planner2->setup();
   planner2->setRange(+Inf);
+  planner2->setSmoothIntermediateSolutions(child->getName(), true);
+  planner2->setSmoothIntermediateSolutions(factor->getName(), false);
 
   // auto name = "Scenario2";
   // auto benchmark = RunBenchmark(name, factor, start, goal_region, timeout, run_count, {planner1, planner2});
@@ -143,9 +145,9 @@ int main(int argc, char* argv[]) {
           ompl::base::exactSolnPlannerTerminationCondition(pdef),
           ompl::base::timedPlannerTerminationCondition(timeout)
       );
-  ompl::base::PlannerStatus status = planner1->solve(ptc);
+  ompl::base::PlannerStatus status = planner2->solve(ptc);
   Visualizer visualizer(world);
-  visualizer.AddPlanner(robot, planner1);
+  visualizer.AddPlanner(robot, planner2);
   visualizer.SetCollisionChecker(robot->GetCollisionChecker());
   //visualizer.AddPath(point, planner->getProblemDefinition(child->getName())->getSolutionPath(), State3d(1, 1, 0));
   visualizer.Run();

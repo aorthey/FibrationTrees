@@ -206,22 +206,23 @@ int main(int argc, char* argv[]) {
 
   float timeout = 600.0;
 
-  auto planner1 = std::make_shared<ompl::geometric::RRTtask>(factor);
+  auto planner1 = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
   planner1->setProblemDefinition(pdef);
   planner1->setup();
+  planner1->setRange(Inf);
+  planner1->setSmoothIntermediateSolutions(false);
 
-  auto planner2 = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
-  planner2->setProblemDefinition(pdef);
-  planner2->setup();
-  planner2->setRange(Inf);
+  // auto planner2 = std::make_shared<ompl::geometric::RRTtask>(factor);
+  // planner2->setProblemDefinition(pdef);
+  // planner2->setup();
 
-  size_t run_count = 10;
-  auto name = "Scenario3";
-  ompl::base::ScopedState<> scoped_start_state(factor);
-  scoped_start_state = start;
-  auto benchmark = RunBenchmark(name, factor, scoped_start_state, goal_region, timeout, run_count, {planner1, planner2});
-  SaveBenchmarkToDatabase(name, benchmark);
-  return 0;
+  // size_t run_count = 10;
+  // auto name = "Scenario3";
+  // ompl::base::ScopedState<> scoped_start_state(factor);
+  // scoped_start_state = start;
+  // auto benchmark = RunBenchmark(name, factor, scoped_start_state, goal_region, timeout, run_count, {planner1, planner2});
+  // SaveBenchmarkToDatabase(name, benchmark);
+  // return 0;
 
   auto ptc = TimeOrSolutionPtc(pdef, timeout);
   ompl::base::PlannerStatus status = planner1->solve(ptc);

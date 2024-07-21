@@ -234,7 +234,7 @@ int main(int argc, char* argv[]) {
 
   ////////////////////////////////////////////////////////////////////////////////
   auto ptc = TimeOrSolutionPtc(pdef, timeout);
-  ompl::base::PlannerStatus status = planner2->solve(ptc);
+  ompl::base::PlannerStatus status = planner->solve(ptc);
  
   ////////////////////////////////////////////////////////////////////////////////
   ////Visualize

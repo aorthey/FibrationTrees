@@ -170,6 +170,7 @@ int main(int argc, char* argv[]) {
   planner->setup();
   planner->setRange(Inf);
   planner->setSmoothIntermediateSolutions(true);
+  planner->setSmoothIntermediateSolutions(root->getName(), false);
  
   //////////////////////////////////////////////////////////////////////////////////////
   //////////Benchmark

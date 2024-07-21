@@ -99,6 +99,7 @@ int main(int argc, char* argv[]) {
   planner->setup();
   planner->setRange(Inf);
   planner->setSmoothIntermediateSolutions(true);
+  planner->setSmoothIntermediateSolutions(factor->getName(), false);
  
   float timeout = 10;
 

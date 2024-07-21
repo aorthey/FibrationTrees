@@ -118,7 +118,6 @@ std::vector<ompl::base::State*> MotionValidatorTaskSpaceMultiRobot::propagateMot
   std::vector<ompl::base::State*> result;
   //Abort when no progress was made
   if(max_number_states == 0) {
-    OMPL_DEBUG("No progress");
     return result;
   }
 

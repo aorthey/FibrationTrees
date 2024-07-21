@@ -97,3 +97,4 @@ TEST(MotionValidatorTest, EarlyStoppageLineDistanceTest) {
   factor->freeState(s2);
   factor->freeState(s1);
 }
+

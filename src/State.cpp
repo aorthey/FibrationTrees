@@ -25,6 +25,18 @@ std::ostream & operator << (std::ostream& os, const StateXd& state) {
   return os;
 }
 
+std::ostream & operator << (std::ostream& os, const State3d& state) {
+  os << std::fixed << std::setprecision(2);
+  os << state.format(CommaFmt);
+  return os;
+}
+
+std::ostream & operator << (std::ostream& os, const Eigen::Vector3f& state) {
+  os << std::fixed << std::setprecision(2);
+  os << state.format(CommaFmt);
+  return os;
+}
+
 StateXd MakeState(std::initializer_list<double> const &init_values) {
   std::vector<double> values{init_values};
   return MakeState(values);

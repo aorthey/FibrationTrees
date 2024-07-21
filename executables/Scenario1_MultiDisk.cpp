@@ -25,8 +25,8 @@ int main()
 {
   MultiRobotDiskEnvironment env(kNumberOfDiskRobots, kRadiusDiskRobots);
 
-  auto factor = env.constructDecompositionFactorTree();
-  // auto factor = env.constructPrioritizedFactorTree();
+  //auto factor = env.constructDecompositionFactorTree();
+  auto factor = env.constructPrioritizedFactorTree();
 
   auto start = env.CreateStartStates(factor);
   auto goal = env.CreateGoalStates(factor);

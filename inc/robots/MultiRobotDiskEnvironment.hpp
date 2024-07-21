@@ -20,13 +20,16 @@ class MultiRobotDiskEnvironment {
   {
     for(size_t robot1 = 0; robot1 < nRobots; robot1++)
     {
+      const double& r1x = values[robot1*2];
+      const double& r1y = values[robot1*2+1];
+      if(std::sqrt(std::pow(r1x, 2)+std::pow(r1y, 2)) < 0.5) {
+        return true;
+      }
       for(size_t robot2 = 0; robot2 < nRobots; robot2++)
       {
         if(robot1 == robot2) {
           continue;
         }
-        const double& r1x = values[robot1*2];
-        const double& r1y = values[robot1*2+1];
         const double& r2x = values[robot2*2];
         const double& r2y = values[robot2*2+1];
 

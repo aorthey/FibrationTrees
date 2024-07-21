@@ -36,6 +36,8 @@ StateXd CwiseMax(const StateXd& lhs, const StateXd& rhs);
 // State operators
 ////////////////////////////////////////////////////////////////////////////////
 std::ostream& operator << (std::ostream& os, const StateXd& state);
+std::ostream& operator << (std::ostream& os, const State3d& state);
+std::ostream& operator << (std::ostream& os, const Eigen::Vector3f& state);
 
 float Distance(const State3d& lhs, const State3d& rhs);
 float Distance(const StateXd& lhs, const StateXd& rhs);
