@@ -114,17 +114,18 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
   ////Planning
   ////////////////////////////////////////////////////////////////////////////////
-  double timeout = 600.0;
-  size_t run_count = 10;
+  double timeout = 20.0;
+  size_t run_count = 5;
 
   ////////////////////////////////////////////////////////////////////////////////
   //RRTtask
   ////////////////////////////////////////////////////////////////////////////////
-  factor->getStateSpace()->setStateSamplerAllocator(
-          std::bind(&allocateTaskSpaceSampler, robot, task_space_limits));
+  // factor->getStateSpace()->setStateSamplerAllocator(
+  //         std::bind(&allocateTaskSpaceSampler, robot, task_space_limits));
   auto planner1 = std::make_shared<ompl::geometric::RRTtask>(factor);
   planner1->setProblemDefinition(pdef);
   planner1->setup();
+  planner1->setName("RRT");
 
   ////////////////////////////////////////////////////////////////////////////////
   //FibrationRRT
@@ -132,15 +133,41 @@ int main(int argc, char* argv[]) {
   auto planner2 = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
   planner2->setProblemDefinition(pdef);
   planner2->setup();
+  //planner2->setRange(+Inf);
   planner2->setRange(+Inf);
+  //planner2->setRange(child->getName(), 0.2);
+  //planner2->setSeed(0);
+
+
+  planner2->setSamplingPerturbationBias(child->getName(), 0.0);
+  planner2->setPathRestrictionSamplingBias(child->getName(), 0.5);
+  planner2->setPathRestrictionSurroundingSamplingBias(child->getName(), 0.0);
+  // planner2->setSamplingPerturbationBias(factor->getName(), 0.0);
+  // planner2->setPathRestrictionSamplingBias(factor->getName(), 0.0);
+  // planner2->setPathRestrictionSurroundingSamplingBias(factor->getName(), 0.0);
+
   planner2->setSmoothIntermediateSolutions(child->getName(), true);
   planner2->setSmoothIntermediateSolutions(factor->getName(), false);
+  //planner2->setSelectorFunctionType(ompl::multilevel::SelectorFunctionType::kExponential);
+  planner2->setSelectorFunctionType(ompl::multilevel::SelectorFunctionType::kUniform);
+  planner2->setName("FibrationRRT");
+
+  ompl::tools::Benchmark::PreSetupEvent pre_setup_event = 
+    [&](const ompl::base::PlannerPtr& planner) -> void {
+      std::cout << planner->getName() << std::endl;
+      if(planner->getName() == "RRT") {
+        planner->getSpaceInformation()->getStateSpace()->setStateSamplerAllocator(
+                std::bind(&allocateTaskSpaceSampler, robot, task_space_limits));
+      } else {
+        planner->getSpaceInformation()->getStateSpace()->allocDefaultStateSampler();
+      }
+    };
+
 
   // auto name = "Scenario2";
-  // auto benchmark = RunBenchmark(name, factor, start, goal_region, timeout, run_count, {planner1, planner2});
+  // auto benchmark = RunBenchmark(name, factor, start, goal_region, timeout, run_count, {planner2}, pre_setup_event);
   // SaveBenchmarkToDatabase(name, benchmark);
   // return 0;
-
   auto ptc = ompl::base::plannerOrTerminationCondition(
           ompl::base::exactSolnPlannerTerminationCondition(pdef),
           ompl::base::timedPlannerTerminationCondition(timeout)

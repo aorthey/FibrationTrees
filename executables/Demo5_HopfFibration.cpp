@@ -264,7 +264,6 @@ int main()
   planner->setPathRestrictionSurroundingSamplingBias(child->getName(), 0.0);
   planner->setSamplingPerturbationBias(child->getName(), 0.0);
 
-
   planner->setSelectorFunctionType(ompl::multilevel::SelectorFunctionType::kLastLevel);
 
   //////////////////////////////////////////////////////////////////////////////////////

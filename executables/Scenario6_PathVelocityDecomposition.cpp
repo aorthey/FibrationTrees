@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
     world->addSkeleton(obstacle);
   }
   world->setGravity(State3d::Zero());
-  addCoordinateFrameToWorld(world);
+  //addCoordinateFrameToWorld(world);
 
   ////////////////////////////////////////////////////////////////////////////////
   ////Create dynamic_obstacles
@@ -225,6 +225,7 @@ int main(int argc, char* argv[]) {
   planner->setup();
   planner->setRange(+Inf);
   planner->setSmoothIntermediateSolutions(false);
+  planner->setSmoothIntermediateSolutions(factor3->getName(), true);
   float timeout = 300.0;
 
   //////////////////////////////////////////////////////////////////////////////////////
@@ -244,7 +245,7 @@ int main(int argc, char* argv[]) {
 
   auto ptc = TimeOrSolutionTerminationCondition(pdef, timeout);
 
-  ompl::msg::setLogLevel(ompl::msg::LogLevel::LOG_INFO);
+  //ompl::msg::setLogLevel(ompl::msg::LogLevel::LOG_INFO);
   ompl::base::PlannerStatus status = planner->solve(ptc);
 
   Visualizer visualizer(world);

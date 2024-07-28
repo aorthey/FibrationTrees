@@ -29,7 +29,8 @@ ompl::tools::Benchmark RunBenchmark(
   const ompl::base::GoalPtr& goal,
   double timeout,
   size_t run_count,
-  const std::initializer_list<ompl::base::PlannerPtr>& planners) {
+  const std::initializer_list<ompl::base::PlannerPtr>& planners,
+  const std::optional<ompl::tools::Benchmark::PreSetupEvent> pre_setup_event) {
 
   ompl::geometric::SimpleSetup setup(factor);
   setup.setStartState(start);
@@ -45,6 +46,10 @@ ompl::tools::Benchmark RunBenchmark(
   request.displayProgress = true;
 
   ompl::tools::Benchmark benchmark(setup, name);
+
+  if(pre_setup_event.has_value()) {
+    benchmark.setPreRunEvent(pre_setup_event.value());
+  }
 
   for(const auto& planner : planners) {
     benchmark.addPlanner(planner);
