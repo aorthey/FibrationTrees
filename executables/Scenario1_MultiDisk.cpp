@@ -1,7 +1,8 @@
 #include <ompl/base/terminationconditions/IterationTerminationCondition.h>
 #include <ompl/util/RandomNumbers.h>
 #include <ompl/geometric/PathSimplifier.h>
-#include <ompl/multilevel/planners/factor/FibrationRRT.h>
+#include <ompl/multilevel/planners/FibrationRRT.h>
+#include <ompl/multilevel/planners/RRTtask.h>
 
 #include <iostream>
 #include <fstream>
@@ -42,7 +43,7 @@ int main()
   //////////////////////////////////////////////////////////////////////////////////////
   //////////Benchmark
   //////////////////////////////////////////////////////////////////////////////////////
-  auto planner2 = std::make_shared<ompl::geometric::RRTtask>(factor);
+  auto planner2 = std::make_shared<ompl::multilevel::RRTtask>(factor);
   planner2->setup();
 
   float timeout = 10.0;

@@ -22,7 +22,7 @@
 #include <ompl/util/RandomNumbers.h>
 #include <ompl/geometric/PathSimplifier.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
-#include <ompl/multilevel/planners/factor/FibrationRRT.h>
+#include <ompl/multilevel/planners/FibrationRRT.h>
 
 #include <ompl/geometric/SimpleSetup.h>
 #include <ompl/geometric/planners/rrt/RRT.h>
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
   // factor->getStateSpace()->setStateSamplerAllocator(
   //         std::bind(&allocateTaskSpaceSampler, robot, task_space_limits));
-  auto planner1 = std::make_shared<ompl::geometric::RRTtask>(factor);
+  auto planner1 = std::make_shared<ompl::multilevel::RRTtask>(factor);
   planner1->setProblemDefinition(pdef);
   planner1->setup();
   planner1->setName("RRT");
@@ -146,7 +146,7 @@ int main(int argc, char* argv[]) {
   // planner2->setPathRestrictionSamplingBias(factor->getName(), 0.0);
   // planner2->setPathRestrictionSurroundingSamplingBias(factor->getName(), 0.0);
 
-  planner2->setSmoothIntermediateSolutions(child->getName(), true);
+  planner2->setSmoothIntermediateSolutions(child->getName(), false);
   planner2->setSmoothIntermediateSolutions(factor->getName(), false);
   //planner2->setSelectorFunctionType(ompl::multilevel::SelectorFunctionType::kExponential);
   planner2->setSelectorFunctionType(ompl::multilevel::SelectorFunctionType::kUniform);

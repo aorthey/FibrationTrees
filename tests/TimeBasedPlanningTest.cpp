@@ -10,7 +10,7 @@
 
 #include <ompl/multilevel/datastructures/projections/TimeBasedProjection.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
-#include <ompl/multilevel/planners/factor/FibrationRRT.h>
+#include <ompl/multilevel/planners/FibrationRRT.h>
 #include <ompl/base/terminationconditions/IterationTerminationCondition.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/geometric/planners/rrt/RRTstar.h>

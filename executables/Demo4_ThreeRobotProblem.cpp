@@ -27,7 +27,7 @@
 #include <ompl/multilevel/datastructures/projections/SE2RN_R2.h>
 #include <ompl/multilevel/datastructures/projections/SE2_R2.h>
 #include <ompl/multilevel/datastructures/projections/SubspaceProjection.h>
-#include <ompl/multilevel/planners/factor/FibrationRRT.h>
+#include <ompl/multilevel/planners/FibrationRRT.h>
 #include <ompl/base/goals/FactoredGoal.h>
 
 #include <ranges>

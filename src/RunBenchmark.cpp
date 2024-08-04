@@ -5,7 +5,7 @@
 #include <ompl/tools/benchmark/Benchmark.h>
 #include <ompl/base/Planner.h>
 #include <ompl/geometric/SimpleSetup.h>
-#include <ompl/geometric/planners/rrt/RRTtask.h>
+#include <ompl/multilevel/planners/RRTtask.h>
 #include <ompl/multilevel/planners/factor/FibrationRRT.h>
 
 ompl::tools::Benchmark RunBenchmark(
@@ -16,7 +16,7 @@ ompl::tools::Benchmark RunBenchmark(
   double timeout,
   size_t run_count) {
 
-  auto planner1 = std::make_shared<ompl::geometric::RRTtask>(factor);
+  auto planner1 = std::make_shared<ompl::multilevel::RRTtask>(factor);
   auto planner2 = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
   planner2->setRange(+Inf);
   return RunBenchmark(name, factor, start, goal, timeout, run_count, {planner1, planner2});

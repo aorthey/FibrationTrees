@@ -26,7 +26,8 @@
 #include <ompl/geometric/PathSimplifier.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
-#include <ompl/multilevel/planners/factor/FibrationRRT.h>
+#include <ompl/multilevel/planners/FibrationRRT.h>
+#include <ompl/multilevel/planners/RRTtask.h>
 #include <ompl/multilevel/datastructures/projections/TimeBasedProjection.h>
 
 const State3d kObstacleColor = State3d(0.8, 0.8, 0.8);

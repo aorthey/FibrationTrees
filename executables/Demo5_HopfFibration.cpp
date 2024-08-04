@@ -4,7 +4,7 @@
 #include <ompl/base/spaces/SO3StateSpace.h>
 #include <ompl/geometric/PathGeometric.h>
 #include <ompl/base/spaces/special/SphereStateSpace.h>
-#include <ompl/multilevel/planners/factor/FibrationRRT.h>
+#include <ompl/multilevel/planners/FibrationRRT.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 
 #include <fstream>

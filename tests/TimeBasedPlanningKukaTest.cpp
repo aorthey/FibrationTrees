@@ -28,7 +28,7 @@
 #include <ompl/geometric/PathSimplifier.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
-#include <ompl/multilevel/planners/factor/FibrationRRT.h>
+#include <ompl/multilevel/planners/FibrationRRT.h>
 #include <ompl/multilevel/datastructures/projections/TimeBasedProjection.h>
 
 float kObstacleEndTime = 20.0;

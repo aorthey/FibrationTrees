@@ -21,7 +21,8 @@
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 #include <ompl/multilevel/datastructures/projections/RNSO2_RN.h>
 #include <ompl/multilevel/datastructures/projections/SubspaceProjection.h>
-#include <ompl/multilevel/planners/factor/FibrationRRT.h>
+#include <ompl/multilevel/planners/FibrationRRT.h>
+#include <ompl/multilevel/planners/RRTtask.h>
 
 #include <ranges>
 
@@ -167,6 +168,7 @@ int main(int argc, char* argv[]) {
   //////////Planning
   //////////////////////////////////////////////////////////////////////////////////////
   auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(root);
+  planner->setProblemDefinition(pdef);
   planner->setup();
   planner->setRange(Inf);
   planner->setSmoothIntermediateSolutions(true);
@@ -175,18 +177,18 @@ int main(int argc, char* argv[]) {
   //////////////////////////////////////////////////////////////////////////////////////
   //////////Benchmark
   //////////////////////////////////////////////////////////////////////////////////////
-  auto planner2 = std::make_shared<ompl::geometric::RRTtask>(root);
+  auto planner2 = std::make_shared<ompl::multilevel::RRTtask>(root);
   planner2->setup();
  
   float timeout = 1000.0;
 
-  size_t run_count = 10;
-  auto name = "Scenario5";
-  ompl::base::ScopedState<> scoped_start_state(root);
-  scoped_start_state = pdef->getStartState(0);
-  auto benchmark = RunBenchmark(name, root, scoped_start_state, pdef->getGoal(), timeout, run_count, {planner, planner2});
-  SaveBenchmarkToDatabase(name, benchmark);
-  return 0;
+  // size_t run_count = 10;
+  // auto name = "Scenario5";
+  // ompl::base::ScopedState<> scoped_start_state(root);
+  // scoped_start_state = pdef->getStartState(0);
+  // auto benchmark = RunBenchmark(name, root, scoped_start_state, pdef->getGoal(), timeout, run_count, {planner, planner2});
+  // SaveBenchmarkToDatabase(name, benchmark);
+  // return 0;
 
   auto ptc = TimeOrSolutionPtc(pdef, timeout);
   ompl::base::PlannerStatus status = planner->solve(ptc);

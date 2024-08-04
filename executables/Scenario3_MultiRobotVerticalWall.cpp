@@ -26,7 +26,7 @@
 #include <ompl/geometric/PathSimplifier.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 #include <ompl/multilevel/datastructures/projections/SubspaceProjection.h>
-#include <ompl/multilevel/planners/factor/FibrationRRT.h>
+#include <ompl/multilevel/planners/FibrationRRT.h>
 
 const float kRobotRobotDistance = 0.3;
 
