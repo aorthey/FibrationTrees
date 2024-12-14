@@ -238,6 +238,7 @@ void PathReplayWorldNode::PrintKeyPressEvents() const {
   for(const auto& event : events_) {
     std::cout << std::string{event.key} << ": " << event.description << std::endl;
   }
+  std::cout << "Current view: " << std::to_string(mViewer->getVerticalFieldOfView()) << std::endl;
 }
 
 void PathReplayWorldNode::setEndTime(float end_time) {

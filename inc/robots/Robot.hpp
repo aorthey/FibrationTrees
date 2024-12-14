@@ -2,10 +2,15 @@
 
 #include <dart/dart.hpp>
 #include <dart/utils/urdf/urdf.hpp>
+
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
+#include <ompl/base/Path.h>
 
 #include "CollisionChecker.hpp"
+#include "EigenPath.hpp"
 #include "State.hpp"
+
+OMPL_CLASS_FORWARD(EigenPath);
 
 class Robot {
   public:
@@ -47,10 +52,15 @@ class Robot {
     void Hide();
     void Show();
 
+    void AddDynamicalObstacle(const std::pair<RobotPtr, ompl::base::PathPtr>& obstacle);
+
   protected:
     dart::dynamics::SkeletonPtr skeleton_;
     ompl::multilevel::FactoredSpaceInformationPtr factor_;
     CollisionCheckerPtr collision_checker_;
+
+  private:
+    std::vector<std::pair<RobotPtr, std::shared_ptr<EigenPath>>> dynamic_obstacles_;
 };
 
 typedef std::shared_ptr<Robot> RobotPtr;

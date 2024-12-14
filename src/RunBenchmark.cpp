@@ -6,7 +6,7 @@
 #include <ompl/base/Planner.h>
 #include <ompl/geometric/SimpleSetup.h>
 #include <ompl/multilevel/planners/RRTtask.h>
-#include <ompl/multilevel/planners/factor/FibrationRRT.h>
+#include <ompl/multilevel/planners/FibrationRRT.h>
 
 ompl::tools::Benchmark RunBenchmark(
   const std::string name,

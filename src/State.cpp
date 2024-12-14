@@ -41,16 +41,19 @@ StateXd MakeState(std::initializer_list<double> const &init_values) {
   std::vector<double> values{init_values};
   return MakeState(values);
 }
+
 StateXd MakeState(std::vector<double> values) {
   StateXd v;
   v.configuration = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(values.data(), values.size());
   return v;
 }
+
 StateXd MakeState(const Eigen::VectorXd& config) {
   StateXd v;
   v.configuration = config;
   return v;
 }
+
 StateXd MakeState(const size_t dimension, const double *values) {
   Eigen::VectorXd v(dimension);
   for(size_t k = 0; k < dimension; k++) {
@@ -65,6 +68,30 @@ StateXd MakeConstantState(const size_t dimension, const double value) {
     v[k] = value;
   }
   return MakeState(v);
+}
+
+State3d MakeState3d(std::initializer_list<double> const &init_values) {
+  std::vector<double> values{init_values};
+  return MakeState3d(values);
+}
+
+State3d MakeState3d(std::vector<double> values) {
+  if(values.size() != 3) {
+    throw std::out_of_range("Size must be three.");
+  }
+  return State3d(values.at(0), values.at(1), values.at(2));
+}
+
+State2d MakeState2d(std::initializer_list<double> const &init_values) {
+  std::vector<double> values{init_values};
+  return MakeState2d(values);
+}
+
+State2d MakeState2d(std::vector<double> values) {
+  if(values.size() != 2) {
+    throw std::out_of_range("Size must be three.");
+  }
+  return State2d(values.at(0), values.at(1));
 }
 
 StateXd CwiseMin(const StateXd& lhs, const StateXd& rhs) {

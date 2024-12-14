@@ -119,21 +119,20 @@ dart::dynamics::SimpleFramePtr createLineSegmentFrame(const std::vector<State3d>
   return lineFrame;
 }
 
-dart::dynamics::SkeletonPtr createFloor(float z_position) {
+dart::dynamics::SkeletonPtr createFloor(float z_position, float width) {
     dart::dynamics::SkeletonPtr floor = dart::dynamics::Skeleton::create("floor");
     dart::dynamics::BodyNodePtr body =
         floor->createJointAndBodyNodePair<dart::dynamics::WeldJoint>(nullptr).second;
 
-    constexpr double floorWidth = 3.0;
-    constexpr double floorHeight = 0.1;
+    constexpr double kFloorHeight = 0.1;
     auto box = std::make_shared<dart::dynamics::BoxShape>(
-        State3d{floorWidth, floorWidth, floorHeight});
+        State3d{width, width, kFloorHeight});
     auto shapeNode = body->createShapeNodeWith<dart::dynamics::VisualAspect, dart::dynamics::CollisionAspect, dart::dynamics::DynamicsAspect>(box);
     shapeNode->getVisualAspect()->setColor(State3d(0.9, 0.9, 0.9));
 
     /* Put the floor into position */
     Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
-    tf.translation() = State3d{0.0, 0.0, z_position + (-floorHeight/2.0 - floorHeight/100.0)};
+    tf.translation() = State3d{0.0, 0.0, z_position + (-kFloorHeight/2.0 - kFloorHeight/100.0)};
     body->getParentJoint()->setTransformFromParentBodyNode(tf);
     body->setName("floor");
 
@@ -161,11 +160,13 @@ dart::dynamics::SkeletonPtr createBox(const State3d& position, float length_x, f
 
 dart::dynamics::SkeletonPtr createCylinder(const State3d& position, const State3d& rotationXYZ, float radius, float height) {
     static int counter = 0;
-    std::string name = "rotated_cylinder_"+std::to_string(counter++);
+    std::string name = "cylinder_"+std::to_string(counter++);
     dart::dynamics::SkeletonPtr cylinder = dart::dynamics::Skeleton::create(name);
 
-    dart::dynamics::BodyNodePtr body =
-        cylinder->createJointAndBodyNodePair<dart::dynamics::WeldJoint>(nullptr).second;
+    auto joint = cylinder->createJointAndBodyNodePair<dart::dynamics::TranslationalJoint2D>(nullptr);
+    joint.first->setXYPlane();
+
+    dart::dynamics::BodyNodePtr body = joint.second;
     dart::dynamics::ShapePtr shape = std::make_shared<dart::dynamics::CylinderShape>(radius, height);
 
     auto shapeNode = body->createShapeNodeWith<dart::dynamics::VisualAspect, dart::dynamics::CollisionAspect, dart::dynamics::DynamicsAspect>(shape);
@@ -175,31 +176,20 @@ dart::dynamics::SkeletonPtr createCylinder(const State3d& position, const State3
     tf.translation() = position;
     auto R = create_rotation_matrix(rotationXYZ[0],rotationXYZ[1],rotationXYZ[2]);
     tf.linear() = R.linear();
-
     body->getParentJoint()->setTransformFromParentBodyNode(tf);
     body->setName(name);
+
+    // auto ll = MakeState(ReadConfigVariable<std::vector<double>>("disk_robot_lower_limit"));
+    // auto ul = MakeState(ReadConfigVariable<std::vector<double>>("disk_robot_upper_limit"));
+    // cylinder->setPositionLowerLimits(ll.configuration);
+    // cylinder->setPositionUpperLimits(ul.configuration);
 
     return cylinder;
 }
 
 dart::dynamics::SkeletonPtr createCylinder(const State3d& position, float radius, float height) {
-    static int counter = 0;
-    std::string name = "cylinder_"+std::to_string(counter++);
-    dart::dynamics::SkeletonPtr cylinder = dart::dynamics::Skeleton::create(name);
-
-    dart::dynamics::BodyNodePtr body =
-        cylinder->createJointAndBodyNodePair<dart::dynamics::WeldJoint>(nullptr).second;
-    dart::dynamics::ShapePtr shape = std::make_shared<dart::dynamics::CylinderShape>(radius, height);
-
-    auto shapeNode = body->createShapeNodeWith<dart::dynamics::VisualAspect, dart::dynamics::CollisionAspect, dart::dynamics::DynamicsAspect>(shape);
-    shapeNode->getVisualAspect()->setColor(State3d(0.9, 0.9, 0.9));
-
-    Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
-    tf.translation() = position;
-    body->getParentJoint()->setTransformFromParentBodyNode(tf);
-    body->setName(name);
-
-    return cylinder;
+  auto rotation = MakeState3d({0, 0, 0});
+  return createCylinder(position, rotation, radius, height);
 }
 
 dart::dynamics::SkeletonPtr createSphere(float radius) {

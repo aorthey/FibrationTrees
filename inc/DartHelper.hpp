@@ -10,6 +10,7 @@
 const State3d kPathColor = State3d(0.3, 0.8, 0.3);
 const float kPathSphereSize = 0.01;
 const float kDefaultLineWidth = 5.0;
+constexpr double kFloorWidth = 3.0;
 
 const State3d color_red = State3d(0.8, 0.1, 0.1);
 const State3d color_red_light = State3d(1.0, 0.4, 0.4);
@@ -26,7 +27,7 @@ StateXd GetRandomPosition(const dart::dynamics::SkeletonPtr& skeleton);
 ////////////////////////////////////////////////////////////////////////////////
 // Skeleton constructors
 ////////////////////////////////////////////////////////////////////////////////
-dart::dynamics::SkeletonPtr createFloor(float z_position = 0.0);
+dart::dynamics::SkeletonPtr createFloor(float z_position = 0.0, float width = kFloorWidth);
 dart::dynamics::SkeletonPtr createCylinder(const State3d& position, float radius, float height);
 dart::dynamics::SkeletonPtr createCylinder(const State3d& position, const State3d& rotationXYZ, float radius, float height);
 dart::dynamics::SkeletonPtr createSphere(float radius);

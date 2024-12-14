@@ -13,6 +13,8 @@
 
 #include "robots/Robot.hpp"
 
+const int kMaxResampleIteration = 100;
+
 ////////////////////////////////////////////////////////////////////////////////
 // Eigen::Vector to ompl::base::State*
 ////////////////////////////////////////////////////////////////////////////////
@@ -28,7 +30,8 @@ bool SampleValidLift(const ompl::multilevel::ProjectionPtr& projection, const om
 std::optional<ompl::base::State*> ComputeValidIKState(const ompl::base::SpaceInformationPtr& si, 
     const ompl::multilevel::ProjectionPtr& projection, const State3d& point);
 std::optional<ompl::base::State*> ComputeValidTotalState(const ompl::multilevel::FactoredSpaceInformationPtr& factor, 
-    const std::unordered_map<std::string, ompl::base::State*>& leaf_node_states);
+    const std::unordered_map<std::string, ompl::base::State*>& leaf_node_states, 
+    size_t max_resample_iterations = kMaxResampleIteration);
 
 ompl::base::PlannerTerminationCondition TimeOrSolutionPtc(const ompl::base::ProblemDefinitionPtr &pdef, double timeout);
 

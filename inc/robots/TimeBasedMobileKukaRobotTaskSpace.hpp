@@ -22,6 +22,9 @@ class TimeBasedMobileKukaRobotTaskSpace : public MobileKukaRobotTaskSpace {
 
     float GetVMax() const;
     float GetTMax() const;
+    void SetVMax(float vMax);
+    void SetTMax(float tMax);
+
   private:
     float vMax_{kDefaultVMax};
     float tMax_{kDefaultTMax};

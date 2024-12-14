@@ -113,6 +113,8 @@ int main(int argc, char* argv[]) {
   factor->setStateValidityChecker(pairwise_collision_checker);
   factor->setStateValidityCheckingResolution(0.001);
 
+  factor->printFactorization(std::cout);
+
   //////////////////////////////////////////////////////////////////////////////////
   //////Create start/goal states and propagate them upwards (lift through the
   //complete fibration trees hierarchy)

@@ -93,18 +93,18 @@ std::pair<RobotPtr, ompl::base::PathPtr> MakeDynamicObstacle(
   //path_simplifier->smoothBSpline(*geom_path);
 
   ////DEBUG
-  path->interpolate(100);
-  ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
-   OMPL_INFORM("Found path with %d states.", path->getStateCount());
-   for(const auto& state : path->getStates()) {
-     if(!robot->IsValid(state)) {
-       OMPL_ERROR("%s", std::string(40, '-').c_str());
-       OMPL_ERROR("Invalid state");
-       si->printState(state);
-       OMPL_ERROR("%s", std::string(40, '-').c_str());
-       throw "Invalid";
-     }
-   }
+  // path->interpolate(100);
+  // ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
+  //  OMPL_INFORM("Found path with %d states.", path->getStateCount());
+  //  for(const auto& state : path->getStates()) {
+  //    if(!robot->IsValid(state)) {
+  //      OMPL_ERROR("%s", std::string(40, '-').c_str());
+  //      OMPL_ERROR("Invalid state");
+  //      si->printState(state);
+  //      OMPL_ERROR("%s", std::string(40, '-').c_str());
+  //      throw "Invalid";
+  //    }
+  //  }
   return std::make_pair(robot, path);
 }
 

@@ -77,7 +77,15 @@ void Robot::SetConfiguration(const StateXd& config) {
 }
 
 bool Robot::IsValid(const ompl::base::State* state) const {
-  auto config = this->StateToEigen(state).configuration;
+  const auto eigen_state = this->StateToEigen(state);
+  const auto config = eigen_state.configuration;
+  const auto time = eigen_state.time;
+
+  for(const auto& [obstacle, path] : dynamic_obstacles_) {
+    auto config = path->GetConfigAt(time);
+    obstacle->SetConfiguration(config);
+  }
+
   auto lb = skeleton_->getPositionLowerLimits();
   auto ub = skeleton_->getPositionUpperLimits();
   for(size_t k = 0; k < config.size(); k++) {
@@ -110,3 +118,9 @@ CollisionCheckerPtr Robot::MakeCollisionChecker(
 ompl::base::MotionValidatorPtr Robot::MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& robot) {
   return factor->getMotionValidator();
 }
+
+void Robot::AddDynamicalObstacle(const std::pair<RobotPtr, ompl::base::PathPtr>& obstacle) {
+  auto path = std::make_shared<EigenPath>(obstacle.first, obstacle.second);
+  dynamic_obstacles_.push_back(std::make_pair(obstacle.first, path));
+}
+

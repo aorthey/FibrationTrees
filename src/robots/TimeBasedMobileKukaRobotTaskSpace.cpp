@@ -21,8 +21,17 @@ ompl::multilevel::FactoredSpaceInformationPtr TimeBasedMobileKukaRobotTaskSpace:
 float TimeBasedMobileKukaRobotTaskSpace::GetVMax() const {
   return vMax_;
 }
+
 float TimeBasedMobileKukaRobotTaskSpace::GetTMax() const {
   return tMax_;
+}
+
+void TimeBasedMobileKukaRobotTaskSpace::SetVMax(float vMax) {
+  vMax_ = vMax;
+}
+
+void TimeBasedMobileKukaRobotTaskSpace::SetTMax(float tMax) {
+  tMax_ = tMax;
 }
 
 void TimeBasedMobileKukaRobotTaskSpace::SetSpaceInformationFromRobot(const RobotPtr& robot, 

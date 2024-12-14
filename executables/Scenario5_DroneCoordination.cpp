@@ -45,7 +45,6 @@ ompl::base::ProblemDefinitionPtr CreateMultiDroneProblemDefinition(
   float yaw = 0.57;
 
   auto startStates = factor->allocChildStates();
-  //auto goalStates = factor->allocChildStates();
 
   std::unordered_map<std::string, ompl::base::GoalSampleableRegionPtr> goals;
 

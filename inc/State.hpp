@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 #include <iostream>
 
+typedef Eigen::Vector2d State2d;
 typedef Eigen::Vector3d State3d;
 typedef Eigen::Vector4d State4d;
 typedef Eigen::VectorXd TangentVector;
@@ -31,6 +32,11 @@ StateXd MakeConstantState(const size_t dimension, const double value);
 
 StateXd CwiseMin(const StateXd& lhs, const StateXd& rhs);
 StateXd CwiseMax(const StateXd& lhs, const StateXd& rhs);
+
+State3d MakeState3d(std::initializer_list<double> const &init_values);
+State3d MakeState3d(std::vector<double> values);
+State2d MakeState2d(std::initializer_list<double> const &init_values);
+State2d MakeState2d(std::vector<double> values);
 
 ////////////////////////////////////////////////////////////////////////////////
 // State operators

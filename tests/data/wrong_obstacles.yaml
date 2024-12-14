@@ -1,0 +1,11 @@
+name: Wrong_Obstacles
+
+robots:
+  Robot1:
+    name: SphereRobot
+
+obstacles:
+
+  Obstacle1:
+    name: Unknown
+    type: unknown

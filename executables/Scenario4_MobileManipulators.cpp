@@ -220,12 +220,11 @@ int main(int argc, char* argv[]) {
   planner->setRange(Inf);
   planner->setSmoothIntermediateSolutions(false);
 
-  auto planner2 = std::make_shared<ompl::multilevel::RRTtask>(factor);
-  planner2->setProblemDefinition(pdef);
-  planner2->setup();
+  // auto planner2 = std::make_shared<ompl::multilevel::RRTtask>(factor);
+  // planner2->setProblemDefinition(pdef);
+  // planner2->setup();
  
   float timeout = 1000.0;
-
   // size_t run_count = 10;
   // auto name = "Scenario4";
   // ompl::base::ScopedState<> scoped_start_state(factor);
@@ -246,7 +245,7 @@ int main(int argc, char* argv[]) {
 
   Visualizer visualizer(world);
   visualizer.SetCollisionChecker(pairwise_collision_checker->GetCollisionChecker());
-  visualizer.AddPlanner(multi_robot, planner2);
+  visualizer.AddPlanner(multi_robot, planner);
 
   visualizer.Run();
 

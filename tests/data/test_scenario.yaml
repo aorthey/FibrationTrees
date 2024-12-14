@@ -1,0 +1,24 @@
+name: Test_Scenario
+
+robots:
+  Robot1:
+    name: SphereRobot
+
+obstacles:
+
+  Obstacle1:
+    name: Maze
+    type: urdf
+    filename: maze.urdf
+    position: [0.55, 0.1, 0.85]
+
+  Obstacle2:
+    name: Floor
+    type: floor
+
+  Obstacle3:
+    name: Box
+    type: box
+    position: [0.5, 0.0, 0.75]
+    size: [0.15, 2.0, 1.5]
+

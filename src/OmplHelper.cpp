@@ -15,7 +15,6 @@ bool SampleValidLift(const ompl::multilevel::ProjectionPtr& projection, const om
   return false;
 }
 
-const int kMaxResampleIteration = 100;
 std::optional<ompl::base::State*> ComputeValidIKState(const ompl::base::SpaceInformationPtr& si, 
     const ompl::multilevel::ProjectionPtr& projection, const State3d& point) {
 
@@ -33,18 +32,18 @@ std::optional<ompl::base::State*> ComputeValidIKState(const ompl::base::SpaceInf
   return state;
 }
 
-std::optional<ompl::base::State*> ComputeValidTotalState(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const std::unordered_map<std::string, ompl::base::State*>& leaf_node_states) {
+std::optional<ompl::base::State*> ComputeValidTotalState(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const std::unordered_map<std::string, ompl::base::State*>& leaf_node_states, size_t max_resample_iterations) {
   ompl::base::State *state = factor->allocState();
 
   size_t samples = 0;
-  while(samples++ < kMaxResampleIteration) {
+  while(samples++ < max_resample_iterations) {
     factor->liftLeafStates(leaf_node_states, state);
     if(factor->isValid(state)) {
       return state;
     }
   }
 
-  OMPL_ERROR("Invalid total state after %d iterations.", samples);
+  OMPL_ERROR("Invalid total state after %d iterations.", samples - 1);
   factor->freeState(state);
   return std::nullopt;
 }
