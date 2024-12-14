@@ -124,3 +124,21 @@ void Robot::AddDynamicalObstacle(const std::pair<RobotPtr, ompl::base::PathPtr>&
   dynamic_obstacles_.push_back(std::make_pair(obstacle.first, path));
 }
 
+void Robot::EnabledSmoothPath() {
+  smooth_path_ = true;
+}
+void Robot::DisableSmoothPath() {
+  smooth_path_ = false;
+}
+bool Robot::ShouldSmoothPath() const {
+  return smooth_path_;
+}
+void Robot::EnabledShowPath() {
+  show_path_ = true;
+}
+void Robot::DisableShowPath() {
+  show_path_ = false;
+}
+bool Robot::ShouldShowPath() const {
+  return show_path_;
+}

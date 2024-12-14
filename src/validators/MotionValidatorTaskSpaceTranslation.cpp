@@ -20,11 +20,13 @@ MotionValidatorTaskSpaceTranslation::~MotionValidatorTaskSpaceTranslation() {
 
 bool MotionValidatorTaskSpaceTranslation::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
   OMPL_ERROR("NYI. Please use propagateMotion.");
+  throw std::domain_error("You are not allowed to use checkMotion");
   return TaskSpaceMotionValidator::checkMotion(s1, s2);
 }
 
 bool MotionValidatorTaskSpaceTranslation::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const {
   OMPL_ERROR("NYI. Please use propagateMotion.");
+  throw std::domain_error("You are not allowed to use checkMotion");
   return TaskSpaceMotionValidator::checkMotion(s1, s2, lastValid);
 }
 

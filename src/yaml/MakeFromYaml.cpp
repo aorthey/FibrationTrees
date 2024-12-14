@@ -108,6 +108,22 @@ RobotPtr MakeRobotFromNode(const YAML::Node& node,
     robot->GetSkeleton()->getRootBodyNode()->getParentJoint()->setTransformFromParentBodyNode(transform);
   }
   MaybeChangeColor(node, robot->GetSkeleton());
+  if(node["smooth_path"]) {
+    auto smooth_path = node["smooth_path"].as<bool>();
+    if(smooth_path) {
+      robot->EnabledSmoothPath();
+    } else {
+      robot->DisableSmoothPath();
+    }
+  }
+  if(node["show_path"]) {
+    auto show_path = node["show_path"].as<bool>();
+    if(show_path) {
+      robot->EnabledShowPath();
+    } else {
+      robot->DisableShowPath();
+    }
+  }
   return robot;
 }
 

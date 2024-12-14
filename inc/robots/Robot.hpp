@@ -54,10 +54,20 @@ class Robot {
 
     void AddDynamicalObstacle(const std::pair<RobotPtr, ompl::base::PathPtr>& obstacle);
 
+    void EnabledShowPath();
+    void DisableShowPath();
+    bool ShouldShowPath() const;
+
+    void EnabledSmoothPath();
+    void DisableSmoothPath();
+    bool ShouldSmoothPath() const;
+
   protected:
     dart::dynamics::SkeletonPtr skeleton_;
     ompl::multilevel::FactoredSpaceInformationPtr factor_;
     CollisionCheckerPtr collision_checker_;
+    bool smooth_path_{false};
+    bool show_path_{false};
 
   private:
     std::vector<std::pair<RobotPtr, std::shared_ptr<EigenPath>>> dynamic_obstacles_;

@@ -14,6 +14,8 @@ robots:
     name: SphereRobot
     lower_limits: [0.39, -0.5, 0]
     upper_limits: [0.43, +0.5, 2]
+    smooth_path: True
+    show_path: True
     hide: True
 
 obstacles:
@@ -52,4 +54,3 @@ problem:
     Robot2:
       config: [0.4, -0.25, 0.95]
       visualize: True
-
