@@ -34,10 +34,3 @@ jobs:
       run: |
         cd build
         ctest --output-on-failure
-        
-    - name: Upload test results
-      if: always()
-      uses: actions/upload-artifact@v2
-      with:
-        name: test-results
-        path: build/Testing/Temporary/LastTest.log
