@@ -8,14 +8,36 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: cmake
-      run: cmake .
-    - name: make
-      run: make
-    - name: unit-tests
-      run: make test
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Set up CMake
+      uses: jwlawson/actions-setup-cmake@v1.11
+      with:
+        cmake-version: '3.5.x'
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libboost-program-options-dev libyaml-cpp-dev libompl-dev libdart6-all-dev
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+    - name: Build
+      run: |
+        cd build
+        make -j$(nproc)
+        
+    - name: Run Tests
+      run: |
+        cd build
+        ctest --output-on-failure
+        
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-results
+        path: build/Testing/Temporary/LastTest.log
