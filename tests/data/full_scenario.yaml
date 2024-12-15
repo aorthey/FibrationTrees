@@ -42,7 +42,7 @@ problem:
 
   goal:
     type: task
+    threshold: 0.025
     Robot2:
       config: [0.4, -0.25, 0.95]
-      threshold: 0.025
       visualize: True

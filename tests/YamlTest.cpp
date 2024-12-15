@@ -20,13 +20,11 @@ TEST(YamlTest, WrongObstacleTest) {
 }
 
 TEST(YamlTest, FullScenarioTest) {
-  //const auto filename = GetMainFolder() + "tests/data/full_scenario.yaml";
   dart::math::Random::setSeed(0);
-  const auto filename = GetDataFolder() + "scenarios/02_VerticalMaze.yaml";
+  const auto filename = GetMainFolder() + "tests/data/full_scenario.yaml";
 
   dart::simulation::WorldPtr world(new dart::simulation::World);
   EXPECT_NO_THROW(
-      auto factor = MakeFactoredSpaceInformationFromYamlFilename(filename, world);
-      //MakeProblemDefinitionFromYamlFilename(filename, factor);
+      MakeFactoredSpaceInformationFromYamlFilename(filename, world);
   );
 }

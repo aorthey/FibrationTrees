@@ -21,6 +21,8 @@
 #include "TimeGoal.hpp"
 #include "robots/Robot.hpp"
 #include "robots/SphereRobot.hpp"
+#include "robots/MobileCar.hpp"
+#include "robots/MobileCarDisk.hpp"
 #include "robots/DiskRobot.hpp"
 #include "robots/RobotFactory.hpp"
 #include "robots/ZeppelinRobot.hpp"
@@ -47,9 +49,23 @@ void MaybeChangeColor(const YAML::Node& node, const dart::dynamics::SkeletonPtr&
   const Eigen::Vector4d color(color_vector.data());
   changeBodyColor(skeleton, color);
 }
+
+void VerifyRobotNameExistsAndIsNotRoot(const std::string& name, const RobotPtr& root_robot, 
+    const std::unordered_map<std::string, RobotPtr>& child_robots) {
+  if(root_robot->GetName() == name) {
+    OMPL_WARN("Cannot specify a task goal on the root space %s.", name.c_str());
+    throw std::runtime_error("No root space allowed for task goal.");
+  }
+  if(child_robots.find(name) == child_robots.end()) {
+    OMPL_ERROR("Could not find child robot %s.", name.c_str());
+    throw std::domain_error("Child robot " + name + " does not exist.");
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Robots
 ////////////////////////////////////////////////////////////////////////////////
+
 RobotPtr MakeRobotFromNode(const YAML::Node& node,
     const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles) {
   std::string name = node["name"].as<std::string>();
@@ -57,6 +73,13 @@ RobotPtr MakeRobotFromNode(const YAML::Node& node,
 
   if(name == "KukaRobotTaskSpace") {
     robot = MakeRobot<KukaRobotTaskSpace>(world, obstacles);
+
+  } else if(name == "MobileKukaRobot") {
+    robot = MakeRobot<MobileKukaRobot>(world, obstacles);
+    // auto lower_limit = node["lower_limits"].as<std::vector<double>>();
+    // auto upper_limit = node["upper_limits"].as<std::vector<double>>();
+    // robot->GetSkeleton()->setPositionLowerLimits(MakeState(lower_limit).configuration);
+    // robot->GetSkeleton()->setPositionUpperLimits(MakeState(upper_limit).configuration);
 
   } else if(name == "MobileKukaRobotTaskSpace") {
     robot = MakeRobot<MobileKukaRobotTaskSpace>(world, obstacles);
@@ -77,6 +100,12 @@ RobotPtr MakeRobotFromNode(const YAML::Node& node,
     if(node["max_time"]) {
       std::static_pointer_cast<TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints>(robot)->SetTMax(node["max_time"].as<double>());
     }
+
+  } else if(name == "MobileCar") {
+    robot = MakeRobot<MobileCar>(world, obstacles);
+
+  } else if(name == "MobileCarDisk") {
+    robot = MakeRobot<MobileCar>(world, obstacles);
 
   } else if(name == "ZeppelinRobot") {
     robot = MakeRobot<ZeppelinRobot>(world, obstacles);
@@ -101,12 +130,14 @@ RobotPtr MakeRobotFromNode(const YAML::Node& node,
     OMPL_ERROR("No robot with name %s available.", name.c_str());
     throw std::out_of_range("No robot with name");
   }
+
   if(node["translation"]) {
     auto translation = node["translation"].as<std::vector<double>>();
     Eigen::Isometry3d transform(Eigen::Isometry3d::Identity());
     transform.translation() = MakeState3d(translation);
     robot->GetSkeleton()->getRootBodyNode()->getParentJoint()->setTransformFromParentBodyNode(transform);
   }
+
   MaybeChangeColor(node, robot->GetSkeleton());
   if(node["smooth_path"]) {
     auto smooth_path = node["smooth_path"].as<bool>();
@@ -262,10 +293,14 @@ std::vector<dart::dynamics::SkeletonPtr> MakeObstaclesFromYamlFilename(const std
       MaybeChangeColor(node, obstacles.back());
       continue;
     } else if(type == "urdf") {
-      std::vector<double> position = node["position"].as<std::vector<double>>();
       std::string urdf_filename = node["filename"].as<std::string>();
-      auto state = State3d(position.at(0), position.at(1), position.at(2));
-      auto urdf = createFromURDF(GetDataFolder() + "objects/maze.urdf", state);
+
+      auto state = State3d(0, 0, 0);
+      if(node["position"]) {
+        std::vector<double> position = node["position"].as<std::vector<double>>();
+        state = State3d(position.at(0), position.at(1), position.at(2));
+      }
+      auto urdf = createFromURDF(GetDataFolder() + urdf_filename, state);
       MaybeChangeColor(node, urdf);
       obstacles.push_back(urdf);
       continue;
@@ -353,7 +388,7 @@ ompl::base::GoalPtr MakeGoalRegionFromGoalNode(const YAML::Node& node, const omp
     const RobotPtr& robot, const ompl::base::State* start, ompl::base::State* goal) {
 
   const auto goal_type = node["type"].as<std::string>();
-  if(goal_type == "task") {
+  if(goal_type == "task" || goal_type == "joint") {
     auto goal_region = std::make_shared<ompl::base::GoalState>(factor);
     goal_region->setState(goal);
     const auto goal_threshold = node["threshold"].as<double>();
@@ -382,8 +417,7 @@ ompl::base::ProblemDefinitionPtr MakeProblemDefinitionFromYamlFilename(
 
   if(!node["problem"]) {
     OMPL_WARN("Requires a problem tag in %s file.", filename.c_str());
-    return nullptr;
-    //throw std::invalid_argument("No problem tag");
+    throw std::invalid_argument("No problem tag");
   }
 
   auto start_node = node["problem"]["start"];
@@ -412,18 +446,15 @@ ompl::base::ProblemDefinitionPtr MakeProblemDefinitionFromYamlFilename(
       auto start_eigen = MakeState(config);
 
       //Get SpaceInformation for robot 
-      if(root_robot->GetName() == name) {
-        OMPL_WARN("Cannot specify a task start on the root space.");
-        throw std::runtime_error("No root space allowed for task starts.");
-      } else {
-        auto robot = child_robots.at(name);
-        auto si = robot->GetSpaceInformation();
-        ompl::base::State *start_ompl_state = si->allocState();
-        robot->EigenToState(start_eigen, start_ompl_state);
-        start_child_states[si->getName()] = start_ompl_state;
-        OMPL_INFORM("Start state:");
-        si->printState(start_ompl_state);
-      }
+      VerifyRobotNameExistsAndIsNotRoot(name, root_robot, child_robots);
+
+      auto robot = child_robots.at(name);
+      auto si = robot->GetSpaceInformation();
+      ompl::base::State *start_ompl_state = si->allocState();
+      robot->EigenToState(start_eigen, start_ompl_state);
+      start_child_states[si->getName()] = start_ompl_state;
+      OMPL_INFORM("Start state:");
+      si->printState(start_ompl_state);
 
       //Maybe visualize
       if(robot_node.second["visualize"]) {
@@ -436,6 +467,7 @@ ompl::base::ProblemDefinitionPtr MakeProblemDefinitionFromYamlFilename(
 
     auto maybe_start = ComputeValidTotalState(root_factor, start_child_states);
     OMPL_INFORM("Done");
+
     if(!maybe_start.has_value()){
       OMPL_ERROR("Could not compute valid start.");
       throw std::runtime_error("Could not compute valid start");
@@ -469,23 +501,15 @@ ompl::base::ProblemDefinitionPtr MakeProblemDefinitionFromYamlFilename(
       auto goal_eigen = MakeState(config);
 
       //Get SpaceInformation for robot 
-      if(root_robot->GetName() == name) {
-        OMPL_WARN("Cannot specify a task goal on the root space.");
-        throw std::runtime_error("No root space allowed for task goal.");
-      } else {
-        if(child_robots.find(name) == child_robots.end()) {
-          OMPL_ERROR("Could not find robot %s.", name.c_str());
-          throw std::domain_error("Child robot " + name + " does not exist.");
-        }
-        auto robot = child_robots.at(name);
-        auto si = robot->GetSpaceInformation();
-        ompl::base::State *goal_ompl_state = si->allocState();
-        robot->EigenToState(goal_eigen, goal_ompl_state);
-        goal_child_states[si->getName()] = goal_ompl_state;
-        OMPL_INFORM("Goal state:");
-        si->printState(goal_ompl_state);
-        space_name_to_robot_name[si->getName()] = name;
-      }
+      VerifyRobotNameExistsAndIsNotRoot(name, root_robot, child_robots);
+      auto robot = child_robots.at(name);
+      auto si = robot->GetSpaceInformation();
+      ompl::base::State *goal_ompl_state = si->allocState();
+      robot->EigenToState(goal_eigen, goal_ompl_state);
+      goal_child_states[si->getName()] = goal_ompl_state;
+      OMPL_INFORM("Goal state:");
+      si->printState(goal_ompl_state);
+      space_name_to_robot_name[si->getName()] = name;
 
       //Maybe visualize
       if(robot_node.second["visualize"]) {
@@ -547,14 +571,53 @@ ompl::base::ProblemDefinitionPtr MakeProblemDefinitionFromYamlFilename(
     return pdef;
 
   } else if (start_type == "joint") {
-    OMPL_ERROR("JOINT. NYI");
-    throw std::invalid_argument("NYI");
+    if(!start_node["config"]) {
+      throw std::domain_error("Requires config for root level robot " + root_robot->GetName());
+    }
+    auto start_vector = start_node["config"].as<std::vector<double>>();
+    auto start = root_factor->allocState();
+    root_robot->EigenToState(MakeState(start_vector), start);
+
+    if(start_node["time"]) {
+      root_robot->TimeToState(start_node["time"].as<double>(), start);
+    }
+    root_factor->printState(start);
+
+
+    const auto goal_type = goal_node["type"].as<std::string>();
+
+    if(!(goal_type == "joint")) {
+      throw std::domain_error("Goal type needs to be joint for a joint start type.");
+    }
+    if(!goal_node["config"]) {
+      throw std::domain_error("Requires config for root level robot " + root_robot->GetName());
+    }
+    auto goal_vector = goal_node["config"].as<std::vector<double>>();
+    auto goal = root_factor->allocState();
+    root_robot->EigenToState(MakeState(goal_vector), goal);
+
+    if(goal_node["time"]) {
+      root_robot->TimeToState(goal_node["time"].as<double>(), goal);
+    }
+    root_factor->printState(goal);
+
+    ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(root_factor);
+    pdef->addStartState(start);
+    auto goal_region = MakeGoalRegionFromGoalNode(goal_node, root_factor, root_robot, start, goal);
+    pdef->setGoal(goal_region);
+    return pdef;
+
   } else {
     throw std::out_of_range("Unknown start type. Can only be task or joint.");
   }
-  return nullptr;
 
+  throw std::runtime_error("Could not return a valid ProblemDefinition.");
+  return nullptr;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Make projections
+////////////////////////////////////////////////////////////////////////////////
 
 ompl::multilevel::ProjectionPtr MakeProjectionFromName(const std::string& name, const ompl::base::SpaceInformationPtr& parent, const ompl::base::SpaceInformationPtr& child, const RobotPtr& parent_robot) {
   if(name == "ProjectionTaskSpace") {
@@ -569,6 +632,9 @@ ompl::multilevel::ProjectionPtr MakeProjectionFromName(const std::string& name, 
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Make factored space information
+////////////////////////////////////////////////////////////////////////////////
 std::tuple<ompl::multilevel::FactoredSpaceInformationPtr, ompl::base::ProblemDefinitionPtr, RobotPtr, std::unordered_map<std::string, RobotPtr>, std::vector<std::pair<RobotPtr, ompl::base::PathPtr>> >
 MakeFactoredSpaceInformationFromYamlFilename(const std::string& filename, const dart::simulation::WorldPtr& world) {
 

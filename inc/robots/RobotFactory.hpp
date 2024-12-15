@@ -10,12 +10,10 @@ class RobotFactory {
 
     std::shared_ptr<RobotType> Create() {
       if(!world_.has_value()) {
-        OMPL_ERROR("Requires world");
-        throw "RequiresWorld";
+        throw std::invalid_argument("Requires World");
       }
       if(!obstacles_.has_value()) {
-        OMPL_ERROR("Requires obstacles");
-        throw "RequiresObstacles";
+        throw std::invalid_argument("Requires Obstacles");
       }
 
       auto robot = std::make_shared<RobotType>();

@@ -3,6 +3,7 @@
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 
 #include "OmplHelper.hpp"
+#include "DartHelper.hpp"
 #include "robots/Robot.hpp"
 #include "Common.hpp"
 
@@ -107,7 +108,8 @@ bool HasValidJointLimits(const RobotPtr& robot, const Eigen::VectorXd& config) {
   auto ub = robot->GetSkeleton()->getPositionUpperLimits();
   for(size_t k = 0; k < config.size(); k++) {
     if(config[k] < lb[k] || config[k] > ub[k] || config[k] != config[k]) {
-      OMPL_WARN("Robot %s is out of bounds: [%f] < [%f] < [%f] (index %d).", robot->GetName().c_str(), lb[k], ub[k], config[k], k);
+      OMPL_WARN("Robot %s is out of bounds: Index %d has value [%f], which is outside of interval [%f, %f].", robot->GetName().c_str(), k, config[k], lb[k], ub[k]);
+      PrintSkeletonInfo(robot->GetSkeleton());
       return false;
     }
   }
@@ -185,8 +187,6 @@ bool DartMultiRobotCollisionChecker::isValid(const ompl::base::State *state) con
     const auto& name = robot->GetSpaceInformation()->getName();
     const auto& state = tmp_skeleton_states_.at(name);
     const auto config = robot->StateToEigen(state).configuration;
-    // const auto lb = robot->GetSkeleton()->getPositionLowerLimits();
-    // const auto ub = robot->GetSkeleton()->getPositionUpperLimits();
     if(!HasValidJointLimits(robot, config)) {
       return false;
     }

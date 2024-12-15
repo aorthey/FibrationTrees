@@ -236,6 +236,28 @@ dart::dynamics::SkeletonPtr createFromURDF(const std::string& urdf_name, const S
     return object;
 }
 
+// dart::dynamics::SkeletonPtr createFromSTL(const std::string& stl_name, const State3d& position)
+// {
+//     dart::utils::DartLoader loader;
+//     dart::utils::DartLoader::Options options;
+//     options.mDefaultRootJointType = dart::utils::DartLoader::RootJointType::FIXED;
+//     loader.setOptions(options);
+
+//     dart::dynamics::SkeletonPtr object
+//       = loader.parseSkeleton(urdf_name);
+
+//     static int count = 0;
+//     object->setMobile(false);
+
+//     auto body = object->getRootBodyNode();
+
+//     Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
+//     tf.translation() = position;
+//     body->getParentJoint()->setTransformFromParentBodyNode(tf);
+
+//     return object;
+// }
+
 void addCoordinateFrameToWorld(const dart::simulation::WorldPtr& world) {
   auto frame_x = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "coordinate_frame_x");
   auto frame_y = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "coordinate_frame_y");

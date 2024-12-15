@@ -105,9 +105,6 @@ void MobileKukaRobot::EigenToState(const StateXd& v, ompl::base::State* state) c
       state_RN->values[k] = v.configuration[k + 3];
   }
 }
-ompl::base::MotionValidatorPtr MobileKukaRobot::MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& /*robot*/) {
-  return std::make_shared<DefaultMotionValidator>(factor);
-}
 
 std::vector<State3d> MobileKukaRobot::GetFK(const StateXd& config) const {
   auto endeffector = "base_link_robot";
