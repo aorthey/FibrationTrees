@@ -14,371 +14,19 @@
 #include <dart/dart.hpp>
 #include "yaml-cpp/yaml.h"
 
+#include "yaml/MakeObstaclesFromYaml.hpp"
+#include "yaml/MakeRobotFromYaml.hpp"
+#include "yaml/MakeFromYamlHelpers.hpp"
+
 #include "FilePath.hpp"
 #include "DartHelper.hpp"
 #include "OmplHelper.hpp"
 #include "TaskSpaceGoal.hpp"
 #include "TimeGoal.hpp"
 #include "robots/Robot.hpp"
-#include "robots/SphereRobot.hpp"
-#include "robots/MobileCar.hpp"
-#include "robots/MobileCarDisk.hpp"
-#include "robots/DiskRobot.hpp"
-#include "robots/RobotFactory.hpp"
-#include "robots/ZeppelinRobot.hpp"
-#include "robots/ZeppelinInnerSphereRobot.hpp"
-#include "robots/MultiRobot.hpp"
-#include "robots/KukaRobotTaskSpace.hpp"
-#include "robots/MobileKukaRobotTaskSpace.hpp"
-#include "robots/TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints.hpp"
+#include "robots/TimeBasedMobileKukaRobotTaskSpace.hpp"
 #include "projections/ProjectionTaskSpace.hpp"
 #include "validators/MotionValidatorTaskSpaceMultiRobot.hpp"
-
-////////////////////////////////////////////////////////////////////////////////
-// Helper functions
-////////////////////////////////////////////////////////////////////////////////
-void MaybeChangeColor(const YAML::Node& node, const dart::dynamics::SkeletonPtr& skeleton) {
-  if(!node["color"]) {
-    return;
-  }
-  auto color_vector = node["color"].as<std::vector<double>>();
-
-  if(color_vector.size() != 4) {
-    throw std::out_of_range("Color needs to have four values, but has " + std::to_string(color_vector.size()));
-  }
-  const Eigen::Vector4d color(color_vector.data());
-  changeBodyColor(skeleton, color);
-}
-
-void VerifyRobotNameExistsAndIsNotRoot(const std::string& name, const RobotPtr& root_robot, 
-    const std::unordered_map<std::string, RobotPtr>& child_robots) {
-  if(root_robot->GetName() == name) {
-    OMPL_WARN("Cannot specify a task goal on the root space %s.", name.c_str());
-    throw std::runtime_error("No root space allowed for task goal.");
-  }
-  if(child_robots.find(name) == child_robots.end()) {
-    OMPL_ERROR("Could not find child robot %s.", name.c_str());
-    throw std::domain_error("Child robot " + name + " does not exist.");
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Robots
-////////////////////////////////////////////////////////////////////////////////
-
-RobotPtr MakeRobotFromNode(const YAML::Node& node,
-    const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles) {
-  std::string name = node["name"].as<std::string>();
-  RobotPtr robot;
-
-  if(name == "KukaRobotTaskSpace") {
-    robot = MakeRobot<KukaRobotTaskSpace>(world, obstacles);
-
-  } else if(name == "MobileKukaRobot") {
-    robot = MakeRobot<MobileKukaRobot>(world, obstacles);
-    // auto lower_limit = node["lower_limits"].as<std::vector<double>>();
-    // auto upper_limit = node["upper_limits"].as<std::vector<double>>();
-    // robot->GetSkeleton()->setPositionLowerLimits(MakeState(lower_limit).configuration);
-    // robot->GetSkeleton()->setPositionUpperLimits(MakeState(upper_limit).configuration);
-
-  } else if(name == "MobileKukaRobotTaskSpace") {
-    robot = MakeRobot<MobileKukaRobotTaskSpace>(world, obstacles);
-
-  } else if(name == "TimeBasedMobileKukaRobotTaskSpace") {
-    robot = MakeRobot<TimeBasedMobileKukaRobotTaskSpace>(world, obstacles);
-    if(node["max_velocity"]) {
-      std::static_pointer_cast<TimeBasedMobileKukaRobotTaskSpace>(robot)->SetVMax(node["max_velocity"].as<double>());
-    }
-    if(node["max_time"]) {
-      std::static_pointer_cast<TimeBasedMobileKukaRobotTaskSpace>(robot)->SetTMax(node["max_time"].as<double>());
-    }
-  } else if(name == "TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints") {
-    robot = MakeRobot<TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints>(world, obstacles);
-    if(node["max_velocity"]) {
-      std::static_pointer_cast<TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints>(robot)->SetVMax(node["max_velocity"].as<double>());
-    }
-    if(node["max_time"]) {
-      std::static_pointer_cast<TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints>(robot)->SetTMax(node["max_time"].as<double>());
-    }
-
-  } else if(name == "MobileCar") {
-    robot = MakeRobot<MobileCar>(world, obstacles);
-
-  } else if(name == "MobileCarDisk") {
-    robot = MakeRobot<MobileCar>(world, obstacles);
-
-  } else if(name == "ZeppelinRobot") {
-    robot = MakeRobot<ZeppelinRobot>(world, obstacles);
-
-  } else if(name == "ZeppelinInnerSphereRobot") {
-    robot = MakeRobot<ZeppelinInnerSphereRobot>(world, obstacles);
-
-  } else if(name == "DiskRobot") {
-    robot = MakeRobot<DiskRobot>(world, obstacles);
-    auto lower_limit = node["lower_limits"].as<std::vector<double>>();
-    auto upper_limit = node["upper_limits"].as<std::vector<double>>();
-    const auto task_space_limits = std::make_pair(MakeState2d(lower_limit), MakeState2d(upper_limit));
-    std::static_pointer_cast<DiskRobot>(robot)->SetLimits(task_space_limits);
-
-  } else if(name == "SphereRobot") {
-    robot = MakeRobot<SphereRobot>(world, obstacles);
-    auto lower_limit = node["lower_limits"].as<std::vector<double>>();
-    auto upper_limit = node["upper_limits"].as<std::vector<double>>();
-    const auto task_space_limits = std::make_pair(MakeState3d(lower_limit), MakeState3d(upper_limit));
-    std::static_pointer_cast<SphereRobot>(robot)->SetLimits(task_space_limits);
-  } else {
-    OMPL_ERROR("No robot with name %s available.", name.c_str());
-    throw std::out_of_range("No robot with name");
-  }
-
-  if(node["translation"]) {
-    auto translation = node["translation"].as<std::vector<double>>();
-    Eigen::Isometry3d transform(Eigen::Isometry3d::Identity());
-    transform.translation() = MakeState3d(translation);
-    robot->GetSkeleton()->getRootBodyNode()->getParentJoint()->setTransformFromParentBodyNode(transform);
-  }
-
-  MaybeChangeColor(node, robot->GetSkeleton());
-  if(node["smooth_path"]) {
-    auto smooth_path = node["smooth_path"].as<bool>();
-    if(smooth_path) {
-      robot->EnabledSmoothPath();
-    } else {
-      robot->DisableSmoothPath();
-    }
-  }
-  if(node["show_path"]) {
-    auto show_path = node["show_path"].as<bool>();
-    if(show_path) {
-      robot->EnabledShowPath();
-    } else {
-      robot->DisableShowPath();
-    }
-  }
-  return robot;
-}
-
-std::unordered_map<std::string, RobotPtr> MakeChildRobotsFromYamlFilename(const std::string& filename, 
-    const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles) {
-
-  std::unordered_map<std::string, RobotPtr> robots;
-  YAML::Node config = YAML::LoadFile(filename);
-  const auto yaml_robots = config["robots"];
-  for(const auto& yaml_robot : yaml_robots) {
-    const auto node = yaml_robot.second;
-
-    if(node["root"]) {
-      if(node["root"].as<bool>()) {
-        continue;
-      }
-    }
-
-    RobotPtr robot = MakeRobotFromNode(node, world, obstacles);
-
-    if(node["hide"]) {
-      if(node["hide"].as<bool>()) {
-        hide(robot->GetSkeleton());
-      }
-    }
-
-    const auto key = yaml_robot.first.as<std::string>();
-    OMPL_DEBUG("Create robot %s", key.c_str());
-    robots[key] = robot;
-  }
-  return robots;
-}
-
-RobotPtr MakeRootRobotFromYamlFilename(const std::string& filename,
-    const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles, 
-    std::unordered_map<std::string, RobotPtr> child_robots) {
-
-  YAML::Node config = YAML::LoadFile(filename);
-  const auto yaml_robots = config["robots"];
-
-  RobotPtr root_robot;
-  bool found_root_robot = false;
-  for(const auto& yaml_robot : yaml_robots) {
-    auto node = yaml_robot.second;
-    if(node["root"]) {
-      if(node["root"].as<bool>()) {
-        if(found_root_robot) {
-          OMPL_ERROR("Multiple robots declared as root in yaml file.");
-          throw std::out_of_range("Multiple robots declared as root in yaml file.");
-        }
-        if(!node["name"]) {
-          OMPL_ERROR("Root robot has no name.");
-          throw std::out_of_range("No valid name.");
-        }
-        if(node["name"].as<std::string>() == "MultiRobot") {
-          auto robot_names = node["robots"].as<std::vector<std::string>>();
-
-          std::vector<RobotPtr> robots_for_multirobot;
-          for(const auto& robot_name : robot_names) {
-            auto findit = child_robots.find(robot_name);
-            if (findit == child_robots.end()) {
-              OMPL_WARN("Robot name not existing: %s", robot_name.c_str());
-              throw std::out_of_range("Not a valid robot.");
-            }else {
-              OMPL_DEBUG("Found robot %s for multi robot.", robot_name.c_str());
-              robots_for_multirobot.push_back(findit->second);
-            }
-          }
-
-          root_robot = MultiRobot::MakeMultiRobot(robots_for_multirobot);
-        } else {
-          root_robot = MakeRobotFromNode(node, world, obstacles);
-        }
-        found_root_robot = true;
-      }
-    }
-  }
-  if(!found_root_robot) {
-    OMPL_ERROR("Requires at least one root robot in yaml file.");
-    throw std::out_of_range("Requires at least one root robot in yaml file.");
-  }
-  return root_robot;
-}
-
-std::string GetRootRobotNameFromYamlFilename(const std::string& filename) {
-
-  YAML::Node config = YAML::LoadFile(filename);
-  const auto yaml_robots = config["robots"];
-
-  for(const auto& yaml_robot : yaml_robots) {
-    auto node = yaml_robot.second;
-    if(node["root"]) {
-      if(node["root"].as<bool>()) {
-        return yaml_robot.first.as<std::string>();
-      }
-    }
-  }
-  OMPL_ERROR("Requires at least one root robot in yaml file.");
-  throw std::out_of_range("Requires at least one root robot in yaml file.");
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-// Obstacles
-////////////////////////////////////////////////////////////////////////////////
-
-std::vector<dart::dynamics::SkeletonPtr> MakeObstaclesFromYamlFilename(const std::string& filename) {
-  YAML::Node config = YAML::LoadFile(filename);
-
-  std::vector<dart::dynamics::SkeletonPtr> obstacles;
-
-  const auto yaml_obstacles = config["obstacles"];
-  for(const auto& obstacle : yaml_obstacles) {
-    auto node = obstacle.second;
-    std::string name = node["name"].as<std::string>();
-    std::string type = node["type"].as<std::string>();
-    OMPL_INFORM("Creating obstacle %s from type %s.", name.c_str(), type.c_str());
-
-    if(type == "robot") {
-      //dynamic obstacle
-      continue;
-    }
-
-    if(type == "floor") {
-      if(node["height"] && node["width"]) {
-        double height = node["height"].as<double>();
-        double width = node["width"].as<double>();
-        OMPL_INFORM("Create floor with height %f and width %f.", height, width);
-        obstacles.push_back(createFloor(height, width));
-      } else if(node["height"]) {
-        double height = node["height"].as<double>();
-        obstacles.push_back(createFloor(height));
-      } else {
-        obstacles.push_back(createFloor());
-      }
-      MaybeChangeColor(node, obstacles.back());
-      continue;
-    } else if(type == "urdf") {
-      std::string urdf_filename = node["filename"].as<std::string>();
-
-      auto state = State3d(0, 0, 0);
-      if(node["position"]) {
-        std::vector<double> position = node["position"].as<std::vector<double>>();
-        state = State3d(position.at(0), position.at(1), position.at(2));
-      }
-      auto urdf = createFromURDF(GetDataFolder() + urdf_filename, state);
-      MaybeChangeColor(node, urdf);
-      obstacles.push_back(urdf);
-      continue;
-    } else if(type == "box") {
-      std::vector<double> position = node["position"].as<std::vector<double>>();
-      std::vector<double> size = node["size"].as<std::vector<double>>();
-      auto state = State3d(position.at(0), position.at(1), position.at(2));
-      auto box = createBox(state, size.at(0), size.at(1), size.at(2));
-      MaybeChangeColor(node, box);
-      obstacles.push_back(box);
-      continue;
-    } else if(type == "cylinder") {
-      std::vector<double> position = node["position"].as<std::vector<double>>();
-      std::vector<double> size = node["size"].as<std::vector<double>>();
-      auto state = State3d(position.at(0), position.at(1), position.at(2));
-      auto cylinder = createCylinder(state, size.at(0), size.at(1));
-      MaybeChangeColor(node, cylinder);
-      obstacles.push_back(cylinder);
-      continue;
-    } else {
-      OMPL_ERROR("Could not create obstacles from type %s", type.c_str());
-      throw std::invalid_argument("Unknown obstacle type:" + type);
-    }
-  }
-  return obstacles;
-}
-
-std::vector<std::pair<RobotPtr, ompl::base::PathPtr>> 
-MakeDynamicObstaclesFromYamlFilename(const std::string& filename, 
-    const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& static_obstacles) {
-
-  YAML::Node config = YAML::LoadFile(filename);
-
-  std::vector<std::pair<RobotPtr, ompl::base::PathPtr>> dynamic_obstacles;
-  const auto yaml_obstacles = config["obstacles"];
-  for(const auto& obstacle : yaml_obstacles) {
-    std::string name = obstacle.second["name"].as<std::string>();
-    std::string type = obstacle.second["type"].as<std::string>();
-    if(type != "robot") {
-      continue;
-    }
-
-    if(!obstacle.second["start"]) {
-      throw std::domain_error("Requires start values");
-    }
-    if(!obstacle.second["goal"]) {
-      throw std::domain_error("Requires goal values");
-    }
-    if(!obstacle.second["time_start"]) {
-      throw std::domain_error("Requires start time");
-    }
-    if(!obstacle.second["time_goal"]) {
-      throw std::domain_error("Requires goal time");
-    }
-
-    auto robot = MakeRobotFromNode(obstacle.second, world, static_obstacles);
-
-    auto config1 = obstacle.second["start"].as<std::vector<double>>();
-    auto config2 = obstacle.second["goal"].as<std::vector<double>>();
-
-    auto state1 = MakeState(config1);
-    state1.time = obstacle.second["time_start"].as<double>();
-    auto state2 = MakeState(config2);
-    state2.time = obstacle.second["time_goal"].as<double>();
-
-    auto si = robot->GetSpaceInformation();
-    auto start = si->allocState();
-    auto goal = si->allocState();
-
-    robot->EigenToState(state1, start);
-    robot->EigenToState(state2, goal);
-
-    auto path = std::make_shared<ompl::geometric::PathGeometric>(si, start, goal);
-    dynamic_obstacles.push_back(std::make_pair(robot, path));
-  }
-
-  return dynamic_obstacles;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 // ProblemDefinition
@@ -453,8 +101,6 @@ ompl::base::ProblemDefinitionPtr MakeProblemDefinitionFromYamlFilename(
       ompl::base::State *start_ompl_state = si->allocState();
       robot->EigenToState(start_eigen, start_ompl_state);
       start_child_states[si->getName()] = start_ompl_state;
-      OMPL_INFORM("Start state:");
-      si->printState(start_ompl_state);
 
       //Maybe visualize
       if(robot_node.second["visualize"]) {
@@ -466,7 +112,6 @@ ompl::base::ProblemDefinitionPtr MakeProblemDefinitionFromYamlFilename(
     }
 
     auto maybe_start = ComputeValidTotalState(root_factor, start_child_states);
-    OMPL_INFORM("Done");
 
     if(!maybe_start.has_value()){
       OMPL_ERROR("Could not compute valid start.");
@@ -477,8 +122,6 @@ ompl::base::ProblemDefinitionPtr MakeProblemDefinitionFromYamlFilename(
     if(start_node["time"]) {
       root_robot->TimeToState(start_node["time"].as<double>(), start);
     }
-    OMPL_INFORM("Found start state:");
-    root_factor->printState(start);
 
     ////////////////////////////////////////////////////////////////////////////////
     // Compute goal configuration to ensure a goal exists
@@ -507,8 +150,6 @@ ompl::base::ProblemDefinitionPtr MakeProblemDefinitionFromYamlFilename(
       ompl::base::State *goal_ompl_state = si->allocState();
       robot->EigenToState(goal_eigen, goal_ompl_state);
       goal_child_states[si->getName()] = goal_ompl_state;
-      OMPL_INFORM("Goal state:");
-      si->printState(goal_ompl_state);
       space_name_to_robot_name[si->getName()] = name;
 
       //Maybe visualize
@@ -526,9 +167,6 @@ ompl::base::ProblemDefinitionPtr MakeProblemDefinitionFromYamlFilename(
       throw std::runtime_error("Could not compute valid goal");
     }
     auto goal = maybe_goal.value();
-
-    OMPL_INFORM("Found goal state:");
-    root_factor->printState(goal);
 
     //////////////////////////////////////////////////////////////////////////////// 
     // Create child task space goals

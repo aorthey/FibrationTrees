@@ -83,7 +83,6 @@ std::vector<ompl::base::State*> MotionValidatorTimeBased::propagateMotion(const 
     robot_->EigenToState(config, tmpState_);
     if(!si_->isValid(tmpState_)) {
       //std::cout << "Invalid state" << std::endl;
-      //si_->printState(tmpState_);
       return result;
     }
     //Do not add too many states, only every X spaced

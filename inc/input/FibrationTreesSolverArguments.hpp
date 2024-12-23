@@ -2,10 +2,10 @@
 
 #include <iostream>
 
-struct ProgramOptions {
+struct FibrationTreesSolverArguments {
  public:
-  ProgramOptions();
-  bool Setup(int argc, char* argv[]);
+  FibrationTreesSolverArguments();
+  bool Setup(const int argc, const char* argv[]);
 
   template<typename T>
   T Get(const std::string& name);
@@ -16,7 +16,7 @@ struct ProgramOptions {
 };
 
 template<typename T>
-T ProgramOptions::Get(const std::string& name) {
+T FibrationTreesSolverArguments::Get(const std::string& name) {
   if (!variables_map_.count(name))
   {
     std::cout << "Argument " << name << " does not exist." << std::endl;

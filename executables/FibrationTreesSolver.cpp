@@ -1,5 +1,5 @@
-#include "FibrationTreesSolverExecuter.hpp"
+#include "input/FibrationTreesSolverExecuter.hpp"
 
-int main(int argc, char* argv[]) {
+int main(const int argc, const char* argv[]) {
   return FibrationTreesSolverExecuter(argc, argv);
 }

@@ -1,11 +1,11 @@
-#include "ProgramOptions.hpp"
+#include "input/FibrationTreesSolverArguments.hpp"
 
 namespace po = boost::program_options;
 
-ProgramOptions::ProgramOptions() {
+FibrationTreesSolverArguments::FibrationTreesSolverArguments() {
 }
 
-bool ProgramOptions::Setup(int argc, char* argv[]) {
+bool FibrationTreesSolverArguments::Setup(const int argc, const char* argv[]) {
   po::options_description description("Allowed options");
   description.add_options()
       ("help,h", "Show help message")
@@ -36,6 +36,6 @@ bool ProgramOptions::Setup(int argc, char* argv[]) {
   return true;
 };
 
-bool ProgramOptions::HasValue(const std::string& name) {
+bool FibrationTreesSolverArguments::HasValue(const std::string& name) {
   return variables_map_.count(name);
 }

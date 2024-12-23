@@ -1,0 +1,25 @@
+name: TestAllPlanners
+
+scenarios:
+  Scenario1:
+    name: MultiRobot_01_MultiDisks
+    filename: scenarios/01_multirobots/01_MultiDisks.yaml
+    run_count: 2
+    timeout: 10
+    planners: [FibrationRrt, RRTConnect, LBTRRT]
+
+  Scenario2:
+    name: TaskSpace_01_VerticalMaze
+    filename: scenarios/02_taskspace/01_VerticalMaze.yaml
+    run_count: 2
+    timeout: 30
+    planners: [FibrationRrt, RrtTask]
+
+planner_settings:
+  FibrationRrt:
+    range: Inf
+    goal_bias: 0.05
+    path_restriction_sampling_bias: 0.5
+    path_restriction_surrounding_sampling_bias: 0.0
+    sampling_perturbation_bias: 0.0
+    selector_function_type: exponential

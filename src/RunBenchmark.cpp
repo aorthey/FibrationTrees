@@ -1,6 +1,7 @@
 #include "RunBenchmark.hpp"
 
 #include "Common.hpp"
+#include "FilePath.hpp"
 
 #include <ompl/tools/benchmark/Benchmark.h>
 #include <ompl/base/Planner.h>
@@ -29,7 +30,7 @@ ompl::tools::Benchmark RunBenchmark(
   const ompl::base::GoalPtr& goal,
   double timeout,
   size_t run_count,
-  const std::initializer_list<ompl::base::PlannerPtr>& planners,
+  const std::vector<ompl::base::PlannerPtr>& planners,
   const std::optional<ompl::tools::Benchmark::PreSetupEvent> pre_setup_event) {
 
   ompl::geometric::SimpleSetup setup(factor);
@@ -60,10 +61,10 @@ ompl::tools::Benchmark RunBenchmark(
 }
 
 void SaveBenchmarkToDatabase(const std::string& name, const ompl::tools::Benchmark& benchmark) {
-  std::string filename = "../log/"+name+".log";
+  std::string filename = GetDataFolder() + "logs/"+name+".log";
   benchmark.saveResultsToFile(filename.c_str());
 
-  std::string db_filename = "../log/"+name+".db";
+  std::string db_filename = GetDataFolder() + "logs/"+name+".db";
 
   auto cmd_log_to_db = "ompl_benchmark_statistics.py "+filename+" -d "+db_filename;
   system(cmd_log_to_db.c_str());

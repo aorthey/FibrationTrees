@@ -1,4 +1,4 @@
-#include "FibrationTreesSolverExecuter.hpp"
+#include "input/FibrationTreesSolverExecuter.hpp"
 
 #include <iostream>
 
@@ -8,15 +8,15 @@
 
 #include "FilePath.hpp"
 #include "Common.hpp"
-#include "ProgramOptions.hpp"
+#include "input/FibrationTreesSolverArguments.hpp"
 #include "OmplHelper.hpp"
 #include "gui/Visualizer.hpp"
 #include "yaml/MakeFromYaml.hpp"
 
-int FibrationTreesSolverExecuter(int argc, char* argv[]) {
+int FibrationTreesSolverExecuter(const int argc, const char* argv[]) {
   dart::math::Random::setSeed(0);
 
-  auto program_options = ProgramOptions();
+  auto program_options = FibrationTreesSolverArguments();
 
   if(!program_options.Setup(argc, argv)) {
     return 0;

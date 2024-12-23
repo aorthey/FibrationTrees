@@ -3,6 +3,7 @@
 #include <iostream>
 #include "FilePath.hpp"
 #include "yaml/MakeFromYaml.hpp"
+#include "yaml/MakeObstaclesFromYaml.hpp"
 
 TEST(YamlTest, ObstacleTest) {
   const auto filename = GetMainFolder() + "tests/data/test_scenario.yaml";
