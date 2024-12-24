@@ -1,4 +1,4 @@
-name: DroneCoordination
+name: MultiDisks
 
 world:
   gravity: [0, 0, 0]

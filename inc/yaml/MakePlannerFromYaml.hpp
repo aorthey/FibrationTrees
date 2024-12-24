@@ -14,3 +14,6 @@ namespace ompl {
 
 ompl::base::PlannerPtr MakePlannerFromYaml(const YAML::Node& node, const std::string& planner_name, 
     const ompl::multilevel::FactoredSpaceInformationPtr& factor, const std::unordered_map<std::string, RobotPtr>& child_robots);
+
+ompl::base::PlannerPtr MakePlannerFromYaml(const std::string& filename, const std::string& planner_name, 
+    const ompl::multilevel::FactoredSpaceInformationPtr& factor, const std::unordered_map<std::string, RobotPtr>& child_robots);

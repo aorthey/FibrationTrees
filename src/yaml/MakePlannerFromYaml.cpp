@@ -31,6 +31,12 @@ void SetParameter(const YAML::Node& node, const ompl::base::PlannerPtr& planner,
   OMPL_INFORM("Setting planner parameter %s to %f", parameter_name.c_str(), parameter_value);
 }
 
+ompl::base::PlannerPtr MakePlannerFromYaml(const std::string& filename, const std::string& planner_name, 
+    const ompl::multilevel::FactoredSpaceInformationPtr& factor, const std::unordered_map<std::string, RobotPtr>& child_robots) {
+  YAML::Node node = YAML::LoadFile(filename);
+  return MakePlannerFromYaml(node, planner_name, factor, child_robots);
+}
+
 ompl::base::PlannerPtr MakePlannerFromYaml(const YAML::Node& node, const std::string& planner_name, 
     const ompl::multilevel::FactoredSpaceInformationPtr& factor, const std::unordered_map<std::string, RobotPtr>& child_robots) {
 

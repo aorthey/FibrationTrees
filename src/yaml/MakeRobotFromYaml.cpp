@@ -5,6 +5,8 @@
 #include "yaml/MakeFromYamlHelpers.hpp"
 
 #include "DartHelper.hpp"
+#include "ToString.hpp"
+
 #include "robots/SphereRobot.hpp"
 #include "robots/MobileCar.hpp"
 #include "robots/MobileCarDisk.hpp"
@@ -18,7 +20,44 @@
 #include "robots/TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints.hpp"
 #include "robots/TimeBasedMobileKukaRobotTaskSpace.hpp"
 
-RobotPtr MakeRobotFromNode(const YAML::Node& node,
+RobotPtr MakeAnyRobotFromNode(const YAML::Node& node,
+    const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles,
+    std::unordered_map<std::string, RobotPtr> child_robots) {
+  if(node["name"].as<std::string>() == "MultiRobot") {
+    return MakeMultiRobotFromNode(node, world, obstacles, child_robots);
+  } else {
+    return MakeAtomicRobotFromNode(node, world, obstacles);
+  }
+}
+
+RobotPtr MakeMultiRobotFromNode(const YAML::Node& node,
+    const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles,
+    std::unordered_map<std::string, RobotPtr> child_robots) {
+
+  if(!node["name"]) {
+    throw std::domain_error("No name for multi robot.");
+  }
+  if(node["name"].as<std::string>() != "MultiRobot") {
+    throw std::domain_error("Not a MultiRobot");
+  }
+
+  auto robot_names = node["robots"].as<std::vector<std::string>>();
+  std::vector<RobotPtr> robots_for_multirobot;
+  for(const auto& robot_name : robot_names) {
+    auto findit = child_robots.find(robot_name);
+    if (findit == child_robots.end()) {
+      OMPL_WARN("Robot name not existing: %s", robot_name.c_str());
+      throw std::out_of_range("Not a valid robot.");
+    }else {
+      robots_for_multirobot.push_back(findit->second);
+    }
+  }
+  OMPL_DEBUG(">> Create multi robot from robots: %s", ToString(robot_names).c_str());
+
+  return MultiRobot::MakeMultiRobot(robots_for_multirobot);
+}
+
+RobotPtr MakeAtomicRobotFromNode(const YAML::Node& node,
     const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles) {
   std::string name = node["name"].as<std::string>();
   RobotPtr robot;
@@ -116,6 +155,8 @@ std::unordered_map<std::string, RobotPtr> MakeChildRobotsFromYamlFilename(const 
   std::unordered_map<std::string, RobotPtr> robots;
   YAML::Node config = YAML::LoadFile(filename);
   const auto yaml_robots = config["robots"];
+
+  //Make all atomic robots
   for(const auto& yaml_robot : yaml_robots) {
     const auto node = yaml_robot.second;
 
@@ -125,7 +166,16 @@ std::unordered_map<std::string, RobotPtr> MakeChildRobotsFromYamlFilename(const 
       }
     }
 
-    RobotPtr robot = MakeRobotFromNode(node, world, obstacles);
+    RobotPtr robot;
+
+    if(node["name"]) {
+      if(node["name"].as<std::string>() == "MultiRobot") {
+        continue;
+      }
+    }
+
+    OMPL_DEBUG(">> Create robot %s", node["name"].as<std::string>().c_str());
+    robot = MakeAtomicRobotFromNode(node, world, obstacles);
 
     if(node["hide"]) {
       if(node["hide"].as<bool>()) {
@@ -134,9 +184,31 @@ std::unordered_map<std::string, RobotPtr> MakeChildRobotsFromYamlFilename(const 
     }
 
     const auto key = yaml_robot.first.as<std::string>();
-    OMPL_DEBUG("Create robot %s", key.c_str());
     robots[key] = robot;
   }
+
+  //Make all multi robots
+  for(const auto& yaml_robot : yaml_robots) {
+    const auto node = yaml_robot.second;
+
+    if(node["root"]) {
+      if(node["root"].as<bool>()) {
+        continue;
+      }
+    }
+
+    if(node["name"]) {
+      if(node["name"].as<std::string>() != "MultiRobot") {
+        continue;
+      }
+    }
+
+    RobotPtr robot = MakeMultiRobotFromNode(node, world, obstacles, robots);
+
+    const auto key = yaml_robot.first.as<std::string>();
+    robots[key] = robot;
+  }
+
   return robots;
 }
 
@@ -159,27 +231,9 @@ RobotPtr MakeRootRobotFromYamlFilename(const std::string& filename,
         }
         if(!node["name"]) {
           OMPL_ERROR("Root robot has no name.");
-          throw std::out_of_range("No valid name.");
+          throw std::domain_error("No valid name.");
         }
-        if(node["name"].as<std::string>() == "MultiRobot") {
-          auto robot_names = node["robots"].as<std::vector<std::string>>();
-
-          std::vector<RobotPtr> robots_for_multirobot;
-          for(const auto& robot_name : robot_names) {
-            auto findit = child_robots.find(robot_name);
-            if (findit == child_robots.end()) {
-              OMPL_WARN("Robot name not existing: %s", robot_name.c_str());
-              throw std::out_of_range("Not a valid robot.");
-            }else {
-              OMPL_DEBUG("Found robot %s for multi robot.", robot_name.c_str());
-              robots_for_multirobot.push_back(findit->second);
-            }
-          }
-
-          root_robot = MultiRobot::MakeMultiRobot(robots_for_multirobot);
-        } else {
-          root_robot = MakeRobotFromNode(node, world, obstacles);
-        }
+        root_robot = MakeAnyRobotFromNode(node, world, obstacles, child_robots);
         found_root_robot = true;
       }
     }

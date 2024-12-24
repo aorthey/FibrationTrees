@@ -104,7 +104,7 @@ MakeDynamicObstaclesFromYamlFilename(const std::string& filename,
       throw std::domain_error("Requires goal time");
     }
 
-    auto robot = MakeRobotFromNode(obstacle.second, world, static_obstacles);
+    auto robot = MakeAtomicRobotFromNode(obstacle.second, world, static_obstacles);
 
     auto config1 = obstacle.second["start"].as<std::vector<double>>();
     auto config2 = obstacle.second["goal"].as<std::vector<double>>();

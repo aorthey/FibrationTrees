@@ -338,8 +338,11 @@ MakeFactoredSpaceInformationFromYamlFilename(const std::string& filename, const 
     std::string projection_name = node["name"].as<std::string>();
     OMPL_INFORM("Loading projection %s", projection_name.c_str());
 
-    if(node["connection"]) {
+    if(projection_name == "ProjectionTaskSpace") {
       //Connection projection
+      if(!node["connection"]) {
+        throw std::domain_error("No connection specified for "+projection_name);
+      }
       std::pair<std::string, std::string> connection = node["connection"].as<std::pair<std::string, std::string>>();
       OMPL_INFORM("Loading projection %s -> %s", connection.first.c_str(), connection.second.c_str());
       auto parent_robot = (connection.first == root_name ? root_robot : child_robots.at(connection.first));
@@ -399,6 +402,8 @@ MakeFactoredSpaceInformationFromYamlFilename(const std::string& filename, const 
         }
       }
 
+    } else if(projection_name == "ProjectionMultiRobotToMultiRobot") {
+      throw std::invalid_argument("NYI");
     } else {
       OMPL_ERROR("Unknown projection type %s", projection_name.c_str());
       throw std::out_of_range("Unknown projection type.");

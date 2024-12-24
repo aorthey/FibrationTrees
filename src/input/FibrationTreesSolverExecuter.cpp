@@ -12,6 +12,7 @@
 #include "OmplHelper.hpp"
 #include "gui/Visualizer.hpp"
 #include "yaml/MakeFromYaml.hpp"
+#include "yaml/MakePlannerFromYaml.hpp"
 
 int FibrationTreesSolverExecuter(const int argc, const char* argv[]) {
   dart::math::Random::setSeed(0);
@@ -44,33 +45,15 @@ int FibrationTreesSolverExecuter(const int argc, const char* argv[]) {
   // Initialize planner
   ////////////////////////////////////////////////////////////////////////////////
 
-  auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
+  auto input_planner_name = program_options.Get<std::string>("planning");
+
+  auto planner = MakePlannerFromYaml(input_filename, input_planner_name, factor, child_robots);
   planner->setProblemDefinition(pdef);
   planner->setup();
-  planner->setRange(+Inf);
-
-  // planner->setSamplingPerturbationBias(child->getName(), 0.0);
-  // planner->setPathRestrictionSamplingBias(child->getName(), 0.5);
-  // planner->setPathRestrictionSurroundingSamplingBias(child->getName(), 0.0);
-  // planner->setSmoothIntermediateSolutions(child->getName(), true);
-
-  ////////////////////////////////////////////////////////////////////////////////
-  // Check smoothing for individual stages
-  ////////////////////////////////////////////////////////////////////////////////
-
-  planner->setSmoothIntermediateSolutions(false);
-  for(const auto& child_robot : child_robots) {
-    planner->setSmoothIntermediateSolutions(child_robot.second->GetName(), child_robot.second->ShouldSmoothPath());
-  }
-  planner->setSmoothIntermediateSolutions(root_robot->GetName(), root_robot->ShouldSmoothPath());
-
 
   ////////////////////////////////////////////////////////////////////////////////
   // Run planner
   ////////////////////////////////////////////////////////////////////////////////
-
-  planner->setSelectorFunctionType(ompl::multilevel::SelectorFunctionType::kUniform);
-  planner->setName("FibrationRRT");
 
   auto ptc = TimeOrSolutionPtc(pdef, program_options.Get<double>("timeout"));
   ompl::base::PlannerStatus status = planner->solve(ptc);
@@ -85,7 +68,13 @@ int FibrationTreesSolverExecuter(const int argc, const char* argv[]) {
     if(!child_robot.second->ShouldShowPath()) {
       continue;
     }
-    auto child_pdef = planner->getProblemDefinition(child_robot.second->GetName());
+    auto fplanner = std::dynamic_pointer_cast<ompl::multilevel::FibrationRRT>(planner);
+    if(fplanner == nullptr) {
+      continue;
+    }
+
+    auto child_pdef = fplanner->getProblemDefinition(child_robot.second->GetName());
+
     if(child_pdef == nullptr) {
       continue;
     }
