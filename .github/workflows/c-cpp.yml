@@ -22,6 +22,7 @@ jobs:
         sudo apt-get install -y libboost-program-options-dev
         sudo apt-get install -y libyaml-cpp-dev
         sudo apt-get install -y libdart-all-dev
+        sudo apt-get install -y libidn11
         
     - name: Clone and Build OMPL
       run: |
