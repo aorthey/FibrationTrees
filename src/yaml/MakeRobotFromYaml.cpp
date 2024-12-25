@@ -245,21 +245,3 @@ RobotPtr MakeRootRobotFromYamlFilename(const std::string& filename,
   return root_robot;
 }
 
-std::string GetRootRobotNameFromYamlFilename(const std::string& filename) {
-
-  YAML::Node config = YAML::LoadFile(filename);
-  const auto yaml_robots = config["robots"];
-
-  for(const auto& yaml_robot : yaml_robots) {
-    auto node = yaml_robot.second;
-    if(node["root"]) {
-      if(node["root"].as<bool>()) {
-        return yaml_robot.first.as<std::string>();
-      }
-    }
-  }
-  OMPL_ERROR("Requires at least one root robot in yaml file.");
-  throw std::out_of_range("Requires at least one root robot in yaml file.");
-}
-
-

@@ -23,5 +23,3 @@ std::unordered_map<std::string, RobotPtr> MakeChildRobotsFromYamlFilename(const 
 RobotPtr MakeRootRobotFromYamlFilename(const std::string& filename,
     const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles, 
     std::unordered_map<std::string, RobotPtr> child_robots);
-
-std::string GetRootRobotNameFromYamlFilename(const std::string& filename);
