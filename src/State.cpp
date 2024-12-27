@@ -107,6 +107,11 @@ namespace std {
     tmp << state;
     return tmp.str();
   }
+  std::string to_string(const Eigen::VectorXd& configuration) {
+    std::stringstream tmp;
+    tmp << configuration;
+    return tmp.str();
+  }
 };
 
 float Distance(const StateXd& lhs, const StateXd& rhs) {

@@ -1,0 +1,81 @@
+name: MultiDisksPrioritization
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: True
+
+obstacles:
+  Obstacle0:
+    name: Floor
+    type: floor
+    height: -0.15
+    color: [0.99, 0.99, 0.99, 1.0]
+    width: 20.0
+
+  Obstacle1:
+    name: Cylinder
+    type: cylinder
+    position: [0.0, 0.0, 2.5]
+    color: [0.8, 0.4, 0.4, 1.0]
+    size: [0.5, 5.0]
+
+robots:
+  RobotA:
+    name: MultiRobot
+    robots: [RobotB, Robot3]
+    root: True
+    hide: True
+    smooth_path: True
+
+  RobotB:
+    name: MultiRobot
+    robots: [Robot1, Robot2]
+    hide: True
+    smooth_path: True
+
+  Robot1:
+    name: DiskRobot
+    lower_limits: [-10.0, -10.0]
+    upper_limits: [+10.0, +10.0]
+    color: [0.3, 0.3, 0.3, 1.0]
+    smooth_path: True
+    hide: False
+
+  Robot2:
+    name: DiskRobot
+    lower_limits: [-10.0, -10.0]
+    upper_limits: [+10.0, +10.0]
+    color: [0.3, 0.3, 0.3, 1.0]
+    smooth_path: True
+    hide: False
+
+  Robot3:
+    name: DiskRobot
+    lower_limits: [-10.0, -10.0]
+    upper_limits: [+10.0, +10.0]
+    color: [0.3, 0.3, 0.3, 1.0]
+    smooth_path: True
+    hide: False
+
+projections:
+
+  Projection0:
+    name: ProjectionMultiRobot
+    parent: RobotA
+    children: [RobotB]
+    task_space: False
+
+  Projection1:
+    name: ProjectionMultiRobot
+    parent: RobotB
+    children: [Robot1]
+
+problem:
+  start:
+    type: joint
+    config: [-5.0, +5.0, -5.0, +2.0, -5.0, -2.0]
+
+  goal:
+    type: joint
+    threshold: 0.5
+    config: [+5.0, +5.0, +5.0, +2.0, +5.0, -2.0]

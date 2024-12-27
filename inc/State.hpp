@@ -19,6 +19,7 @@ struct StateXd {
 
 namespace std {
   std::string to_string(const StateXd& state);
+  std::string to_string(const Eigen::VectorXd& configuration);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

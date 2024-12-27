@@ -4,6 +4,9 @@
 
 MultiRobot::MultiRobot(const std::vector<RobotPtr>& robots) 
   : robots_(robots) {
+
+
+
 }
 
 MultiRobot::~MultiRobot() {
@@ -35,45 +38,81 @@ ompl::multilevel::FactoredSpaceInformationPtr MultiRobot::MakeSpaceInformation(c
 typedef std::unordered_map<std::string, ompl::base::State*> SplitConfig;
 
 StateXd MultiRobot::StateToEigen(const ompl::base::State* state) const {
-  auto child_states = factor_->allocChildStates();
-  std::vector<SplitConfig> configs;
-  factor_->project(state, child_states);
+  // auto child_states = factor_->allocChildStates();
+  // std::vector<SplitConfig> configs;
+  // factor_->project(state, child_states);
 
-  std::vector<Eigen::VectorXd> eigen_vectors;
+  // std::vector<Eigen::VectorXd> eigen_vectors;
 
-  int dimension = 0;
+  // int dimension = 0;
+  // for(const auto& robot : robots_) {
+  //   auto state = child_states.at(robot->GetSpaceInformation()->getName());
+  //   auto eigen_vector = robot->StateToEigen(state).configuration;
+  //   eigen_vectors.push_back(eigen_vector);
+  //   dimension += eigen_vector.rows();
+  // }
+
+  // Eigen::VectorXd result(dimension);
+
+  // int current_dimension = 0;
+  // for(const auto& eigen_vector : eigen_vectors) {
+  //   for(size_t k = current_dimension; k < current_dimension + eigen_vector.rows(); k++) {
+  //     result[k] = eigen_vector[k-current_dimension];
+  //   }
+  //   current_dimension += eigen_vector.rows();
+  // }
+  // return MakeState(result);
+
+  auto compound_state = state->as<ompl::base::CompoundState>();
+
+  size_t Ndimension = factor_->getStateDimension();
+  Eigen::VectorXd result(Ndimension);
+
+  size_t subspace_index = 0;
+  size_t current_dimension = 0;
   for(const auto& robot : robots_) {
-    auto state = child_states.at(robot->GetSpaceInformation()->getName());
-    auto eigen_vector = robot->StateToEigen(state).configuration;
-    eigen_vectors.push_back(eigen_vector);
-    dimension += eigen_vector.rows();
-  }
 
-  Eigen::VectorXd result(dimension);
+    int Nrobot = robot->GetSpaceInformation()->getStateDimension();
+    auto eigen_vector = robot->StateToEigen(compound_state->operator[](subspace_index)).configuration;
 
-  int current_dimension = 0;
-  for(const auto& eigen_vector : eigen_vectors) {
+
     for(size_t k = current_dimension; k < current_dimension + eigen_vector.rows(); k++) {
       result[k] = eigen_vector[k-current_dimension];
     }
-    current_dimension += eigen_vector.rows();
+    current_dimension = current_dimension + Nrobot;
+    subspace_index++;
   }
   return MakeState(result);
 }
 
 void MultiRobot::EigenToState(const StateXd& v, ompl::base::State* state) const {
-  int current_dimension = 0;
-  auto child_states = factor_->allocChildStates();
+  auto state_space = factor_->getStateSpace();
+
+  if(!state_space->isCompound()) {
+    throw std::domain_error("Not a compound space:" + state_space->getName());
+  }
+
+  auto compound_space = state_space->as<ompl::base::CompoundStateSpace>();
+  if(compound_space->getSubspaceCount() != robots_.size()) {
+    throw std::out_of_range("Number of subspaces is "
+        + std::to_string(compound_space->getSubspaceCount()) 
+        + " but " + std::to_string(robots_.size()) + " robots are given.");
+  }
+  
+  size_t current_dimension = 0;
+  size_t subspace_index = 0;
+
+  auto compound_state = state->as<ompl::base::CompoundState>();
   for(const auto& robot : robots_) {
     int Nrobot = robot->GetSpaceInformation()->getStateDimension();
+
     auto eigen_vector = v.configuration.segment(current_dimension, Nrobot);
-    auto state = child_states.at(robot->GetSpaceInformation()->getName());
-    robot->EigenToState(MakeState(eigen_vector), state);
+
+    robot->EigenToState(MakeState(eigen_vector), compound_state->operator[](subspace_index));
 
     current_dimension = current_dimension + Nrobot;
+    subspace_index++;
   }
-  factor_->lift(child_states, state);
-  factor_->freeChildStates(child_states);
 }
 
 std::vector<State3d> MultiRobot::GetFK(const StateXd& config) const {
