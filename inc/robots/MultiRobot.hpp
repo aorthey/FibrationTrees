@@ -14,9 +14,11 @@ class MultiRobot : public Robot {
 
     std::vector<State3d> GetFK(const StateXd& config) const override;
     void SetConfiguration(const StateXd& config) override;
+    bool IsMultiRobot() const override;
+
+    std::vector<RobotPtr> GetSubRobots() const;
 
     static std::shared_ptr<MultiRobot> MakeMultiRobot(const std::vector<RobotPtr>& robots);
   private:
     std::vector<RobotPtr> robots_;
-
 };

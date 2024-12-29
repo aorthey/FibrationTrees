@@ -5,10 +5,12 @@
 #include <ompl/util/ClassForward.h>
 #include <ompl/base/StateValidityChecker.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
+
 #include "State.hpp"
 
 OMPL_CLASS_FORWARD(CollisionChecker);
 OMPL_CLASS_FORWARD(Robot);
+OMPL_CLASS_FORWARD(MultiRobot);
 
 const State3d kCollisionColor = State3d(0.8, 0.3, 0.3);
 
@@ -61,14 +63,13 @@ class RobotToObstaclesCollisionChecker : public ompl::base::StateValidityChecker
   CollisionCheckerPtr collision_checker_;
 };
 
-class DartMultiRobotCollisionChecker : public ompl::base::StateValidityChecker
+class MultiRobotCollisionChecker : public ompl::base::StateValidityChecker
 {
  public:
-    DartMultiRobotCollisionChecker(const ompl::multilevel::FactoredSpaceInformationPtr& si, 
-      const dart::simulation::WorldPtr& world,
-      const std::vector<RobotPtr>& robots);
+    MultiRobotCollisionChecker(const dart::simulation::WorldPtr& world,
+      const std::shared_ptr<MultiRobot>& multi_robot);
 
-    ~DartMultiRobotCollisionChecker();
+    ~MultiRobotCollisionChecker();
 
     CollisionCheckerPtr GetCollisionChecker() const;
 
@@ -76,7 +77,7 @@ class DartMultiRobotCollisionChecker : public ompl::base::StateValidityChecker
 
  protected:
     std::vector<RobotPtr> robots_;
-    std::unordered_map<std::string, ompl::base::State*> tmp_skeleton_states_;
+    MultiRobotPtr multi_robot_;
 
     dart::simulation::WorldPtr world_;
     CollisionCheckerPtr collision_checker_;

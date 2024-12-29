@@ -67,11 +67,6 @@ StateXd ZeppelinRobot::StateToEigen(const ompl::base::State* state) const {
   for (unsigned int k = 0; k < N-1; k++)
   {
       v[k] = state_RN->values[k];
-      // if(v[k] != v[k]) {
-      //   OMPL_ERROR("Detected NaN in StateToEigen");
-      //   factor_->printState(state);
-      //   throw "DetectedNaN";
-      // }
   }
   v[N-1] = state_SO2->value;
   return MakeState(v);
@@ -84,11 +79,6 @@ void ZeppelinRobot::EigenToState(const StateXd& v, ompl::base::State* state) con
   for (unsigned int k = 0; k < N-1; k++)
   {
       state_RN->values[k] = v[k];
-      // if(v[k] != v[k]) {
-      //   OMPL_ERROR("Detected NaN in EigenToState");
-      //   factor_->printState(state);
-      //   throw "DetectedNaN";
-      // }
   }
   state_SO2->value = v[N-1];
 }

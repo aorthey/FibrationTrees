@@ -208,14 +208,19 @@ ompl::base::ProblemDefinitionPtr MakeProblemDefinitionFromYamlFilename(
       throw std::domain_error("Requires config for root level robot " + root_robot->GetName());
     }
     auto start_vector = start_node["config"].as<std::vector<double>>();
+
+    if(start_vector.size() != root_robot->GetDimension()) {
+      throw std::runtime_error("Start vector has wrong dimension " + std::to_string(start_vector.size()) 
+          + ", expected " + std::to_string(root_robot->GetDimension()));
+    }
+
     auto start = root_factor->allocState();
+
     root_robot->EigenToState(MakeState(start_vector), start);
 
     if(start_node["time"]) {
       root_robot->TimeToState(start_node["time"].as<double>(), start);
     }
-    root_factor->printState(start);
-
 
     const auto goal_type = goal_node["type"].as<std::string>();
 
@@ -226,13 +231,17 @@ ompl::base::ProblemDefinitionPtr MakeProblemDefinitionFromYamlFilename(
       throw std::domain_error("Requires config for root level robot " + root_robot->GetName());
     }
     auto goal_vector = goal_node["config"].as<std::vector<double>>();
+    if(goal_vector.size() != root_robot->GetDimension()) {
+      throw std::runtime_error("Goal vector has wrong dimension " + std::to_string(goal_vector.size()) 
+          + ", expected " + std::to_string(root_robot->GetDimension()));
+    }
+
     auto goal = root_factor->allocState();
     root_robot->EigenToState(MakeState(goal_vector), goal);
 
     if(goal_node["time"]) {
       root_robot->TimeToState(goal_node["time"].as<double>(), goal);
     }
-    root_factor->printState(goal);
 
     ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(root_factor);
     pdef->addStartState(start);
@@ -320,6 +329,9 @@ MakeFactoredSpaceInformationFromYamlFilename(const std::string& filename, const 
   //////////////////////////////////////////////////////////////////////////////// 
 
   auto pdef = MakeProblemDefinitionFromYamlFilename(filename, world, root, root_robot, child_robots);
+
+  auto start = pdef->getStartState(0);
+  root_robot->SetConfiguration(root_robot->StateToEigen(start));
 
   return std::make_tuple(root, pdef, root_robot, child_robots, dynamic_obstacles);
 }

@@ -34,6 +34,7 @@ class Robot {
     const std::shared_ptr<CollisionChecker>& GetCollisionChecker();
 
     size_t GetDimension() const;
+    virtual bool IsMultiRobot() const;
 
     std::string GetName() const;
     virtual void SetConfiguration(const StateXd& config);

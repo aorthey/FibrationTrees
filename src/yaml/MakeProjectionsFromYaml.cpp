@@ -32,7 +32,12 @@ std::string GetRootRobotNameFromYamlFilename(const std::string& filename) {
 // Make projections
 ////////////////////////////////////////////////////////////////////////////////
 
-ompl::multilevel::ProjectionPtr MakeProjectionFromName(const std::string& name, const ompl::base::SpaceInformationPtr& parent, const ompl::base::SpaceInformationPtr& child, const RobotPtr& parent_robot) {
+ompl::multilevel::ProjectionPtr MakeProjectionFromNode(const YAML::Node& node, const ompl::base::SpaceInformationPtr& parent, const ompl::base::SpaceInformationPtr& child, const RobotPtr& parent_robot) {
+
+  if(!node["name"]) {
+    throw std::domain_error("Requires a name to create a projection.");
+  }
+  const std::string name = node["name"].as<std::string>();
   if(name == "ProjectionTaskSpace") {
     return std::make_shared<ProjectionTaskSpace>(parent, child, parent_robot);
   } else if(name == "Projection_RNSO2_RN") {
@@ -41,20 +46,12 @@ ompl::multilevel::ProjectionPtr MakeProjectionFromName(const std::string& name, 
     return std::make_shared<ompl::multilevel::Projection_RN_RM>(parent->getStateSpace(), child->getStateSpace());
   } else if(name == "Projection_TimeBased") {
     return std::make_shared<ompl::multilevel::Projection_TimeBased>(parent->getStateSpace(), child->getStateSpace());
+  } else if(name == "ProjectionSubspace") {
+    return std::make_shared<ompl::multilevel::Projection_FiberedSubspace>(parent->getStateSpace(), child->getStateSpace());
   } else {
     OMPL_ERROR("Could not find a projection with name %s", name.c_str());
     throw std::domain_error("No projection with this name.");
   }
-}
-
-bool CheckIfWeNeedFiberSpace(const YAML::Node& node) {
-  if(node["children"]) {
-    auto children_names = node["children"].as<std::vector<std::string>>();
-    if(children_names.size() > 1) {
-      return false;
-    }
-  }
-  return true;
 }
 
 void MakeProjectionsFromYamlFilename(const std::string& filename, const dart::simulation::WorldPtr& world, 
@@ -71,19 +68,15 @@ void MakeProjectionsFromYamlFilename(const std::string& filename, const dart::si
     std::string projection_name = node["name"].as<std::string>();
     OMPL_INFORM("Creating projection %s", projection_name.c_str());
 
-    //if(projection_name == "ProjectionTaskSpace") {
     if(node["connection"]) {
-      //Connection projection
-      // if(!node["connection"]) {
-      //   throw std::domain_error("No connection specified for "+projection_name);
-      // }
+
       std::pair<std::string, std::string> connection = node["connection"].as<std::pair<std::string, std::string>>();
       OMPL_INFORM("Creating projection %s -> %s", connection.first.c_str(), connection.second.c_str());
       auto parent_robot = (connection.first == root_name ? root_robot : child_robots.at(connection.first));
       auto parent = (connection.first == root_name ? root : parent_robot->GetSpaceInformation());
       auto child_robot = child_robots.at(connection.second);
       auto child = child_robot->GetSpaceInformation();
-      auto projection = MakeProjectionFromName(projection_name, parent, child, parent_robot);
+      auto projection = MakeProjectionFromNode(node, parent, child, parent_robot);
 
       if(!parent->addChild(child, projection)) {
         OMPL_ERROR("Could not add projection for child %s", child->getName().c_str());
@@ -93,10 +86,6 @@ void MakeProjectionsFromYamlFilename(const std::string& filename, const dart::si
     } else if(projection_name == "ProjectionMultiRobot") {
       auto parent_name = node["parent"].as<std::string>();
 
-      // if(parent != root_name) {
-      //   OMPL_ERROR("Multi robot projections are only possible on the root node for now.");
-      //   throw std::out_of_range("Non-root MultiRobot projection");
-      // }
       if(!node["children"]) {
         OMPL_ERROR("Multi robot projections requires children.");
         throw std::domain_error("Requires children");
@@ -108,22 +97,22 @@ void MakeProjectionsFromYamlFilename(const std::string& filename, const dart::si
       auto children_name = node["children"].as<std::vector<std::string>>();
 
       size_t subspace_index = 0;
-      //bool computer_fiber_space = CheckIfWeNeedFiberSpace(node);
 
       OMPL_INFORM("Creating multi robot projection %s -> ", parent_name.c_str());
-      std::vector<RobotPtr> child_robots_of_parent;
 
+      std::vector<RobotPtr> child_robots_of_parent;
       if(children_name.size() == 1) {
         auto child_name = children_name.front();
         auto child_robot = child_robots.at(child_name);
         auto child = child_robot->GetSpaceInformation();
         OMPL_INFORM(" -> %s", child_name.c_str());
 
-        auto projection = std::make_shared<ompl::multilevel::Projection_FiberedSubspace>(parent->getStateSpace(), child->getStateSpace(), 0);
+        auto projection = std::make_shared<ompl::multilevel::Projection_FiberedSubspace>(parent->getStateSpace(), child->getStateSpace());
 
         if(!parent->addChild(child, projection, true)) {
           throw std::runtime_error("Could not add child");
         }
+        child_robots_of_parent.push_back(child_robot);
       } else {
         for(const auto& child_name : children_name) {
           auto child_robot = child_robots.at(child_name);
@@ -138,27 +127,18 @@ void MakeProjectionsFromYamlFilename(const std::string& filename, const dart::si
             throw std::runtime_error("Could not add child");
           }
         }
-      }
+        // auto pairwise_collision_checker = std::make_shared<DartMultiRobotCollisionChecker>(world, child_robots_of_parent);
+        // parent->setStateValidityChecker(pairwise_collision_checker);
+        // parent->setStateValidityCheckingResolution(0.001);
 
-      auto pairwise_collision_checker = std::make_shared<DartMultiRobotCollisionChecker>(parent, world, child_robots_of_parent);
-      parent->setStateValidityChecker(pairwise_collision_checker);
-      parent->setStateValidityCheckingResolution(0.001);
-
-      if(node["task_space"]) {
-        if(node["task_space"].as<bool>()) {
-          auto motion_validator = std::make_shared<MotionValidatorTaskSpaceMultiRobot>(parent);
-          parent->setMotionValidator(motion_validator);
+        if(node["task_space"]) {
+          if(node["task_space"].as<bool>()) {
+            auto motion_validator = std::make_shared<MotionValidatorTaskSpaceMultiRobot>(parent);
+            parent->setMotionValidator(motion_validator);
+          }
         }
+
       }
-
-    } else if(projection_name == "ProjectionMultiRobotToMultiRobot") {
-      throw std::invalid_argument("NYI");
-
-
-
-
-
-
 
     } else {
       OMPL_ERROR("Unknown projection type %s", projection_name.c_str());

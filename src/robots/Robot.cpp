@@ -6,6 +6,10 @@ size_t Robot::GetDimension() const {
   return factor_->getStateDimension();
 }
 
+bool Robot::IsMultiRobot() const {
+  return false;
+}
+
 const std::shared_ptr<dart::dynamics::Skeleton>& Robot::GetSkeleton() {
   return skeleton_;
 }

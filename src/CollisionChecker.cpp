@@ -5,6 +5,8 @@
 #include "OmplHelper.hpp"
 #include "DartHelper.hpp"
 #include "robots/Robot.hpp"
+#include "robots/MultiRobot.hpp"
+#include "CollisionCheckerHelper.hpp"
 #include "Common.hpp"
 
 CollisionChecker::CollisionChecker(const dart::simulation::WorldPtr& world, 
@@ -87,12 +89,10 @@ void MultiCollisionChecker::PrintCollisionInfo() {
 }
 
 bool MultiCollisionChecker::IsInCollision(const dart::simulation::WorldPtr& world) {
-  for(const auto& collision_checker : collision_checkers_) {
-    if(collision_checker->IsInCollision(world)) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(collision_checkers_.begin(), collision_checkers_.end(), 
+      [&](const CollisionCheckerPtr& collision_checker) {
+        return collision_checker->IsInCollision(world);
+      });
 }
 
 RobotToObstaclesCollisionChecker::RobotToObstaclesCollisionChecker(
@@ -134,18 +134,14 @@ bool RobotToObstaclesCollisionChecker::isValid(const ompl::base::State *state) c
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// DartMultiRobotCollisionChecker
+// MultiRobotCollisionChecker
 ////////////////////////////////////////////////////////////////////////////////
-DartMultiRobotCollisionChecker::DartMultiRobotCollisionChecker(const ompl::multilevel::FactoredSpaceInformationPtr& factor,
-  const dart::simulation::WorldPtr& world,
-  const std::vector<RobotPtr>& robots)
-  : ompl::base::StateValidityChecker(factor), world_(world), robots_(robots)
-{
-  for(size_t index = 0; index < robots.size(); index++) {
-    const auto& robot = robots.at(index);
-    const auto& factor = robot->GetSpaceInformation();
-    tmp_skeleton_states_.insert({factor->getName(), factor->allocState()});
-  }
+
+MultiRobotCollisionChecker::MultiRobotCollisionChecker(const dart::simulation::WorldPtr& world,
+  const std::shared_ptr<MultiRobot>& multi_robot) 
+  : ompl::base::StateValidityChecker(multi_robot->GetSpaceInformation()), world_(world), multi_robot_(multi_robot) {
+
+  std::vector<RobotPtr> robots = CollectAtomicRobots(multi_robot_);
 
   std::vector<CollisionCheckerPtr> pairwise_collision_checkers;
   for(size_t index1 = 0; index1 < robots.size(); index1++) {
@@ -164,37 +160,30 @@ DartMultiRobotCollisionChecker::DartMultiRobotCollisionChecker(const ompl::multi
   }
 
   collision_checker_ = std::make_shared<MultiCollisionChecker>(world, pairwise_collision_checkers);
-}
 
-DartMultiRobotCollisionChecker::~DartMultiRobotCollisionChecker() {
-  auto children = static_cast<ompl::multilevel::FactoredSpaceInformation*>(si_)->getChildren();
-  for(const auto& child : children) {
-    const auto& name = child->getName();
-    auto it = tmp_skeleton_states_.find(name);
-    if(it == tmp_skeleton_states_.end()) {
-      continue;
-    }
-    child->freeState(it->second);
+  if(!si_->getStateSpace()->isCompound()) {
+    throw std::runtime_error("MultiRobot requires compound space.");
   }
 }
 
-bool DartMultiRobotCollisionChecker::isValid(const ompl::base::State *state) const {
+MultiRobotCollisionChecker::~MultiRobotCollisionChecker() {
+}
 
-  auto factor = static_cast<ompl::multilevel::FactoredSpaceInformation*>(si_);
-  factor->project(state, tmp_skeleton_states_);
+bool MultiRobotCollisionChecker::isValid(const ompl::base::State *state) const {
 
-  for(const auto& robot : robots_) {
+  auto compound_state = state->as<ompl::base::CompoundState>();
+
+  size_t index = 0;
+  auto subrobots = multi_robot_->GetSubRobots();
+  for(const auto& robot : subrobots) {
     const auto& name = robot->GetSpaceInformation()->getName();
-    const auto& state = tmp_skeleton_states_.at(name);
-    const auto config = robot->StateToEigen(state).configuration;
-    if(!HasValidJointLimits(robot, config)) {
-      return false;
-    }
-    robot->GetSkeleton()->setConfiguration(config);
+    const auto eigen_state = robot->StateToEigen(compound_state->operator[](index));
+    index++;
+    robot->SetConfiguration(eigen_state);
   }
   return !collision_checker_->IsInCollision(world_);
 }
 
-CollisionCheckerPtr DartMultiRobotCollisionChecker::GetCollisionChecker() const {
+CollisionCheckerPtr MultiRobotCollisionChecker::GetCollisionChecker() const {
   return collision_checker_;
 }

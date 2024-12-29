@@ -98,7 +98,6 @@ projections:
     parent: Robot0
     task_space: False
     children: [Robot1, Robot2, Robot3, Robot4, Robot5, Robot6, Robot7, Robot8]
-      #children: [Robot1, Robot2, Robot5, Robot6]
 
 problem:
   start:

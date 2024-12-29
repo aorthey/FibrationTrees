@@ -40,7 +40,6 @@ RobotPtr MakeMultiRobotFromNode(const YAML::Node& node,
   if(node["name"].as<std::string>() != "MultiRobot") {
     throw std::domain_error("Not a MultiRobot");
   }
-
   auto robot_names = node["robots"].as<std::vector<std::string>>();
   std::vector<RobotPtr> robots_for_multirobot;
   for(const auto& robot_name : robot_names) {
@@ -52,9 +51,17 @@ RobotPtr MakeMultiRobotFromNode(const YAML::Node& node,
       robots_for_multirobot.push_back(findit->second);
     }
   }
-  OMPL_DEBUG(">> Create multi robot from robots: %s", ToString(robot_names).c_str());
 
-  return MultiRobot::MakeMultiRobot(robots_for_multirobot);
+  auto multi_robot = MultiRobot::MakeMultiRobot(robots_for_multirobot);
+  OMPL_DEBUG(">> Create multi robot %s from robots: %s", multi_robot->GetName().c_str(), ToString(robot_names).c_str());
+
+  auto pairwise_collision_checker = std::make_shared<MultiRobotCollisionChecker>(world, multi_robot);
+
+  auto si = multi_robot->GetSpaceInformation();
+  si->setStateValidityChecker(pairwise_collision_checker);
+  si->setStateValidityCheckingResolution(0.001);
+
+  return multi_robot;
 }
 
 RobotPtr MakeAtomicRobotFromNode(const YAML::Node& node,

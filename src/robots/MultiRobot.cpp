@@ -4,12 +4,13 @@
 
 MultiRobot::MultiRobot(const std::vector<RobotPtr>& robots) 
   : robots_(robots) {
-
-
-
 }
 
 MultiRobot::~MultiRobot() {
+}
+
+bool MultiRobot::IsMultiRobot() const {
+  return true;
 }
 
 dart::dynamics::SkeletonPtr MultiRobot::MakeSkeleton() {
@@ -38,31 +39,6 @@ ompl::multilevel::FactoredSpaceInformationPtr MultiRobot::MakeSpaceInformation(c
 typedef std::unordered_map<std::string, ompl::base::State*> SplitConfig;
 
 StateXd MultiRobot::StateToEigen(const ompl::base::State* state) const {
-  // auto child_states = factor_->allocChildStates();
-  // std::vector<SplitConfig> configs;
-  // factor_->project(state, child_states);
-
-  // std::vector<Eigen::VectorXd> eigen_vectors;
-
-  // int dimension = 0;
-  // for(const auto& robot : robots_) {
-  //   auto state = child_states.at(robot->GetSpaceInformation()->getName());
-  //   auto eigen_vector = robot->StateToEigen(state).configuration;
-  //   eigen_vectors.push_back(eigen_vector);
-  //   dimension += eigen_vector.rows();
-  // }
-
-  // Eigen::VectorXd result(dimension);
-
-  // int current_dimension = 0;
-  // for(const auto& eigen_vector : eigen_vectors) {
-  //   for(size_t k = current_dimension; k < current_dimension + eigen_vector.rows(); k++) {
-  //     result[k] = eigen_vector[k-current_dimension];
-  //   }
-  //   current_dimension += eigen_vector.rows();
-  // }
-  // return MakeState(result);
-
   auto compound_state = state->as<ompl::base::CompoundState>();
 
   size_t Ndimension = factor_->getStateDimension();
@@ -116,26 +92,17 @@ void MultiRobot::EigenToState(const StateXd& v, ompl::base::State* state) const 
 }
 
 std::vector<State3d> MultiRobot::GetFK(const StateXd& config) const {
-  auto state = factor_->allocState();
-  EigenToState(config, state);
-
-  auto child_states = factor_->allocChildStates();
-  factor_->project(state, child_states);
-
-  std::vector<State3d> tcps;
+  int current_dimension = 0;
+  std::vector<State3d> tcp_frames;
   for(const auto& robot : robots_) {
-    for(const auto& child_state : child_states) {
-      if(child_state.first == robot->GetSpaceInformation()->getName()) {
-        auto frames = robot->GetFK(child_state.second);
-        for(const auto& tcp : frames) {
-          tcps.push_back(tcp);
-        }
-      }
-    }
+    int Nrobot = robot->GetSpaceInformation()->getStateDimension();
+    auto eigen_vector = config.configuration.segment(current_dimension, Nrobot);
+    auto state = MakeState(eigen_vector);
+    auto frames = robot->GetFK(state);
+    tcp_frames.insert(tcp_frames.end(), frames.begin(), frames.end());
+    current_dimension = current_dimension + Nrobot;
   }
-  factor_->freeChildStates(child_states);
-  factor_->freeState(state);
-  return tcps;
+  return tcp_frames;
 }
 
 void MultiRobot::SetConfiguration(const StateXd& config) {
@@ -146,4 +113,8 @@ void MultiRobot::SetConfiguration(const StateXd& config) {
     robot->SetConfiguration(MakeState(eigen_vector));
     current_dimension = current_dimension + Nrobot;
   }
+}
+
+std::vector<RobotPtr> MultiRobot::GetSubRobots() const {
+  return robots_;
 }

@@ -22,14 +22,39 @@ obstacles:
 robots:
   RobotA:
     name: MultiRobot
-    robots: [RobotB, Robot3]
+    robots: [RobotB, Robot8]
     root: True
     hide: True
     smooth_path: True
 
-  RobotB:
+  RobotG:
     name: MultiRobot
     robots: [Robot1, Robot2]
+    hide: True
+    smooth_path: True
+  RobotF:
+    name: MultiRobot
+    robots: [RobotG, Robot3]
+    hide: True
+    smooth_path: True
+  RobotE:
+    name: MultiRobot
+    robots: [RobotF, Robot4]
+    hide: True
+    smooth_path: True
+  RobotD:
+    name: MultiRobot
+    robots: [RobotE, Robot5]
+    hide: True
+    smooth_path: True
+  RobotC:
+    name: MultiRobot
+    robots: [RobotD, Robot6]
+    hide: True
+    smooth_path: True
+  RobotB:
+    name: MultiRobot
+    robots: [RobotC, Robot7]
     hide: True
     smooth_path: True
 
@@ -57,6 +82,46 @@ robots:
     smooth_path: True
     hide: False
 
+  Robot4:
+    name: DiskRobot
+    lower_limits: [-10.0, -10.0]
+    upper_limits: [+10.0, +10.0]
+    color: [0.3, 0.3, 0.3, 1.0]
+    smooth_path: True
+    hide: False
+
+  Robot5:
+    name: DiskRobot
+    lower_limits: [-10.0, -10.0]
+    upper_limits: [+10.0, +10.0]
+    color: [0.3, 0.3, 0.3, 1.0]
+    smooth_path: True
+    hide: False
+
+  Robot6:
+    name: DiskRobot
+    lower_limits: [-10.0, -10.0]
+    upper_limits: [+10.0, +10.0]
+    color: [0.3, 0.3, 0.3, 1.0]
+    smooth_path: True
+    hide: False
+
+  Robot7:
+    name: DiskRobot
+    lower_limits: [-10.0, -10.0]
+    upper_limits: [+10.0, +10.0]
+    color: [0.3, 0.3, 0.3, 1.0]
+    smooth_path: True
+    hide: False
+
+  Robot8:
+    name: DiskRobot
+    lower_limits: [-10.0, -10.0]
+    upper_limits: [+10.0, +10.0]
+    color: [0.3, 0.3, 0.3, 1.0]
+    smooth_path: True
+    hide: False
+
 projections:
 
   Projection0:
@@ -68,14 +133,45 @@ projections:
   Projection1:
     name: ProjectionMultiRobot
     parent: RobotB
+    children: [RobotC]
+    task_space: False
+
+  Projection2:
+    name: ProjectionMultiRobot
+    parent: RobotC
+    children: [RobotD]
+    task_space: False
+
+  Projection3:
+    name: ProjectionMultiRobot
+    parent: RobotD
+    children: [RobotE]
+    task_space: False
+
+  Projection4:
+    name: ProjectionMultiRobot
+    parent: RobotE
+    children: [RobotF]
+    task_space: False
+
+  Projection5:
+    name: ProjectionMultiRobot
+    parent: RobotF
+    children: [RobotG]
+    task_space: False
+
+  Projection6:
+    name: ProjectionMultiRobot
+    parent: RobotG
     children: [Robot1]
+    task_space: False
 
 problem:
   start:
     type: joint
-    config: [-5.0, +5.0, -5.0, +2.0, -5.0, -2.0]
+    config: [-6.0, -5.0, -2.0, -5.0, +2.0, -5.0, +6.0, -5.0, -6.0, +5.0, -2.0, +5.0, +2.0, +5.0, +6.0, +5.0]
 
   goal:
     type: joint
     threshold: 0.5
-    config: [+5.0, +5.0, +5.0, +2.0, +5.0, -2.0]
+    config: [-6.0, +5.0, -2.0, +5.0, +2.0, +5.0, +6.0, +5.0, -6.0, -5.0, -2.0, -5.0, +2.0, -5.0, +6.0, -5.0]
