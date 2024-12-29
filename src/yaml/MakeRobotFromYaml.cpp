@@ -30,6 +30,20 @@ RobotPtr MakeAnyRobotFromNode(const YAML::Node& node,
   }
 }
 
+bool CanMakeMultiRobotFromNode(const YAML::Node& node,
+    std::unordered_map<std::string, RobotPtr> child_robots) {
+
+  if(!node["robots"]) {
+    throw std::domain_error("Requires yaml field called robots.");
+  }
+  auto robot_names = node["robots"].as<std::vector<std::string>>();
+
+  return std::all_of(robot_names.begin(), robot_names.end(), [&](const std::string& robot_name) {
+    auto findit = child_robots.find(robot_name);
+    return (findit != child_robots.end());
+  });
+}
+
 RobotPtr MakeMultiRobotFromNode(const YAML::Node& node,
     const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles,
     std::unordered_map<std::string, RobotPtr> child_robots) {
@@ -173,16 +187,13 @@ std::unordered_map<std::string, RobotPtr> MakeChildRobotsFromYamlFilename(const 
       }
     }
 
-    RobotPtr robot;
-
     if(node["name"]) {
       if(node["name"].as<std::string>() == "MultiRobot") {
         continue;
       }
     }
 
-    OMPL_DEBUG(">> Create robot %s", node["name"].as<std::string>().c_str());
-    robot = MakeAtomicRobotFromNode(node, world, obstacles);
+    auto robot = MakeAtomicRobotFromNode(node, world, obstacles);
 
     if(node["hide"]) {
       if(node["hide"].as<bool>()) {
@@ -192,28 +203,55 @@ std::unordered_map<std::string, RobotPtr> MakeChildRobotsFromYamlFilename(const 
 
     const auto key = yaml_robot.first.as<std::string>();
     robots[key] = robot;
+    OMPL_DEBUG(">> Create robot %s: %s", key.c_str(), node["name"].as<std::string>().c_str());
   }
 
   //Make all multi robots
+
+  while(true) {
+    bool added_new_robot = false;
+    for(const auto& yaml_robot : yaml_robots) {
+      const auto node = yaml_robot.second;
+      if(node["root"]) {
+        if(node["root"].as<bool>()) {
+          continue;
+        }
+      }
+
+      if(node["name"]) {
+        if(node["name"].as<std::string>() != "MultiRobot") {
+          continue;
+        }
+      }
+      const auto key = yaml_robot.first.as<std::string>();
+      if(robots.contains(key)) {
+        continue;
+      }
+
+      if(!CanMakeMultiRobotFromNode(node, robots)) {
+        continue;
+      }
+
+      RobotPtr robot = MakeMultiRobotFromNode(node, world, obstacles, robots);
+      robots[key] = robot;
+      added_new_robot = true;
+    }
+    if(!added_new_robot) {
+      break;
+    }
+  }
+
   for(const auto& yaml_robot : yaml_robots) {
     const auto node = yaml_robot.second;
-
     if(node["root"]) {
       if(node["root"].as<bool>()) {
         continue;
       }
     }
-
-    if(node["name"]) {
-      if(node["name"].as<std::string>() != "MultiRobot") {
-        continue;
-      }
-    }
-
-    RobotPtr robot = MakeMultiRobotFromNode(node, world, obstacles, robots);
-
     const auto key = yaml_robot.first.as<std::string>();
-    robots[key] = robot;
+    if(!robots.contains(key)) {
+      throw std::runtime_error("Could not load robot " + key);
+    }
   }
 
   return robots;

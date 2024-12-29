@@ -15,6 +15,7 @@ class MultiRobot : public Robot {
     std::vector<State3d> GetFK(const StateXd& config) const override;
     void SetConfiguration(const StateXd& config) override;
     bool IsMultiRobot() const override;
+    bool HasValidJointLimits(const Eigen::VectorXd& config) const override;
 
     std::vector<RobotPtr> GetSubRobots() const;
 

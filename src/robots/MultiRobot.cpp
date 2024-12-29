@@ -118,3 +118,17 @@ void MultiRobot::SetConfiguration(const StateXd& config) {
 std::vector<RobotPtr> MultiRobot::GetSubRobots() const {
   return robots_;
 }
+
+bool MultiRobot::HasValidJointLimits(const Eigen::VectorXd& config) const {
+  int current_dimension = 0;
+  for(const auto& robot : robots_) {
+    int Nrobot = robot->GetSpaceInformation()->getStateDimension();
+    auto eigen_vector = config.segment(current_dimension, Nrobot);
+    if(!robot->HasValidJointLimits(eigen_vector)) {
+      return false;
+    }
+    current_dimension = current_dimension + Nrobot;
+  }
+  return true;
+
+}

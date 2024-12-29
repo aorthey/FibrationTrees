@@ -38,6 +38,7 @@ class Robot {
 
     std::string GetName() const;
     virtual void SetConfiguration(const StateXd& config);
+    virtual bool HasValidJointLimits(const Eigen::VectorXd& config) const;
 
     void SetSkeleton(const dart::dynamics::SkeletonPtr& skeleton);
     void SetSpaceInformation(const ompl::multilevel::FactoredSpaceInformationPtr& factor);

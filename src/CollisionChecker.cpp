@@ -103,29 +103,10 @@ RobotToObstaclesCollisionChecker::RobotToObstaclesCollisionChecker(
 {
 }
 
-bool HasValidJointLimits(const RobotPtr& robot, const Eigen::VectorXd& config) {
-  auto lb = robot->GetSkeleton()->getPositionLowerLimits();
-  auto ub = robot->GetSkeleton()->getPositionUpperLimits();
-  for(size_t k = 0; k < config.size(); k++) {
-    if(config[k] < lb[k] || config[k] > ub[k] || config[k] != config[k]) {
-      OMPL_WARN("Robot %s is out of bounds: Index %d has value [%f], which is outside of interval [%f, %f].", robot->GetName().c_str(), k, config[k], lb[k], ub[k]);
-      PrintSkeletonInfo(robot->GetSkeleton());
-      return false;
-    }
-  }
-  //for(size_t k = 0; k < config.size(); k++) {
-  //  if(config[k] < (lb[k] - 1e-5) || config[k] > (ub[k] + 1e-5) || config[k] != config[k]) {
-  //    //std::cout <<"Out of bounds: " << config[k] << " not in ["<< lb[k] << "," << ub[k] <<"]" << std::endl;
-  //    return false;
-  //  }
-  //}
-  return true;
-}
-
 bool RobotToObstaclesCollisionChecker::isValid(const ompl::base::State *state) const
 {
   auto config = robot_->StateToEigen(state).configuration;
-  if(!HasValidJointLimits(robot_, config)) {
+  if(!robot_->IsValid(state)) {
     return false;
   }
   //Check collisions
@@ -178,8 +159,11 @@ bool MultiRobotCollisionChecker::isValid(const ompl::base::State *state) const {
   for(const auto& robot : subrobots) {
     const auto& name = robot->GetSpaceInformation()->getName();
     const auto eigen_state = robot->StateToEigen(compound_state->operator[](index));
-    index++;
+    if(!robot->HasValidJointLimits(eigen_state.configuration)) {
+      return false;
+    }
     robot->SetConfiguration(eigen_state);
+    index++;
   }
   return !collision_checker_->IsInCollision(world_);
 }

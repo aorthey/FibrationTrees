@@ -80,16 +80,8 @@ void Robot::SetConfiguration(const StateXd& config) {
   skeleton_->setConfiguration(config.configuration);
 }
 
-bool Robot::IsValid(const ompl::base::State* state) const {
-  const auto eigen_state = this->StateToEigen(state);
-  const auto config = eigen_state.configuration;
-  const auto time = eigen_state.time;
 
-  for(const auto& [obstacle, path] : dynamic_obstacles_) {
-    auto config = path->GetConfigAt(time);
-    obstacle->SetConfiguration(config);
-  }
-
+bool Robot::HasValidJointLimits(const Eigen::VectorXd& config) const {
   auto lb = skeleton_->getPositionLowerLimits();
   auto ub = skeleton_->getPositionUpperLimits();
   for(size_t k = 0; k < config.size(); k++) {
@@ -98,7 +90,23 @@ bool Robot::IsValid(const ompl::base::State* state) const {
       return false;
     }
   }
-  skeleton_->setConfiguration(config);
+  return true;
+}
+
+bool Robot::IsValid(const ompl::base::State* state) const {
+  const auto eigen_state = this->StateToEigen(state);
+
+  if(!HasValidJointLimits(eigen_state.configuration)) {
+    return false;
+  }
+
+  const auto time = eigen_state.time;
+  for(const auto& [obstacle, path] : dynamic_obstacles_) {
+    auto config = path->GetConfigAt(time);
+    obstacle->SetConfiguration(config);
+  }
+
+  skeleton_->setConfiguration(eigen_state.configuration);
   return !collision_checker_->IsInCollision();
 }
 

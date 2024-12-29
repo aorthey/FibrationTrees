@@ -16,4 +16,4 @@ Maybe when pressing Fn/Strg/Alt/Super ?
 
 * TODO
 
-- [ ] Ensure that multi robots can be loaded in arbitrary order
+- [x] Ensure that multi robots can be loaded in arbitrary order

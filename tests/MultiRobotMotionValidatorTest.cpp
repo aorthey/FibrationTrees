@@ -37,7 +37,7 @@ void CheckMultiRobotEdge(
   auto robot2 = MakeRobot<MobileKukaRobotTaskSpace>(world);
 
   std::vector<RobotPtr> robots = {robot1, robot2};
-  auto robot = MultiRobot::MakeMultiRobot(robots);
+  auto multi_robot = MultiRobot::MakeMultiRobot(robots);
 
   ////////////////////////////////////////////////////////////////////////////////
   ////OMPL Setup
@@ -50,7 +50,7 @@ void CheckMultiRobotEdge(
   //  grand_child1 (point1)    grand_child2 (point2)
   //
   ////////////////////////////////////////////////////////////////////////////////
-  auto factor = robot->GetSpaceInformation();
+  auto factor = multi_robot->GetSpaceInformation();
 
   auto child1 = robot1->GetSpaceInformation();
   auto child2 = robot2->GetSpaceInformation();
@@ -80,7 +80,7 @@ void CheckMultiRobotEdge(
   EXPECT_TRUE(factor->addChild(child1, projection_to_1, computer_fiber_space));
   EXPECT_TRUE(factor->addChild(child2, projection_to_2, computer_fiber_space));
 
-  auto pairwise_collision_checker = std::make_shared<DartMultiRobotCollisionChecker>(factor, world, robots);
+  auto pairwise_collision_checker = std::make_shared<MultiRobotCollisionChecker>(world, multi_robot);
   factor->setStateValidityChecker(pairwise_collision_checker);
 
   auto motion_validator = std::make_shared<MotionValidatorTaskSpaceMultiRobot>(factor);
@@ -109,7 +109,7 @@ void CheckMultiRobotEdge(
   std::cout << "Found start IK solution" << std::endl;
   factor->printState(start);
 
-  auto tcp_start = robot->Robot::GetFK(start);
+  auto tcp_start = multi_robot->Robot::GetFK(start);
   EXPECT_EQ(tcp_start.size(), 2u);
   std::cout << "Tcp start[1] " << tcp_start.at(0) << std::endl;
   std::cout << "Tcp start[2] " << tcp_start.at(1) << std::endl;
@@ -129,7 +129,7 @@ void CheckMultiRobotEdge(
   std::cout << "Found goal IK solution" << std::endl;
   factor->printState(goal);
 
-  auto tcp_goal = robot->Robot::GetFK(goal);
+  auto tcp_goal = multi_robot->Robot::GetFK(goal);
   EXPECT_EQ(tcp_goal.size(), 2u);
   std::cout << "Tcp goal[1] " << tcp_goal.at(0) << std::endl;
   std::cout << "Tcp goal[2] " << tcp_goal.at(1) << std::endl;
@@ -161,7 +161,7 @@ void CheckMultiRobotEdge(
     EXPECT_GT(d, 0.0);
     EXPECT_LT(d, 0.1);
   }
-  auto config = robot->StateToEigen(configs.back());
+  auto config = multi_robot->StateToEigen(configs.back());
   std::cout << "Reached config " << config << std::endl;
 
   //Check for invalid entries in config
@@ -169,7 +169,7 @@ void CheckMultiRobotEdge(
     EXPECT_GT(std::abs(config[k]), 1e-10);
   }
 
-  auto tcps = robot->Robot::GetFK(configs.back());
+  auto tcps = multi_robot->Robot::GetFK(configs.back());
   std::cout << "  Reached Tcp for " << config << std::endl;
   for(const auto& tcp : tcps) {
     std::cout << "    " << tcp << std::endl;
@@ -230,15 +230,15 @@ protected:
     // Setup multi robot space
     ////////////////////////////////////////////////////////////////////////////////
     std::vector<RobotPtr> robots = {robot1, robot2};
-    robot = MultiRobot::MakeMultiRobot(robots);
-    factor = robot->GetSpaceInformation();
+    multi_robot = MultiRobot::MakeMultiRobot(robots);
+    factor = multi_robot->GetSpaceInformation();
     auto projection_to_1 = std::make_shared<ompl::multilevel::Projection_Subspace>(factor, space1, 0);
     auto projection_to_2 = std::make_shared<ompl::multilevel::Projection_Subspace>(factor, space2, 1);
     bool computer_fiber_space = false;
     EXPECT_TRUE(factor->addChild(space1, projection_to_1, computer_fiber_space));
     EXPECT_TRUE(factor->addChild(space2, projection_to_2, computer_fiber_space));
 
-    collision_checker = std::make_shared<DartMultiRobotCollisionChecker>(factor, world, robots);
+    collision_checker = std::make_shared<MultiRobotCollisionChecker>(world, multi_robot);
     factor->setStateValidityChecker(collision_checker);
 
     name1 = robot1->GetSpaceInformation()->getName();
@@ -250,11 +250,11 @@ protected:
     std::vector<const ompl::base::State*> states;
     for(const auto& config : configs) {
       auto state = factor->allocState();
-      robot->EigenToState(config, state);
+      multi_robot->EigenToState(config, state);
       states.push_back(state);
     }
     auto ompl_path = std::make_shared<ompl::geometric::PathGeometric>(factor, states);
-    auto path = std::make_shared<EigenPath>(robot, ompl_path);
+    auto path = std::make_shared<EigenPath>(multi_robot, ompl_path);
     return path;
   }
 
@@ -267,7 +267,7 @@ protected:
     for(float position = 0.0; position < 1.0; position += kStepSize) {
       auto config = path->GetConfigAt(position);
       //std::cout << "[Step " << position << "] Config " << config << std::endl;
-      robot->EigenToState(config, state);
+      multi_robot->EigenToState(config, state);
       factor->project(state, children_states);
 
       auto config1 = robot1->StateToEigen(children_states.at(name1));
@@ -287,8 +287,8 @@ protected:
   std::shared_ptr<DiskRobot> robot2;
   std::string name1;
   std::string name2;
-  RobotPtr robot;
-  std::shared_ptr<DartMultiRobotCollisionChecker> collision_checker;
+  MultiRobotPtr multi_robot;
+  std::shared_ptr<MultiRobotCollisionChecker> collision_checker;
 };
 
 TEST_F(DiskRobotTest, PathSpacingTest) {
