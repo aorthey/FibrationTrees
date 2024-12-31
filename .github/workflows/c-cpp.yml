@@ -16,7 +16,7 @@ jobs:
     - name: Set up CMake
       uses: jwlawson/actions-setup-cmake@v1.11
       with:
-        cmake-version: '3.5.x'
+        cmake-version: '3.8.x'
 
     - name: Install dependencies
       run: |
