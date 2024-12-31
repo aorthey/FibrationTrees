@@ -13,15 +13,16 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set up CMake
-      uses: jwlawson/actions-setup-cmake@v1.11
-      with:
-        cmake-version: '3.8.x'
+    # - name: Set up CMake
+    #   uses: jwlawson/actions-setup-cmake@v1.11
+    #   with:
+    #     cmake-version: '3.8.x'
 
     - name: Install dependencies
       run: |
         sudo apt-get update -y -qq &&
         sudo apt-get install -y -qq \
+        cmake \
         libboost-filesystem-dev \
         libboost-program-options-dev \
         libboost-serialization-dev \
