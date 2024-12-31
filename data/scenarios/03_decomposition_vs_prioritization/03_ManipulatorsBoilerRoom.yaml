@@ -1,4 +1,4 @@
-name: CubeRobots
+name: ManipulatorsBoilerRoom
 
 world:
   gravity: [0, 0, 0]
@@ -11,6 +11,12 @@ obstacles:
     height: -0.15
     color: [0.99, 0.99, 0.99, 1.0]
     width: 20.0
+
+  Obstacle1:
+    name: Boilerroom
+    type: urdf
+    filename: objects/boilerroom.urdf
+    position: [0.0, 0.0, 0.0]
 
 robots:
   RobotAll:
