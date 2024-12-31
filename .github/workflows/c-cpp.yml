@@ -12,10 +12,12 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+
     - name: Set up CMake
       uses: jwlawson/actions-setup-cmake@v1.11
       with:
         cmake-version: '3.5.x'
+
     - name: Install dependencies
       run: |
         sudo apt-get update
@@ -23,6 +25,8 @@ jobs:
         sudo apt-get install -y libyaml-cpp-dev
         sudo apt-get install -y libdart-all-dev
         sudo apt-get install -y libidn11-dev
+        sudo apt-get install -y libidn-dev
+        sudo apt-get install -y libidn12
         
     - name: Clone and Build OMPL
       run: |

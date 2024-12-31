@@ -1,5 +1,7 @@
 #include "yaml/MakePlannerFromYaml.hpp"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 #include <ompl/multilevel/planners/RRTtask.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/geometric/planners/rrt/RRT.h>
@@ -41,10 +43,13 @@ ompl::base::PlannerPtr MakePlannerFromYaml(const YAML::Node& node, const std::st
     const ompl::multilevel::FactoredSpaceInformationPtr& factor, const std::unordered_map<std::string, RobotPtr>& child_robots) {
 
   ompl::base::PlannerPtr planner;
-  if(planner_name == "FibrationRrt") {
+
+  if(boost::starts_with(planner_name, "FibrationRrt")) {
+    //Allow different endings to indicate fibration tree types
     planner = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
 
     auto fplanner = std::static_pointer_cast<ompl::multilevel::FibrationRRT>(planner);
+    fplanner->setName(planner_name);
     fplanner->setSmoothIntermediateSolutions(false);
     for(const auto& child_robot : child_robots) {
       fplanner->setSmoothIntermediateSolutions(child_robot.second->GetName(), child_robot.second->ShouldSmoothPath());

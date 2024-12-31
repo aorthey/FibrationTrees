@@ -1,4 +1,4 @@
-name: MultiDisks
+name: MultiDisksPrioritization
 
 world:
   gravity: [0, 0, 0]
@@ -100,40 +100,10 @@ projections:
 
 problem:
   start:
-    type: task
-    Robot1: 
-      config: [-5.0, +5.0]
-    Robot2: 
-      config: [-5.0, +2.0]
-    Robot3: 
-      config: [-5.0, -2.0]
-    Robot4: 
-      config: [-5.0, -5.0]
-    Robot5: 
-      config: [+5.0, +5.0]
-    Robot6: 
-      config: [+5.0, +2.0]
-    Robot7: 
-      config: [+5.0, -2.0]
-    Robot8: 
-      config: [+5.0, -5.0]
+    type: joint
+    config: [-6.0, -5.0, -2.0, -5.0, +2.0, -5.0, +6.0, -5.0, -6.0, +5.0, -2.0, +5.0, +2.0, +5.0, +6.0, +5.0]
 
   goal:
-    type: task
+    type: joint
     threshold: 0.5
-    Robot1: 
-      config: [+5.0, +5.0]
-    Robot2: 
-      config: [+5.0, +2.0]
-    Robot3: 
-      config: [+5.0, -2.0]
-    Robot4: 
-      config: [+5.0, -5.0]
-    Robot5: 
-      config: [-5.0, +5.0]
-    Robot6: 
-      config: [-5.0, +2.0]
-    Robot7: 
-      config: [-5.0, -2.0]
-    Robot8: 
-      config: [-5.0, -5.0]
+    config: [-6.0, +5.0, -2.0, +5.0, +2.0, +5.0, +6.0, +5.0, -6.0, -5.0, -2.0, -5.0, +2.0, -5.0, +6.0, -5.0]

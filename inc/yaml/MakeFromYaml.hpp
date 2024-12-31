@@ -2,7 +2,8 @@
 
 #include <ompl/base/ProblemDefinition.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
-#include "yaml-cpp/yaml.h"
+#include <yaml-cpp/yaml.h>
+
 #include "robots/Robot.hpp"
 
 std::tuple<

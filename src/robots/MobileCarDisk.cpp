@@ -3,7 +3,7 @@
 #include <ompl/base/spaces/ReedsSheppStateSpace.h>
 #include "FilePath.hpp"
 
-dart::dynamics::SkeletonPtr MobileCarDisk::MakeSkeleton() {
+dart::dynamics::SkeletonPtr MobileCarDisk::MakeSkeleton(const YAML::Node& /*node*/) {
   const auto urdf_name = GetDataFolder() + "robots/car_disk.urdf";
 
   dart::utils::DartLoader loader;

@@ -7,7 +7,7 @@
 #include "FilePath.hpp"
 #include "validators/DefaultMotionValidator.hpp"
 
-dart::dynamics::SkeletonPtr MobileKukaRobot::MakeSkeleton() {
+dart::dynamics::SkeletonPtr MobileKukaRobot::MakeSkeleton(const YAML::Node& /*node*/) {
   const auto urdf_name = GetDataFolder() + "robots/kuka_lwr/kuka_endeffector_mobile.urdf";
 
   dart::utils::DartLoader loader;

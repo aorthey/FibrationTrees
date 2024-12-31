@@ -32,6 +32,7 @@ dart::dynamics::SkeletonPtr createCylinder(const State3d& position, float radius
 dart::dynamics::SkeletonPtr createCylinder(const State3d& position, const State3d& rotationXYZ, float radius, float height);
 dart::dynamics::SkeletonPtr createSphere(float radius);
 dart::dynamics::SkeletonPtr createBox(const State3d& position, float length_x, float length_y, float length_z);
+dart::dynamics::SkeletonPtr createPlanarBox(const State3d& position, float length_x, float length_y, float length_z);
 dart::dynamics::SkeletonPtr createFromURDF(const std::string& urdf_name, const State3d& position);
 void changeBodyColor(const dart::dynamics::SkeletonPtr& skeleton, const Eigen::Vector4d& color);
 void hide(const dart::dynamics::SkeletonPtr& skeleton);

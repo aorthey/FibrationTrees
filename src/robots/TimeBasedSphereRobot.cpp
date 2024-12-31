@@ -7,7 +7,7 @@
 #include "spaces/EuclideanTimeBased.hpp"
 #include "validators/MotionValidatorTimeBased.hpp"
 
-dart::dynamics::SkeletonPtr TimeBasedSphereRobot::MakeSkeleton() {
+dart::dynamics::SkeletonPtr TimeBasedSphereRobot::MakeSkeleton(const YAML::Node& /*node*/) {
   return createSphere(0.01);
 }
 

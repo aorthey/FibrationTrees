@@ -5,7 +5,7 @@
 #include "FilePath.hpp"
 #include "validators/MotionValidatorReedsShepp.hpp"
 
-dart::dynamics::SkeletonPtr MobileCar::MakeSkeleton() {
+dart::dynamics::SkeletonPtr MobileCar::MakeSkeleton(const YAML::Node& /*node*/) {
   const auto urdf_name = GetDataFolder() + "robots/car.urdf";
 
   dart::utils::DartLoader loader;

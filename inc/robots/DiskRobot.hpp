@@ -6,7 +6,7 @@
 class DiskRobot : public EuclideanRobot {
   public:
     DiskRobot() = default;
-    dart::dynamics::SkeletonPtr MakeSkeleton() override;
+    dart::dynamics::SkeletonPtr MakeSkeleton(const YAML::Node& node) override;
     void SetLimits(const std::pair<State2d, State2d>& limits);
 
   private:

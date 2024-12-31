@@ -206,7 +206,7 @@ TEST(MultiRobotMotionValidatorTest, CollisionTest) {
 class DiskRobot : public SphereRobot {
   public:
     DiskRobot() = default;
-    dart::dynamics::SkeletonPtr MakeSkeleton() override {
+    dart::dynamics::SkeletonPtr MakeSkeleton(const YAML::Node& /*node*/) override {
       return createSphere(0.2);
     }
 };

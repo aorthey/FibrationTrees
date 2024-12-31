@@ -4,7 +4,7 @@
 
 #include "DartHelper.hpp"
 
-dart::dynamics::SkeletonPtr DiskRobot::MakeSkeleton() {
+dart::dynamics::SkeletonPtr DiskRobot::MakeSkeleton(const YAML::Node& /*node*/) {
   return createCylinder(State3d(0,0,0), radius_, height_);
 }
 

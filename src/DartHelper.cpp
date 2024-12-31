@@ -158,6 +158,26 @@ dart::dynamics::SkeletonPtr createBox(const State3d& position, float length_x, f
     return box;
 }
 
+dart::dynamics::SkeletonPtr createPlanarBox(const State3d& position, float length_x, float length_y, float length_z) {
+    static int counter = 0;
+    std::string name = "planar_box_"+std::to_string(counter++);
+    dart::dynamics::SkeletonPtr box = dart::dynamics::Skeleton::create(name);
+    auto joint = box->createJointAndBodyNodePair<dart::dynamics::PlanarJoint>(nullptr);
+    joint.first->setXYPlane();
+    dart::dynamics::BodyNodePtr body = joint.second;
+
+    auto box_shape = std::make_shared<dart::dynamics::BoxShape>(
+        State3d{length_x, length_y, length_z});
+    auto shapeNode = body->createShapeNodeWith<dart::dynamics::VisualAspect, dart::dynamics::CollisionAspect, dart::dynamics::DynamicsAspect>(box_shape);
+    shapeNode->getVisualAspect()->setColor(State3d(0.9, 0.9, 0.9));
+
+    Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
+    tf.translation() = position;
+    body->getParentJoint()->setTransformFromParentBodyNode(tf);
+    body->setName(name);
+    return box;
+}
+
 dart::dynamics::SkeletonPtr createCylinder(const State3d& position, const State3d& rotationXYZ, float radius, float height) {
     static int counter = 0;
     std::string name = "cylinder_"+std::to_string(counter++);
@@ -236,28 +256,6 @@ dart::dynamics::SkeletonPtr createFromURDF(const std::string& urdf_name, const S
     return object;
 }
 
-// dart::dynamics::SkeletonPtr createFromSTL(const std::string& stl_name, const State3d& position)
-// {
-//     dart::utils::DartLoader loader;
-//     dart::utils::DartLoader::Options options;
-//     options.mDefaultRootJointType = dart::utils::DartLoader::RootJointType::FIXED;
-//     loader.setOptions(options);
-
-//     dart::dynamics::SkeletonPtr object
-//       = loader.parseSkeleton(urdf_name);
-
-//     static int count = 0;
-//     object->setMobile(false);
-
-//     auto body = object->getRootBodyNode();
-
-//     Eigen::Isometry3d tf(Eigen::Isometry3d::Identity());
-//     tf.translation() = position;
-//     body->getParentJoint()->setTransformFromParentBodyNode(tf);
-
-//     return object;
-// }
-
 void addCoordinateFrameToWorld(const dart::simulation::WorldPtr& world) {
   auto frame_x = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "coordinate_frame_x");
   auto frame_y = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "coordinate_frame_y");
@@ -309,23 +307,22 @@ void changeBodyColor(const dart::dynamics::SkeletonPtr& skeleton, const Eigen::V
     }
   }
 }
-void hide(const dart::dynamics::SkeletonPtr& skeleton) {
+
+void hideSkeleton(const dart::dynamics::SkeletonPtr& skeleton, bool enable) {
   for(const auto& body_node : skeleton->getBodyNodes()) {
     auto shapeNodes = body_node->getShapeNodesWith<dart::dynamics::VisualAspect>();
     for(const auto& node : shapeNodes) {
       auto properties(node->getVisualAspect()->getProperties());
-      properties.mHidden = true;
+      properties.mHidden = enable;
       node->getVisualAspect()->setProperties(properties);
     }
   }
 }
+
+void hide(const dart::dynamics::SkeletonPtr& skeleton) {
+  hideSkeleton(skeleton, true);
+}
+
 void show(const dart::dynamics::SkeletonPtr& skeleton) {
-  for(const auto& body_node : skeleton->getBodyNodes()) {
-    auto shapeNodes = body_node->getShapeNodesWith<dart::dynamics::VisualAspect>();
-    for(const auto& node : shapeNodes) {
-      auto properties(node->getVisualAspect()->getProperties());
-      properties.mHidden = false;
-      node->getVisualAspect()->setProperties(properties);
-    }
-  }
+  hideSkeleton(skeleton, false);
 }

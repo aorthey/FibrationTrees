@@ -5,6 +5,6 @@
 class MobileCarDisk : public EuclideanRobot {
   public:
     MobileCarDisk() = default;
-    dart::dynamics::SkeletonPtr MakeSkeleton() override;
+    dart::dynamics::SkeletonPtr MakeSkeleton(const YAML::Node& node) override;
 };
 

@@ -6,6 +6,8 @@
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 #include <ompl/base/Path.h>
 
+#include <yaml-cpp/yaml.h>
+
 #include "CollisionChecker.hpp"
 #include "EigenPath.hpp"
 #include "State.hpp"
@@ -16,7 +18,7 @@ class Robot {
   public:
     Robot() = default;
 
-    virtual dart::dynamics::SkeletonPtr MakeSkeleton() = 0;
+    virtual dart::dynamics::SkeletonPtr MakeSkeleton(const YAML::Node& node) = 0;
     virtual ompl::multilevel::FactoredSpaceInformationPtr MakeSpaceInformation(const RobotPtr& robot) = 0;
     virtual CollisionCheckerPtr MakeCollisionChecker(
         const ompl::multilevel::FactoredSpaceInformationPtr& factor, 

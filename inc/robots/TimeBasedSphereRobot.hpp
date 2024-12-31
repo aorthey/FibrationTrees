@@ -8,7 +8,7 @@ class TimeBasedSphereRobot : public Robot {
 
   public:
     TimeBasedSphereRobot() = default;
-    dart::dynamics::SkeletonPtr MakeSkeleton() override;
+    dart::dynamics::SkeletonPtr MakeSkeleton(const YAML::Node& node) override;
 
     //void SetSpaceInformationFromRobot(const RobotPtr& robot,
     //const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles);

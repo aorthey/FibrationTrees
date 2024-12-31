@@ -7,10 +7,11 @@
 #include "DartHelper.hpp"
 #include "ToString.hpp"
 
+#include "robots/DiskRobot.hpp"
+#include "robots/CubeRobot.hpp"
 #include "robots/SphereRobot.hpp"
 #include "robots/MobileCar.hpp"
 #include "robots/MobileCarDisk.hpp"
-#include "robots/DiskRobot.hpp"
 #include "robots/RobotFactory.hpp"
 #include "robots/ZeppelinRobot.hpp"
 #include "robots/ZeppelinInnerSphereRobot.hpp"
@@ -84,17 +85,17 @@ RobotPtr MakeAtomicRobotFromNode(const YAML::Node& node,
   RobotPtr robot;
 
   if(name == "KukaRobotTaskSpace") {
-    robot = MakeRobot<KukaRobotTaskSpace>(world, obstacles);
+    robot = MakeRobot<KukaRobotTaskSpace>(world, obstacles, node);
 
   } else if(name == "MobileKukaRobot") {
-    robot = MakeRobot<MobileKukaRobot>(world, obstacles);
+    robot = MakeRobot<MobileKukaRobot>(world, obstacles, node);
     // auto lower_limit = node["lower_limits"].as<std::vector<double>>();
     // auto upper_limit = node["upper_limits"].as<std::vector<double>>();
     // robot->GetSkeleton()->setPositionLowerLimits(MakeState(lower_limit).configuration);
     // robot->GetSkeleton()->setPositionUpperLimits(MakeState(upper_limit).configuration);
 
   } else if(name == "MobileKukaRobotTaskSpace") {
-    robot = MakeRobot<MobileKukaRobotTaskSpace>(world, obstacles);
+    robot = MakeRobot<MobileKukaRobotTaskSpace>(world, obstacles, node);
 
   } else if(name == "TimeBasedMobileKukaRobotTaskSpace") {
     robot = MakeRobot<TimeBasedMobileKukaRobotTaskSpace>(world, obstacles);
@@ -114,26 +115,29 @@ RobotPtr MakeAtomicRobotFromNode(const YAML::Node& node,
     }
 
   } else if(name == "MobileCar") {
-    robot = MakeRobot<MobileCar>(world, obstacles);
+    robot = MakeRobot<MobileCar>(world, obstacles, node);
 
   } else if(name == "MobileCarDisk") {
-    robot = MakeRobot<MobileCar>(world, obstacles);
+    robot = MakeRobot<MobileCar>(world, obstacles, node);
 
   } else if(name == "ZeppelinRobot") {
-    robot = MakeRobot<ZeppelinRobot>(world, obstacles);
+    robot = MakeRobot<ZeppelinRobot>(world, obstacles, node);
 
   } else if(name == "ZeppelinInnerSphereRobot") {
-    robot = MakeRobot<ZeppelinInnerSphereRobot>(world, obstacles);
+    robot = MakeRobot<ZeppelinInnerSphereRobot>(world, obstacles, node);
+
+  } else if(name == "CubeRobot") {
+    robot = MakeRobot<CubeRobot>(world, obstacles, node);
 
   } else if(name == "DiskRobot") {
-    robot = MakeRobot<DiskRobot>(world, obstacles);
+    robot = MakeRobot<DiskRobot>(world, obstacles, node);
     auto lower_limit = node["lower_limits"].as<std::vector<double>>();
     auto upper_limit = node["upper_limits"].as<std::vector<double>>();
     const auto task_space_limits = std::make_pair(MakeState2d(lower_limit), MakeState2d(upper_limit));
     std::static_pointer_cast<DiskRobot>(robot)->SetLimits(task_space_limits);
 
   } else if(name == "SphereRobot") {
-    robot = MakeRobot<SphereRobot>(world, obstacles);
+    robot = MakeRobot<SphereRobot>(world, obstacles, node);
     auto lower_limit = node["lower_limits"].as<std::vector<double>>();
     auto upper_limit = node["upper_limits"].as<std::vector<double>>();
     const auto task_space_limits = std::make_pair(MakeState3d(lower_limit), MakeState3d(upper_limit));
@@ -151,6 +155,7 @@ RobotPtr MakeAtomicRobotFromNode(const YAML::Node& node,
   }
 
   MaybeChangeColor(node, robot->GetSkeleton());
+
   if(node["smooth_path"]) {
     auto smooth_path = node["smooth_path"].as<bool>();
     if(smooth_path) {

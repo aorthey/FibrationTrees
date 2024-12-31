@@ -23,7 +23,7 @@ const float kIKSolutionAccuracy = 1e-5;
 class TestSphereRobot : public SphereRobot {
   public:
     TestSphereRobot() = default;
-    dart::dynamics::SkeletonPtr MakeSkeleton() override {
+    dart::dynamics::SkeletonPtr MakeSkeleton(const YAML::Node& /*node*/) override {
       return createSphere(0.05);
     }
 };

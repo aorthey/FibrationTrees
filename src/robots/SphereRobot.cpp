@@ -4,7 +4,7 @@
 
 #include "DartHelper.hpp"
 
-dart::dynamics::SkeletonPtr SphereRobot::MakeSkeleton() {
+dart::dynamics::SkeletonPtr SphereRobot::MakeSkeleton(const YAML::Node& /*node*/) {
   return createSphere(0.01);
 }
 

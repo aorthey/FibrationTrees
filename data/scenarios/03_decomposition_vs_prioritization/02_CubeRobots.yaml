@@ -1,0 +1,45 @@
+name: CubeRobots
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: True
+
+obstacles:
+  Obstacle0:
+    name: Floor
+    type: floor
+    height: -0.15
+    color: [0.99, 0.99, 0.99, 1.0]
+    width: 20.0
+
+robots:
+  RobotAll:
+    name: MultiRobot
+    robots: [RobotA, RobotB]
+    root: True
+
+  RobotA:
+    name: CubeRobot
+    lower_limits: [-10.0, -10.0]
+    upper_limits: [+10.0, +10.0]
+    size: [1.0, 3.0, 2.0]
+    smooth_path: True
+
+  RobotB:
+    name: CubeRobot
+    lower_limits: [-10.0, -10.0]
+    upper_limits: [+10.0, +10.0]
+    size: [1.0, 1.0, 4.0]
+    smooth_path: True
+    color: [0.9, 0.7, 0.7, 0.5]
+
+problem:
+  start:
+    type: joint
+    config: [0.0, 0.0, 0.78, 0.0, 3.0, 0.78]
+
+  goal:
+    type: joint
+    threshold: 0.5
+    config: [-8.0, -3.0, 0.0, 0.0, 0.0, 0.0]
+

@@ -2,6 +2,7 @@
 
 #include <optional>
 #include "Robot.hpp"
+#include "yaml-cpp/yaml.h"
 
 template <typename RobotType>
 class RobotFactory {
@@ -15,13 +16,16 @@ class RobotFactory {
       if(!obstacles_.has_value()) {
         throw std::invalid_argument("Requires Obstacles");
       }
+      if(!node_.has_value()) {
+        throw std::invalid_argument("Requires YAML Node");
+      }
 
       auto robot = std::make_shared<RobotType>();
 
       ////////////////////////////////////////////////////////////////////////////////
       // Make Skeleton
       ////////////////////////////////////////////////////////////////////////////////
-      auto skeleton = robot->MakeSkeleton();
+      auto skeleton = robot->MakeSkeleton(node_.value());
       robot->SetSkeleton(skeleton);
 
       ////////////////////////////////////////////////////////////////////////////////
@@ -51,20 +55,29 @@ class RobotFactory {
     void SetObstacles(const std::vector<dart::dynamics::SkeletonPtr>& obstacles) {
       obstacles_ = obstacles;
     }
+    void SetNode(const YAML::Node& node) {
+      node_ = node;
+    }
   private:
     std::optional<std::vector<dart::dynamics::SkeletonPtr>> obstacles_;
     std::optional<dart::simulation::WorldPtr> world_;
+    std::optional<YAML::Node> node_;
 };
 
 
 template <typename RobotType>
-std::shared_ptr<RobotType> MakeRobot(const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles) {
+std::shared_ptr<RobotType> MakeRobot(const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles, const YAML::Node& node) {
   RobotFactory<RobotType> robot_factory;
   robot_factory.SetWorld(world);
   robot_factory.SetObstacles(obstacles);
+  robot_factory.SetNode(node);
   auto robot = robot_factory.Create();
   world->addSkeleton(robot->GetSkeleton());
   return robot;
+}
+template <typename RobotType>
+std::shared_ptr<RobotType> MakeRobot(const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles) {
+  return MakeRobot<RobotType>(world, obstacles, YAML::Node());
 }
 
 template <typename RobotType>

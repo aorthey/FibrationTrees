@@ -7,5 +7,5 @@
 class ZeppelinInnerSphereRobot : public SphereRobot {
   public:
     ZeppelinInnerSphereRobot() = default;
-    dart::dynamics::SkeletonPtr MakeSkeleton() override;
+    dart::dynamics::SkeletonPtr MakeSkeleton(const YAML::Node& node) override;
 };

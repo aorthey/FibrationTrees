@@ -1,8 +1,9 @@
 #pragma once
 
+#include <yaml-cpp/yaml.h>
+
 #include <ompl/base/Planner.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
-#include "yaml-cpp/yaml.h"
 
 #include "robots/Robot.hpp"
 

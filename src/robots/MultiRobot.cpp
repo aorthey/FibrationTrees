@@ -13,7 +13,7 @@ bool MultiRobot::IsMultiRobot() const {
   return true;
 }
 
-dart::dynamics::SkeletonPtr MultiRobot::MakeSkeleton() {
+dart::dynamics::SkeletonPtr MultiRobot::MakeSkeleton(const YAML::Node& /*node*/) {
   std::cout << "MakeSkeleton" << std::endl;
   return nullptr;
 }

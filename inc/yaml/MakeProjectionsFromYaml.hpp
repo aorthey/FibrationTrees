@@ -1,4 +1,6 @@
-#include "yaml-cpp/yaml.h"
+#pragma once
+
+#include <yaml-cpp/yaml.h>
 
 #include <ompl/util/ClassForward.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>

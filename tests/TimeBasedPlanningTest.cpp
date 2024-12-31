@@ -19,14 +19,14 @@
 class TimeBasedDiskRobot : public TimeBasedSphereRobot {
   public:
     TimeBasedDiskRobot() = default;
-    dart::dynamics::SkeletonPtr MakeSkeleton() override {
+    dart::dynamics::SkeletonPtr MakeSkeleton(const YAML::Node& /*node*/) override {
       return createSphere(0.2);
     }
 };
 class DiskRobot : public SphereRobot {
   public:
     DiskRobot() = default;
-    dart::dynamics::SkeletonPtr MakeSkeleton() override {
+    dart::dynamics::SkeletonPtr MakeSkeleton(const YAML::Node& /*node*/) override {
       return createSphere(0.2);
     }
 };

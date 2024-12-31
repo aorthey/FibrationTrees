@@ -1,4 +1,7 @@
 #include <gtest/gtest.h>
+#include "robots/DiskRobot.hpp"
+#include "robots/CubeRobot.hpp"
+#include "robots/SphereRobot.hpp"
 #include "robots/KukaRobot.hpp"
 #include "robots/KukaRobotTaskSpace.hpp"
 #include "robots/MobileKukaBase.hpp"
@@ -20,6 +23,9 @@ template <class T>
 class RobotLoaderTest : public testing::Test {};
 
 using RobotTypes = ::testing::Types<
+    DiskRobot,
+    SphereRobot, 
+    CubeRobot,
     KukaRobot, 
     KukaRobotTaskSpace, 
     MobileCar, 
@@ -27,9 +33,6 @@ using RobotTypes = ::testing::Types<
     MobileKukaBase,
     MobileKukaRobot, 
     MobileKukaRobotTaskSpace, 
-    SphereRobot, 
-    //TimeBasedMobileKukaRobotTaskSpace, 
-    //TimeBasedSphereRobot, 
     ZeppelinInnerSphereRobot,
     ZeppelinRobot
 >;
@@ -38,27 +41,27 @@ TYPED_TEST_SUITE(RobotLoaderTest, RobotTypes);
 
 TYPED_TEST(RobotLoaderTest, DefaultLoaderTest) {
   auto robot = MakeRobot<TypeParam>();
-  std::cout << "Done" << std::endl;
 
   auto si = robot->GetSpaceInformation();
 
   const auto Ndim = si->getStateDimension();
-  //const auto Ndim = robot->GetSkeleton()->getNumDofs();
 
-  std::cout << "Created robot " << robot->GetSpaceInformation()->getName() << " with " << Ndim << " dimensions." << std::endl;
+  ////////////////////////////////////////////////////////////////////////////////
+  OMPL_DEBUG("Created robot %s with %d dimensions.", robot->GetSpaceInformation()->getName().c_str(), Ndim);
+  ////////////////////////////////////////////////////////////////////////////////
   StateXd v = MakeConstantState(Ndim, 0.0f);
   for(size_t k = 0; k < Ndim; k++) {
     v[k] = k+1;
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  std::cout << "Test EigenToState" << std::endl;
+  OMPL_DEBUG("Test EigenToState");
   ////////////////////////////////////////////////////////////////////////////////
   auto q = si->allocState();
   robot->EigenToState(v, q);
 
   ////////////////////////////////////////////////////////////////////////////////
-  std::cout << "Test StateToEigen" << std::endl;
+  OMPL_DEBUG("Test StateToEigen");
   ////////////////////////////////////////////////////////////////////////////////
   auto w = robot->StateToEigen(q);
 
@@ -67,10 +70,17 @@ TYPED_TEST(RobotLoaderTest, DefaultLoaderTest) {
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  std::cout << "Test IsValid" << std::endl;
+  OMPL_DEBUG("Test IsValid");
   ////////////////////////////////////////////////////////////////////////////////
+
   for(size_t k = 0; k < Ndim; k++) {
     v[k] = std::numeric_limits<double>::quiet_NaN();
+  }
+  robot->EigenToState(v, q);
+  EXPECT_FALSE(robot->IsValid(q));
+
+  for(size_t k = 0; k < Ndim; k++) {
+    v[k] = std::numeric_limits<double>::infinity();
   }
   robot->EigenToState(v, q);
   EXPECT_FALSE(robot->IsValid(q));
@@ -95,7 +105,7 @@ TYPED_TEST(RobotLoaderTest, ObstacleLoaderTest) {
   world->addSkeleton(floor);
 
   ////////////////////////////////////////////////////////////////////////////////
-  std::cout << "Create Robot" << std::endl;
+  OMPL_DEBUG("Create Robot");
   ////////////////////////////////////////////////////////////////////////////////
   auto robot = MakeRobot<TypeParam>(world, obstacles);
 
@@ -106,7 +116,7 @@ TYPED_TEST(RobotLoaderTest, ObstacleLoaderTest) {
   StateXd v = MakeConstantState(Ndim, std::numeric_limits<double>::quiet_NaN());
 
   ////////////////////////////////////////////////////////////////////////////////
-  std::cout << "Test IsValid" << std::endl;
+  OMPL_DEBUG("Test IsValid");
   ////////////////////////////////////////////////////////////////////////////////
 
   robot->EigenToState(v, q);
@@ -117,6 +127,7 @@ TYPED_TEST(RobotLoaderTest, ObstacleLoaderTest) {
     v[k] = std::numeric_limits<double>::infinity();
   }
   robot->EigenToState(v, q);
+
   EXPECT_FALSE(factor->isValid(q));
 
   //Zero does not throw
@@ -126,14 +137,11 @@ TYPED_TEST(RobotLoaderTest, ObstacleLoaderTest) {
   robot->EigenToState(v, q);
   EXPECT_NO_THROW(factor->isValid(q));
 
-  ////////////////////////////////////////////////////////////////////////////////
   factor->freeState(q);
 }
 
 TYPED_TEST(RobotLoaderTest, JointLimitTest) {
-  // RobotFactory<TypeParam> robot_factory;
-  // auto robot = robot_factory.Create();
-  auto robot = MakeRobot<TypeParam>();//robot_factory.Create();
+  auto robot = MakeRobot<TypeParam>();
 
   auto skeleton = robot->GetSkeleton();
   auto lb = skeleton->getPositionLowerLimits();

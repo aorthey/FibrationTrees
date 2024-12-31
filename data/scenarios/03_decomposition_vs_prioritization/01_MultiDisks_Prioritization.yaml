@@ -27,34 +27,39 @@ robots:
     hide: True
     smooth_path: True
 
-  RobotG:
+  RobotB:
     name: MultiRobot
-    robots: [Robot1, Robot2]
+    robots: [RobotC, Robot7]
     hide: True
     smooth_path: True
-  RobotF:
-    name: MultiRobot
-    robots: [RobotG, Robot3]
-    hide: True
-    smooth_path: True
-  RobotE:
-    name: MultiRobot
-    robots: [RobotF, Robot4]
-    hide: True
-    smooth_path: True
-  RobotD:
-    name: MultiRobot
-    robots: [RobotE, Robot5]
-    hide: True
-    smooth_path: True
+
   RobotC:
     name: MultiRobot
     robots: [RobotD, Robot6]
     hide: True
     smooth_path: True
-  RobotB:
+
+  RobotD:
     name: MultiRobot
-    robots: [RobotC, Robot7]
+    robots: [RobotE, Robot5]
+    hide: True
+    smooth_path: True
+
+  RobotE:
+    name: MultiRobot
+    robots: [RobotF, Robot4]
+    hide: True
+    smooth_path: True
+
+  RobotF:
+    name: MultiRobot
+    robots: [RobotG, Robot3]
+    hide: True
+    smooth_path: True
+
+  RobotG:
+    name: MultiRobot
+    robots: [Robot1, Robot2]
     hide: True
     smooth_path: True
 

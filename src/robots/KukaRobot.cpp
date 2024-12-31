@@ -6,7 +6,7 @@
 #include "KinematicsSolver.hpp"
 #include "FilePath.hpp"
 
-dart::dynamics::SkeletonPtr KukaRobot::MakeSkeleton() {
+dart::dynamics::SkeletonPtr KukaRobot::MakeSkeleton(const YAML::Node& /*node*/) {
   const auto urdf_name = GetDataFolder() + "robots/kuka_lwr/kuka_endeffector.urdf";
 
   dart::utils::DartLoader loader;

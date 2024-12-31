@@ -1,4 +1,6 @@
-#include "yaml-cpp/yaml.h"
+#pragma once
+
+#include <yaml-cpp/yaml.h>
 
 #include <dart/dart.hpp>
 

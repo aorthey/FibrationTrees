@@ -1,0 +1,38 @@
+name: MobileRobotNagivation
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: True
+
+obstacles:
+  Obstacle0:
+    name: Floor
+    type: floor
+    height: -0.255
+    color: [0.99, 0.99, 0.99, 1.0]
+    width: 5.0
+
+  Obstacle1:
+    name: Box
+    type: box
+    position: [0.0, 0.0, 0.75]
+    color: [0.8, 0.4, 0.4, 1.0]
+    size: [0.3, 0.3, 2.0]
+
+robots:
+  Robot1:
+    name: MobileCar
+    color: [0.7, 0.5, 0.5, 1.0]
+    smooth_path: False
+    root: True
+    hide: False
+
+problem:
+  start:
+    type: joint
+    config: [-1.0, -1.0, 0.57]
+
+  goal:
+    type: joint
+    threshold: 0.1
+    config: [+1.0, +1.0, -0.57]

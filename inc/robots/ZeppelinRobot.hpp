@@ -7,7 +7,7 @@
 class ZeppelinRobot : public Robot {
   public:
     ZeppelinRobot() = default;
-    dart::dynamics::SkeletonPtr MakeSkeleton() override;
+    dart::dynamics::SkeletonPtr MakeSkeleton(const YAML::Node& node) override;
     ompl::multilevel::FactoredSpaceInformationPtr MakeSpaceInformation(const RobotPtr& robot) override;
 
     StateXd StateToEigen(const ompl::base::State* state) const override;

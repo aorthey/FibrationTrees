@@ -1,16 +1,20 @@
 #include <gtest/gtest.h>
 
 #include <iostream>
+#include <ompl/base/StateSpaceTypes.h>
+#include <ompl/base/spaces/SE2StateSpace.h>
+
 #include "FilePath.hpp"
+#include "Common.hpp"
+#include "robots/CubeRobot.hpp"
+#include "robots/RobotFactory.hpp"
 #include "yaml/MakeFromYaml.hpp"
 #include "yaml/MakeObstaclesFromYaml.hpp"
 
 TEST(YamlTest, ObstacleTest) {
   const auto filename = GetMainFolder() + "tests/data/test_scenario.yaml";
   YAML::Node config = YAML::LoadFile(filename);
-
   auto obstacles = MakeObstaclesFromYamlFilename(filename);
-
   EXPECT_EQ(obstacles.size(), 3u);
 }
 
@@ -23,9 +27,37 @@ TEST(YamlTest, WrongObstacleTest) {
 TEST(YamlTest, FullScenarioTest) {
   dart::math::Random::setSeed(0);
   const auto filename = GetMainFolder() + "tests/data/full_scenario.yaml";
-
   dart::simulation::WorldPtr world(new dart::simulation::World);
   EXPECT_NO_THROW(
       MakeFactoredSpaceInformationFromYamlFilename(filename, world);
   );
+}
+
+TEST(YamlTest, LoadCubeRobotWithLimitsTest) {
+  const auto filename = GetMainFolder() + "tests/data/cube_robot.yaml";
+  YAML::Node config = YAML::LoadFile(filename);
+
+  EXPECT_TRUE(config["name"]);
+  EXPECT_TRUE(config["upper_limits"]);
+  EXPECT_TRUE(config["lower_limits"]);
+  EXPECT_TRUE(config["size"]);
+
+  EXPECT_EQ(config["name"].as<std::string>(), "CubeRobot");
+
+  dart::simulation::WorldPtr world(new dart::simulation::World);
+  auto robot = MakeRobot<CubeRobot>(world, {}, config);
+
+  auto si = robot->GetSpaceInformation();
+  EXPECT_EQ(si->getStateSpace()->getType(), ompl::base::StateSpaceType::STATE_SPACE_SE2);
+
+  auto space = si->getStateSpace()->as<ompl::base::SE2StateSpace>();
+  auto bounds = space->getBounds();
+
+  EXPECT_EQ(bounds.low.size(), 2u);
+  EXPECT_EQ(bounds.high.size(), 2u);
+
+  EXPECT_NEAR(bounds.low.at(0), -6.0, Epsilon);
+  EXPECT_NEAR(bounds.low.at(1), -7.0, Epsilon);
+  EXPECT_NEAR(bounds.high.at(0), +8.0, Epsilon);
+  EXPECT_NEAR(bounds.high.at(1), +9.0, Epsilon);
 }

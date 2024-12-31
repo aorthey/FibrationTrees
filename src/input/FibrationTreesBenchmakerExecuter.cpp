@@ -1,6 +1,7 @@
 #include "input/FibrationTreesBenchmakerExecuter.hpp"
 
 #include <iostream>
+#include <filesystem>
 
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 #include <ompl/multilevel/planners/FibrationRRT.h>
@@ -40,6 +41,11 @@ size_t GetRunCount(const YAML::Node& node) {
     return kDefaultMinimalRunCount;
   }
   return node["run_count"].as<size_t>();
+}
+
+std::string MakeOutputFilename(const std::string& filename) {
+  std::filesystem::path p(filename);
+  return p.stem();
 }
 
 int FibrationTreesBenchmakerExecuter(const int argc, const char* argv[]) {
@@ -93,7 +99,9 @@ int FibrationTreesBenchmakerExecuter(const int argc, const char* argv[]) {
     start = pdef->getStartState(0);
     auto goal = pdef->getGoal();
     auto benchmark_result = RunBenchmark(scenario_name, factor, start, goal, timeout, run_count, planners);
-    SaveBenchmarkToDatabase(scenario_name, benchmark_result);
+
+    auto output_filename = MakeOutputFilename(filename);
+    SaveBenchmarkToDatabase(output_filename, benchmark_result);
   }
 
   return 0;

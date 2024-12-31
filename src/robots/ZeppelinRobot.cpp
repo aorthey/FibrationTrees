@@ -11,7 +11,7 @@
 
 #include "FilePath.hpp"
 
-dart::dynamics::SkeletonPtr ZeppelinRobot::MakeSkeleton() {
+dart::dynamics::SkeletonPtr ZeppelinRobot::MakeSkeleton(const YAML::Node& /*node*/) {
   const std::string urdf_name = GetDataFolder() + "robots/zeppelin_with_joints.urdf";
   dart::utils::DartLoader loader;
   dart::utils::DartLoader::Options options;

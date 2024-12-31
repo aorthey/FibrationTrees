@@ -85,8 +85,9 @@ bool Robot::HasValidJointLimits(const Eigen::VectorXd& config) const {
   auto lb = skeleton_->getPositionLowerLimits();
   auto ub = skeleton_->getPositionUpperLimits();
   for(size_t k = 0; k < config.size(); k++) {
-    if(config[k] < lb[k] || config[k] > ub[k] || config[k] != config[k]) {
-      OMPL_WARN("Out of limits: %f is not in [%f, %f] (index %d).", config[k], lb[k], ub[k], k);
+    const auto& value = config[k];
+    if(!std::isfinite(value) || value < lb[k] || value > ub[k]) {
+      //OMPL_WARN("Out of limits: %f is not in [%f, %f] (index %d).", value, lb[k], ub[k], k);
       return false;
     }
   }
