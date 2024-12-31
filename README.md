@@ -21,3 +21,4 @@ Maybe when pressing Fn/Strg/Alt/Super ?
 - [x] Add options to robot factory by using YAML::Node
 - [ ] Multi robot collision checker init in MakeCollisionChecker
 - [ ] Terminate immediately on invalid goal
+- [ ] Fix workflow to execute tests on github

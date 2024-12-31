@@ -20,11 +20,19 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y libboost-program-options-dev
-        sudo apt-get install -y libyaml-cpp-dev
-        sudo apt-get install -y libdart-all-dev
-        sudo apt-get install -y libidn11-dev
+        sudo apt-get update -y -qq &&
+        sudo apt-get install -y -qq \
+        libboost-filesystem-dev \
+        libboost-program-options-dev \
+        libboost-serialization-dev \
+        libboost-system-dev \
+        libboost-test-dev \
+        libeigen3-dev \
+        libflann-dev \
+        libode-dev \
+        libtriangle-dev \
+        libyaml-cpp-dev \
+        libdart-all-dev
         
     - name: Clone and Build OMPL
       run: |
