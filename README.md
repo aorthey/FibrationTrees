@@ -1,9 +1,10 @@
+[![ContinuousIntegrationPipeline](https://github.com/aorthey/FibrationTrees/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/aorthey/FibrationTrees/actions/workflows/c-cpp.yml)
+
 * Dependencies
 sudo apt install libdart-dev
 sudo apt install libdart-external-ikfast-dev
 sudo apt install libdart-imgui-dev
 sudo apt install libdart-lodepng-dev
-
 
 * Problems
 

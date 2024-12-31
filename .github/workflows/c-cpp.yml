@@ -9,14 +9,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-
-    # - name: Set up CMake
-    #   uses: jwlawson/actions-setup-cmake@v1.11
-    #   with:
-    #     cmake-version: '3.8.x'
 
     - name: Install dependencies
       run: |
@@ -40,7 +36,8 @@ jobs:
         libdart-collision-bullet-dev \
         libdart-external-ikfast-dev \
         libdart-external-imgui-dev \
-        libdart-external-lodepng-dev
+        libdart-external-lodepng-dev \
+        python3-numpy
         wget http://mirrors.kernel.org/ubuntu/pool/main/libi/libidn/libidn11_1.33-2.2ubuntu2_amd64.deb
         sudo apt install ./libidn11_1.33-2.2ubuntu2_amd64.deb
         
@@ -64,7 +61,7 @@ jobs:
     - name: Build
       run: |
         cd build
-        make -j
+        make -j$(nproc)
         
     - name: Run Tests
       run: |
