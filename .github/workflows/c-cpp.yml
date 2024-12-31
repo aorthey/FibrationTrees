@@ -37,6 +37,7 @@ jobs:
         libdart-external-ikfast-dev \
         libdart-external-imgui-dev \
         libdart-external-lodepng-dev \
+        libgtest-dev \
         python3-numpy
         wget http://mirrors.kernel.org/ubuntu/pool/main/libi/libidn/libidn11_1.33-2.2ubuntu2_amd64.deb
         sudo apt install ./libidn11_1.33-2.2ubuntu2_amd64.deb
