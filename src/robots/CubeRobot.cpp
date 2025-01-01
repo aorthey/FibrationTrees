@@ -4,6 +4,7 @@
 #include <ompl/base/spaces/SE2StateSpace.h>
 
 #include "DartHelper.hpp"
+#include "yaml/SkeletonHelpers.hpp"
 
 dart::dynamics::SkeletonPtr CubeRobot::MakeSkeleton(const YAML::Node& node) {
   if(node["size"]) {
@@ -18,21 +19,8 @@ dart::dynamics::SkeletonPtr CubeRobot::MakeSkeleton(const YAML::Node& node) {
 
   auto skeleton = createPlanarBox(State3d(0, 0, 0.5*height_), width_, length_, height_);
 
-  if(node["lower_limits"]) {
-    const auto lower_limits = node["lower_limits"].as<std::vector<double>>();
-    if(lower_limits.size() != 2) {
-      throw std::domain_error("CubeRobot lower_limits must be size 2 (x, y).");
-    }
-    skeleton->setPositionLowerLimits({0,1}, MakeState2d(lower_limits));
-  }
-  if(node["upper_limits"]) {
-    const auto upper_limits = node["upper_limits"].as<std::vector<double>>();
-    if(upper_limits.size() != 2) {
-      throw std::domain_error("CubeRobot upper_limits must be size 2 (x, y).");
-    }
-    skeleton->setPositionUpperLimits({0,1}, MakeState2d(upper_limits));
-  }
-
+  SetSkeletonLowerLimits(skeleton, node, 2u);
+  SetSkeletonUpperLimits(skeleton, node, 2u);
   return skeleton;
 }
 

@@ -39,8 +39,8 @@ Maybe when pressing Fn/Strg/Alt/Super ?
 - [x] Ensure that multi robots can be loaded in arbitrary order
 - [x] Add [x]DiskRobot, [x]SphereRobot, [x]CubeRobot to RobotLoaderTest
 - [x] Add options to robot factory by using YAML::Node
+- [x] Fix workflow to execute tests on github
 - [ ] Add CubeRobot DvP scenario
 - [ ] Add MobileManip DvP scenario
 - [ ] Multi robot collision checker init in MakeCollisionChecker
 - [ ] Terminate immediately on invalid goal
-- [ ] Fix workflow to execute tests on github

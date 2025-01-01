@@ -3,6 +3,8 @@
 #include <ompl/multilevel/datastructures/projections/SubspaceProjection.h>
 #include <ompl/multilevel/datastructures/projections/SubspaceFiberedProjection.h>
 #include <ompl/multilevel/datastructures/projections/RNSO2_RN.h>
+#include <ompl/multilevel/datastructures/projections/SE2RN_R2.h>
+#include <ompl/multilevel/datastructures/projections/XRN_X_SE2.h>
 #include <ompl/multilevel/datastructures/projections/RN_RM.h>
 #include <ompl/multilevel/datastructures/Projection.h>
 #include <ompl/multilevel/datastructures/projections/TimeBasedProjection.h>
@@ -42,6 +44,10 @@ ompl::multilevel::ProjectionPtr MakeProjectionFromNode(const YAML::Node& node, c
     return std::make_shared<ProjectionTaskSpace>(parent, child, parent_robot);
   } else if(name == "Projection_RNSO2_RN") {
     return std::make_shared<ompl::multilevel::Projection_RNSO2_RN>(parent->getStateSpace(), child->getStateSpace());
+  } else if(name == "Projection_SE2RN_R2") {
+    return std::make_shared<ompl::multilevel::Projection_SE2RN_R2>(parent->getStateSpace(), child->getStateSpace());
+  } else if(name == "Projection_SE2RN_SE2") {
+    return std::make_shared<ompl::multilevel::Projection_SE2RN_SE2>(parent->getStateSpace(), child->getStateSpace());
   } else if(name == "Projection_RN_RM") {
     return std::make_shared<ompl::multilevel::Projection_RN_RM>(parent->getStateSpace(), child->getStateSpace());
   } else if(name == "Projection_TimeBased") {

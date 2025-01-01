@@ -63,3 +63,23 @@ std::vector<State3d> MobileCar::GetFK(const StateXd& config) const {
   skeleton_->setConfiguration(config.configuration);
   return std::vector<State3d>({skeleton_->getBodyNode(endeffector)->getTransform().translation()});
 }
+
+StateXd MobileCar::StateToEigen(const ompl::base::State* state) const {
+  Eigen::VectorXd v(3);
+  const auto *state_SE2 = state->as<ompl::base::SE2StateSpace::StateType>();
+
+  v[0] = state_SE2->getX();
+  v[1] = state_SE2->getY();
+  v[2] = state_SE2->getYaw();
+  return MakeState(v);
+}
+
+void MobileCar::EigenToState(const StateXd& v, ompl::base::State* state) const {
+  auto N = v.configuration.size();
+  auto *state_SE2 = state->as<ompl::base::SE2StateSpace::StateType>();
+
+  state_SE2->setX(v.configuration[0]);
+  state_SE2->setY(v.configuration[1]);
+  state_SE2->setYaw(v.configuration[2]);
+}
+

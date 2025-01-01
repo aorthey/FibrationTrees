@@ -6,8 +6,9 @@
 #include "KinematicsSolver.hpp"
 #include "FilePath.hpp"
 #include "validators/DefaultMotionValidator.hpp"
+#include "yaml/SkeletonHelpers.hpp"
 
-dart::dynamics::SkeletonPtr MobileKukaRobot::MakeSkeleton(const YAML::Node& /*node*/) {
+dart::dynamics::SkeletonPtr MobileKukaRobot::MakeSkeleton(const YAML::Node& node) {
   const auto urdf_name = GetDataFolder() + "robots/kuka_lwr/kuka_endeffector_mobile.urdf";
 
   dart::utils::DartLoader loader;
@@ -15,22 +16,22 @@ dart::dynamics::SkeletonPtr MobileKukaRobot::MakeSkeleton(const YAML::Node& /*no
   options.mDefaultRootJointType = dart::utils::DartLoader::RootJointType::FLOATING;
   loader.setOptions(options);
 
-  dart::dynamics::SkeletonPtr manipulator
+  dart::dynamics::SkeletonPtr skeleton
     = loader.parseSkeleton(urdf_name);
 
   static int count = 0;
-  manipulator->setName("manipulator_"+std::to_string(count++));
-  manipulator->setMobile(false);
-  manipulator->setSelfCollisionCheck(true);
-  manipulator->setAdjacentBodyCheck(true);
+  skeleton->setName("manipulator_"+std::to_string(count++));
+  skeleton->setMobile(false);
+  skeleton->setSelfCollisionCheck(true);
+  skeleton->setAdjacentBodyCheck(true);
 
   Eigen::Isometry3d transform(Eigen::Isometry3d::Identity());
   transform.translation() = State3d{0.0, 0.0, -0.2};
-  manipulator->getRootBodyNode()->getParentJoint()->setTransformFromParentBodyNode(transform);
+  skeleton->getRootBodyNode()->getParentJoint()->setTransformFromParentBodyNode(transform);
 
   //Disable friction. This was causing an assert error in ContactConstraint.cpp
   //in dartsim
-  for(const auto& body_node : manipulator->getBodyNodes()) {
+  for(const auto& body_node : skeleton->getBodyNodes()) {
     auto nodes = body_node->getShapeNodesWith<dart::dynamics::DynamicsAspect>();
     for(const auto& node : nodes) {
       node->getDynamicsAspect()->setFrictionCoeff(0.0);
@@ -38,7 +39,10 @@ dart::dynamics::SkeletonPtr MobileKukaRobot::MakeSkeleton(const YAML::Node& /*no
       node->getDynamicsAspect()->setSecondaryFrictionCoeff(0.0);
     }
   }
-  return manipulator;
+
+  SetSkeletonLowerLimits(skeleton, node, 2u);
+  SetSkeletonUpperLimits(skeleton, node, 2u);
+  return skeleton;
 }
 
 ompl::multilevel::FactoredSpaceInformationPtr MobileKukaRobot::MakeSpaceInformation(const RobotPtr& robot) {

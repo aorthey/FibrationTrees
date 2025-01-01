@@ -86,16 +86,12 @@ RobotPtr MakeAtomicRobotFromNode(const YAML::Node& node,
 
   if(name == "KukaRobotTaskSpace") {
     robot = MakeRobot<KukaRobotTaskSpace>(world, obstacles, node);
-
-  } else if(name == "MobileKukaRobot") {
-    robot = MakeRobot<MobileKukaRobot>(world, obstacles, node);
-    // auto lower_limit = node["lower_limits"].as<std::vector<double>>();
-    // auto upper_limit = node["upper_limits"].as<std::vector<double>>();
-    // robot->GetSkeleton()->setPositionLowerLimits(MakeState(lower_limit).configuration);
-    // robot->GetSkeleton()->setPositionUpperLimits(MakeState(upper_limit).configuration);
-
   } else if(name == "MobileKukaRobotTaskSpace") {
     robot = MakeRobot<MobileKukaRobotTaskSpace>(world, obstacles, node);
+  } else if(name == "MobileKukaRobot") {
+    robot = MakeRobot<MobileKukaRobot>(world, obstacles, node);
+  } else if(name == "MobileKukaBase") {
+    robot = MakeRobot<MobileKukaBase>(world, obstacles, node);
 
   } else if(name == "TimeBasedMobileKukaRobotTaskSpace") {
     robot = MakeRobot<TimeBasedMobileKukaRobotTaskSpace>(world, obstacles);

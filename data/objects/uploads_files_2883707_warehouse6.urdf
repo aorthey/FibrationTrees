@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<robot name="maze">
+  <link name="root">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="uploads_files_2883707_warehouse6.stl" scale="0.5 0.5 0.5"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="uploads_files_2883707_warehouse6.stl" scale="0.5 0.5 0.5"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>

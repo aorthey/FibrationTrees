@@ -5,8 +5,9 @@
 
 #include "FilePath.hpp"
 #include "validators/DefaultMotionValidator.hpp"
+#include "yaml/SkeletonHelpers.hpp"
 
-dart::dynamics::SkeletonPtr MobileKukaBase::MakeSkeleton(const YAML::Node& /*node*/) {
+dart::dynamics::SkeletonPtr MobileKukaBase::MakeSkeleton(const YAML::Node& node) {
   const auto urdf_name = GetDataFolder() + "robots/kuka_lwr/kuka_mobile_base_only.urdf";
 
   dart::utils::DartLoader loader;
@@ -37,11 +38,13 @@ dart::dynamics::SkeletonPtr MobileKukaBase::MakeSkeleton(const YAML::Node& /*nod
       node->getDynamicsAspect()->setSecondaryFrictionCoeff(0.0);
     }
   }
+  SetSkeletonLowerLimits(skeleton, node, 2u);
+  SetSkeletonUpperLimits(skeleton, node, 2u);
   return skeleton;
 }
 
 ompl::multilevel::FactoredSpaceInformationPtr MobileKukaBase::MakeSpaceInformation(const RobotPtr& robot) {
-  auto space = std::make_shared<ompl::base::SE2StateSpace>();
+  auto space = std::make_shared<ompl::base::RealVectorStateSpace>(2);
 
   ////////////////////////////////////////////////////////////////////////////////
   // Set Bounds RN
@@ -56,25 +59,6 @@ ompl::multilevel::FactoredSpaceInformationPtr MobileKukaBase::MakeSpaceInformati
   space->setBounds(bounds);
   auto factor = std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space);
   return factor;
-}
-
-StateXd MobileKukaBase::StateToEigen(const ompl::base::State* state) const {
-  Eigen::VectorXd v(3);
-  const auto *state_SE2 = state->as<ompl::base::SE2StateSpace::StateType>();
-
-  v[0] = state_SE2->getX();
-  v[1] = state_SE2->getY();
-  v[2] = state_SE2->getYaw();
-  return MakeState(v);
-}
-
-void MobileKukaBase::EigenToState(const StateXd& v, ompl::base::State* state) const {
-  auto N = v.configuration.size();
-  auto *state_SE2 = state->as<ompl::base::SE2StateSpace::StateType>();
-
-  state_SE2->setX(v.configuration[0]);
-  state_SE2->setY(v.configuration[1]);
-  state_SE2->setYaw(v.configuration[2]);
 }
 
 ompl::base::MotionValidatorPtr MobileKukaBase::MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& /*robot*/) {

@@ -7,19 +7,10 @@
 
 #include "State.hpp"
 
-const State3d kPathColor = State3d(0.3, 0.8, 0.3);
+const State3d kPathColor = State3d(0.2, 0.5, 0.2);
 const float kPathSphereSize = 0.01;
 const float kDefaultLineWidth = 5.0;
 constexpr double kFloorWidth = 3.0;
-
-const State3d color_red = State3d(0.8, 0.1, 0.1);
-const State3d color_red_light = State3d(1.0, 0.4, 0.4);
-
-const State3d color_green = State3d(0.1, 0.8, 0.1);
-const State3d color_green_light = State3d(0.4, 1.0, 0.4);
-
-const State3d color_blue = State3d(0.1, 0.1, 0.8);
-const State3d color_blue_light = State3d(0.4, 0.4, 1.0);
 
 void PrintSkeletonInfo(const dart::dynamics::SkeletonPtr& skeleton);
 StateXd GetRandomPosition(const dart::dynamics::SkeletonPtr& skeleton);

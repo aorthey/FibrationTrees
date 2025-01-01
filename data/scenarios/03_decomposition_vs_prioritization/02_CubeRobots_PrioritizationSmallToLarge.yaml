@@ -1,0 +1,175 @@
+name: CubeRobots
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: True
+
+obstacles:
+  Obstacle0:
+    name: Floor
+    type: floor
+    height: -0.15
+    color: [0.99, 0.99, 0.99, 1.0]
+    width: 30.0
+
+robots:
+  RobotA:
+    name: MultiRobot
+    robots: [RobotB, Robot8]
+    root: True
+    hide: True
+    smooth_path: True
+
+  RobotB:
+    name: MultiRobot
+    robots: [RobotC, Robot7]
+    hide: True
+    smooth_path: True
+
+  RobotC:
+    name: MultiRobot
+    robots: [RobotD, Robot6]
+    hide: True
+    smooth_path: True
+
+  RobotD:
+    name: MultiRobot
+    robots: [RobotE, Robot5]
+    hide: True
+    smooth_path: True
+
+  RobotE:
+    name: MultiRobot
+    robots: [RobotF, Robot4]
+    hide: True
+    smooth_path: True
+
+  RobotF:
+    name: MultiRobot
+    robots: [RobotG, Robot3]
+    hide: True
+    smooth_path: True
+
+  RobotG:
+    name: MultiRobot
+    robots: [Robot1, Robot2]
+    hide: True
+    smooth_path: True
+
+  Robot1:
+    name: CubeRobot
+    lower_limits: [-15.0, -15.0]
+    upper_limits: [+15.0, +15.0]
+    size: [1.0, 0.5, 1.0]
+    smooth_path: True
+    color: [0.9, 0.7, 0.7, 0.5]
+
+  Robot2:
+    name: CubeRobot
+    lower_limits: [-15.0, -15.0]
+    upper_limits: [+15.0, +15.0]
+    size: [1.0, 1.0, 2.0]
+    smooth_path: True
+    color: [0.9, 0.7, 0.7, 0.5]
+
+  Robot3:
+    name: CubeRobot
+    lower_limits: [-15.0, -15.0]
+    upper_limits: [+15.0, +15.0]
+    size: [1.5, 1.0, 3.0]
+    smooth_path: True
+    color: [0.9, 0.7, 0.7, 0.5]
+
+  Robot4:
+    name: CubeRobot
+    lower_limits: [-15.0, -15.0]
+    upper_limits: [+15.0, +15.0]
+    size: [2.0, 1.5, 3.0]
+    smooth_path: True
+    color: [0.9, 0.7, 0.7, 0.5]
+
+  Robot5:
+    name: CubeRobot
+    lower_limits: [-15.0, -15.0]
+    upper_limits: [+15.0, +15.0]
+    size: [2.0, 3.0, 4.0]
+    smooth_path: True
+    color: [0.9, 0.7, 0.7, 0.5]
+
+  Robot6:
+    name: CubeRobot
+    lower_limits: [-15.0, -15.0]
+    upper_limits: [+15.0, +15.0]
+    size: [3.0, 3.0, 5.0]
+    smooth_path: True
+    color: [0.9, 0.7, 0.7, 0.5]
+
+  Robot7:
+    name: CubeRobot
+    lower_limits: [-15.0, -15.0]
+    upper_limits: [+15.0, +15.0]
+    size: [4.0, 3.0, 5.0]
+    smooth_path: True
+    color: [0.9, 0.7, 0.7, 0.5]
+
+  Robot8:
+    name: CubeRobot
+    lower_limits: [-15.0, -15.0]
+    upper_limits: [+15.0, +15.0]
+    size: [4.0, 4.0, 6.0]
+    smooth_path: True
+    color: [0.9, 0.7, 0.7, 0.5]
+
+projections:
+
+  Projection0:
+    name: ProjectionMultiRobot
+    parent: RobotA
+    children: [RobotB]
+    task_space: False
+
+  Projection1:
+    name: ProjectionMultiRobot
+    parent: RobotB
+    children: [RobotC]
+    task_space: False
+
+  Projection2:
+    name: ProjectionMultiRobot
+    parent: RobotC
+    children: [RobotD]
+    task_space: False
+
+  Projection3:
+    name: ProjectionMultiRobot
+    parent: RobotD
+    children: [RobotE]
+    task_space: False
+
+  Projection4:
+    name: ProjectionMultiRobot
+    parent: RobotE
+    children: [RobotF]
+    task_space: False
+
+  Projection5:
+    name: ProjectionMultiRobot
+    parent: RobotF
+    children: [RobotG]
+    task_space: False
+
+  Projection6:
+    name: ProjectionMultiRobot
+    parent: RobotG
+    children: [Robot1]
+    task_space: False
+
+problem:
+  start:
+    type: joint
+    config: [-10.0, +5.0, 0.0, -10.0, 0.0, 0.78, -10.0, -5.0, 0.0, +10.0, +5.0, 0.0, +10.0, 0.0, 0.78, +10.0, -5.0, 0.0, +3.0, -10.0, 0.0, -3.0, -10.0, 0.0]
+
+  goal:
+    type: joint
+    threshold: 0.5
+    config: [+10.0, +5.0, 0.0, +10.0, 0.0, 0.78, +10.0, -5.0, 0.0,-10.0, +5.0, 0.0, -10.0, 0.0, 0.78, -10.0, -5.0, 0.0, +3.0, +10.0, 0.0, -3.0, +10.0, 0.0]
