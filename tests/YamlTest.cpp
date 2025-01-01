@@ -60,4 +60,26 @@ TEST(YamlTest, LoadCubeRobotWithLimitsTest) {
   EXPECT_NEAR(bounds.low.at(1), -7.0, Epsilon);
   EXPECT_NEAR(bounds.high.at(0), +8.0, Epsilon);
   EXPECT_NEAR(bounds.high.at(1), +9.0, Epsilon);
+
+  EXPECT_EQ(robot->GetSkeleton()->getNumShapeNodes(), 1u);
+  auto shape_node = robot->GetSkeleton()->getShapeNode(0);
+  auto shape = shape_node->getShape();
+
+  EXPECT_NEAR(shape->getVolume(), 1.0*2.0*3.0, Epsilon);
+
+  auto box_shape = std::dynamic_pointer_cast<dart::dynamics::BoxShape>(shape);
+  EXPECT_NE(box_shape, nullptr);
+
+  auto size = box_shape->getSize();
+  EXPECT_EQ(size.size(), 3u);
+
+  auto expected_size = config["size"].as<std::vector<double>>();
+  EXPECT_EQ(expected_size.size(), 3u);
+
+  EXPECT_NEAR(size[0], 1.0, Epsilon);
+  EXPECT_NEAR(size[1], 2.0, Epsilon);
+  EXPECT_NEAR(size[2], 3.0, Epsilon);
+  EXPECT_NEAR(size[0], expected_size.at(0), Epsilon);
+  EXPECT_NEAR(size[1], expected_size.at(1), Epsilon);
+  EXPECT_NEAR(size[2], expected_size.at(2), Epsilon);
 }

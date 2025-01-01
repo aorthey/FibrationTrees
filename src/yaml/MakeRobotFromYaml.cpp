@@ -7,6 +7,7 @@
 #include "DartHelper.hpp"
 #include "ToString.hpp"
 
+#include "robots/Drone.hpp"
 #include "robots/DiskRobot.hpp"
 #include "robots/CubeRobot.hpp"
 #include "robots/SphereRobot.hpp"
@@ -127,17 +128,12 @@ RobotPtr MakeAtomicRobotFromNode(const YAML::Node& node,
 
   } else if(name == "DiskRobot") {
     robot = MakeRobot<DiskRobot>(world, obstacles, node);
-    auto lower_limit = node["lower_limits"].as<std::vector<double>>();
-    auto upper_limit = node["upper_limits"].as<std::vector<double>>();
-    const auto task_space_limits = std::make_pair(MakeState2d(lower_limit), MakeState2d(upper_limit));
-    std::static_pointer_cast<DiskRobot>(robot)->SetLimits(task_space_limits);
 
   } else if(name == "SphereRobot") {
     robot = MakeRobot<SphereRobot>(world, obstacles, node);
-    auto lower_limit = node["lower_limits"].as<std::vector<double>>();
-    auto upper_limit = node["upper_limits"].as<std::vector<double>>();
-    const auto task_space_limits = std::make_pair(MakeState3d(lower_limit), MakeState3d(upper_limit));
-    std::static_pointer_cast<SphereRobot>(robot)->SetLimits(task_space_limits);
+
+  } else if(name == "Drone") {
+    robot = MakeRobot<Drone>(world, obstacles, node);
   } else {
     OMPL_ERROR("No robot with name %s available.", name.c_str());
     throw std::out_of_range("No robot with name");

@@ -7,5 +7,8 @@ class SphereRobot : public EuclideanRobot {
     SphereRobot() = default;
     dart::dynamics::SkeletonPtr MakeSkeleton(const YAML::Node& node) override;
     void SetLimits(const std::pair<State3d, State3d>& limits);
+
+  private:
+    double radius_{0.01};
 };
 

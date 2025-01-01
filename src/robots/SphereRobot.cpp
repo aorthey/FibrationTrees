@@ -3,9 +3,17 @@
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 
 #include "DartHelper.hpp"
+#include "yaml/SkeletonHelpers.hpp"
 
-dart::dynamics::SkeletonPtr SphereRobot::MakeSkeleton(const YAML::Node& /*node*/) {
-  return createSphere(0.01);
+dart::dynamics::SkeletonPtr SphereRobot::MakeSkeleton(const YAML::Node& node) {
+  if(node["radius"]) {
+    radius_ = node["radius"].as<double>();
+  }
+  std::cout << radius_ << std::endl;
+  auto skeleton = createSphere(radius_);
+  SetSkeletonLowerLimits(skeleton, node, 3u);
+  SetSkeletonUpperLimits(skeleton, node, 3u);
+  return skeleton;
 }
 
 void SphereRobot::SetLimits(const std::pair<State3d, State3d>& limits) {

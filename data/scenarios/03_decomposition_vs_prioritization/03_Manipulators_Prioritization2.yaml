@@ -1,0 +1,300 @@
+name: ManipulatorsBoilerRoom
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: True
+
+obstacles:
+
+  Obstacle1:
+    name: warehouse6
+    type: urdf
+    filename: objects/uploads_files_2883707_warehouse6.urdf
+    position: [0.0, 0.0, -0.3]
+
+robots:
+  RobotA:
+    name: MultiRobot
+    robots: [RobotAi, Robot8]
+    root: True
+    hide: True
+    smooth_path: True
+  RobotAi:
+    name: MultiRobot
+    robots: [RobotB, Robot8i]
+    root: True
+    hide: True
+    smooth_path: True
+
+  RobotB:
+    name: MultiRobot
+    robots: [RobotBi, Robot7]
+    hide: True
+    smooth_path: True
+  RobotBi:
+    name: MultiRobot
+    robots: [RobotC, Robot7i]
+    hide: True
+    smooth_path: True
+
+  RobotC:
+    name: MultiRobot
+    robots: [RobotCi, Robot6]
+    hide: True
+    smooth_path: True
+  RobotCi:
+    name: MultiRobot
+    robots: [RobotD, Robot6i]
+    hide: True
+    smooth_path: True
+
+  RobotD:
+    name: MultiRobot
+    robots: [RobotDi, Robot5]
+    hide: True
+    smooth_path: True
+  RobotDi:
+    name: MultiRobot
+    robots: [RobotE, Robot5]
+    hide: True
+    smooth_path: True
+
+  RobotE:
+    name: MultiRobot
+    robots: [RobotEi, Robot4]
+    hide: True
+    smooth_path: True
+  RobotEi:
+    name: MultiRobot
+    robots: [RobotF, Robot4]
+    hide: True
+    smooth_path: True
+
+  RobotF:
+    name: MultiRobot
+    robots: [RobotFi, Robot3]
+    hide: True
+    smooth_path: True
+  RobotFi:
+    name: MultiRobot
+    robots: [RobotG, Robot3]
+    hide: True
+    smooth_path: True
+
+  RobotG:
+    name: MultiRobot
+    robots: [RobotGi, Robot2]
+    hide: True
+    smooth_path: True
+  RobotGi:
+    name: MultiRobot
+    robots: [Robot1, Robot2i]
+    hide: True
+    smooth_path: True
+
+  Robot1:
+    name: MobileKukaRobot
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
+    smooth_path: True
+  Robot1i:
+    name: MobileKukaBase
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
+    smooth_path: True
+    hide: True
+
+  Robot2:
+    name: MobileKukaRobot
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
+    smooth_path: True
+  Robot2i:
+    name: MobileKukaBase
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
+    smooth_path: True
+    hide: True
+
+  Robot3:
+    name: MobileKukaRobot
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
+    smooth_path: True
+  Robot3i:
+    name: MobileKukaBase
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
+    smooth_path: True
+    hide: True
+
+  Robot4:
+    name: MobileKukaRobot
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
+    smooth_path: True
+  Robot4i:
+    name: MobileKukaBase
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
+    smooth_path: True
+    hide: True
+
+  Robot5:
+    name: MobileKukaRobot
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
+    smooth_path: True
+  Robot5i:
+    name: MobileKukaBase
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
+    smooth_path: True
+    hide: True
+
+  Robot6:
+    name: MobileKukaRobot
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
+    smooth_path: True
+  Robot6i:
+    name: MobileKukaBase
+    lower_limits: [-7.0, -7.0]
+    upper_limits: [+7.0, +7.0]
+    smooth_path: True
+    hide: True
+
+  Robot7:
+    name: MobileKukaRobot
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
+    smooth_path: True
+  Robot7i:
+    name: MobileKukaBase
+    lower_limits: [-7.0, -7.0]
+    upper_limits: [+7.0, +7.0]
+    smooth_path: True
+    hide: True
+
+  Robot8:
+    name: MobileKukaRobot
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
+    smooth_path: True
+  Robot8i:
+    name: MobileKukaBase
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
+    smooth_path: True
+    hide: True
+
+projections:
+
+  Projection0:
+    name: ProjectionMultiRobot
+    parent: RobotAi
+    children: [RobotB]
+    task_space: False
+
+  Projection1:
+    name: ProjectionMultiRobot
+    parent: RobotBi
+    children: [RobotC]
+    task_space: False
+
+  Projection2:
+    name: ProjectionMultiRobot
+    parent: RobotCi
+    children: [RobotD]
+    task_space: False
+
+  Projection3:
+    name: ProjectionMultiRobot
+    parent: RobotDi
+    children: [RobotE]
+    task_space: False
+
+  Projection4:
+    name: ProjectionMultiRobot
+    parent: RobotEi
+    children: [RobotF]
+    task_space: False
+
+  Projection5:
+    name: ProjectionMultiRobot
+    parent: RobotFi
+    children: [RobotG]
+    task_space: False
+
+  Projection6:
+    name: ProjectionMultiRobot
+    parent: RobotGi
+    children: [Robot1]
+    task_space: False
+
+  # Projection1:
+  #   name: Projection_SE2RN_R2
+  #   connection: [RobotA, RobotAi]
+
+  # Projection2:
+  #   name: Projection_SE2RN_R2
+  #   connection: [Robot2, Robot2i]
+  # Projection3:
+  #   name: Projection_SE2RN_R2
+  #   connection: [Robot3, Robot3i]
+  # Projection4:
+  #   name: Projection_SE2RN_R2
+  #   connection: [Robot4, Robot4i]
+  # Projection5:
+  #   name: Projection_SE2RN_R2
+  #   connection: [Robot5, Robot5i]
+  # Projection6:
+  #   name: Projection_SE2RN_R2
+  #   connection: [Robot6, Robot6i]
+  # Projection7:
+  #   name: Projection_SE2RN_R2
+  #   connection: [Robot7, Robot7i]
+  # Projection8:
+  #   name: Projection_SE2RN_R2
+  #   connection: [Robot8, Robot8i]
+
+problem:
+  start:
+    type: task
+    Robot1i:
+      config: [-2.3, +6.0, 0]
+    Robot2i:
+      config: [-0.5, +4.0, 0]
+    Robot3i:
+      config: [+2.5, +4.0, 0]
+    Robot4i:
+      config: [+0.8, +2.0, 0]
+    Robot5i:
+      config: [+2.7, -3.0, 0]
+    Robot6i:
+      config: [-2.2, -1.3, 0]
+    Robot7i:
+      config: [-0.0, +0.0, 0]
+    Robot8i:
+      config: [-0.0, -2.0, 0]
+
+  goal:
+    type: task
+    threshold: 0.5
+    Robot1i:
+      config: [+2.0, -6.0, 0]
+    Robot2i:
+      config: [+1.0, -6.0, 0]
+    Robot3i:
+      config: [-1.0, -6.0, 0]
+    Robot4i:
+      config: [-2.0, -6.0, 0]
+    Robot5i:
+      config: [+2.0, +5.5, 0]
+    Robot6i:
+      config: [+1.0, +5.5, 0]
+    Robot7i:
+      config: [-1.0, +5.5, 0]
+    Robot8i:
+      config: [-2.0, +5.5, 0]
+

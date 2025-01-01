@@ -2,9 +2,9 @@
 
 #include "robots/Robot.hpp"
 
-class ZeppelinRobot : public Robot {
+class Drone : public Robot {
   public:
-    ZeppelinRobot() = default;
+    Drone() = default;
     dart::dynamics::SkeletonPtr MakeSkeleton(const YAML::Node& node) override;
     ompl::multilevel::FactoredSpaceInformationPtr MakeSpaceInformation(const RobotPtr& robot) override;
 

@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<robot name="drone">
+  <link name="body">
+  <contact>
+      <lateral_friction value="1"/>
+  </contact>
+    <collision>
+      <origin xyz="+0.0 +0.0 +0.0" rpy="0 0 0" />
+      <geometry>
+        <mesh scale="1 1 1" filename="drone/drone.stl"/>
+      </geometry>
+       <material name="grey">
+        <color rgba="0.5 0.5 0.5 0.5"/>
+      </material>
+    </collision>
+    <visual>
+      <origin xyz="+0.0 +0.0 +0.0" rpy="0 0 0"/>
+      <geometry>
+        <mesh scale="1 1 1" filename="drone/drone.stl"/>
+      </geometry>
+       <material name="grey">
+        <color rgba="0.5 0.5 0.5 0.5"/>
+      </material>
+    </visual>
+    <inertial>
+      <mass value="10"/>
+      <inertia ixx="1e-6" ixy="0.0" ixz="0.0" iyy="0.083" iyz="0.0" izz="0.083"/>
+    </inertial>
+  </link>
+</robot>
+

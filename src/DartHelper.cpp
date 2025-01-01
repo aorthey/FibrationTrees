@@ -199,11 +199,6 @@ dart::dynamics::SkeletonPtr createCylinder(const State3d& position, const State3
     body->getParentJoint()->setTransformFromParentBodyNode(tf);
     body->setName(name);
 
-    // auto ll = MakeState(ReadConfigVariable<std::vector<double>>("disk_robot_lower_limit"));
-    // auto ul = MakeState(ReadConfigVariable<std::vector<double>>("disk_robot_upper_limit"));
-    // cylinder->setPositionLowerLimits(ll.configuration);
-    // cylinder->setPositionUpperLimits(ul.configuration);
-
     return cylinder;
 }
 

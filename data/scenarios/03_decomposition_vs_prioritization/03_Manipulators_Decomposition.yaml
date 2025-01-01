@@ -7,7 +7,7 @@ world:
 obstacles:
 
   Obstacle1:
-    name: Boilerroom
+    name: warehouse6
     type: urdf
     filename: objects/uploads_files_2883707_warehouse6.urdf
     position: [0.0, 0.0, -0.3]
@@ -20,97 +20,97 @@ robots:
 
   RobotA:
     name: MobileKukaRobot
-    lower_limits: [-10.0, -10.0]
-    upper_limits: [+10.0, +10.0]
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
     smooth_path: True
   RobotAi:
     name: MobileKukaBase
-    lower_limits: [-10.0, -10.0]
-    upper_limits: [+10.0, +10.0]
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
     smooth_path: True
     hide: True
 
   RobotB:
     name: MobileKukaRobot
-    lower_limits: [-10.0, -10.0]
-    upper_limits: [+10.0, +10.0]
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
     smooth_path: True
   RobotBi:
     name: MobileKukaBase
-    lower_limits: [-10.0, -10.0]
-    upper_limits: [+10.0, +10.0]
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
     smooth_path: True
     hide: True
 
   RobotC:
     name: MobileKukaRobot
-    lower_limits: [-10.0, -10.0]
-    upper_limits: [+10.0, +10.0]
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
     smooth_path: True
   RobotCi:
     name: MobileKukaBase
-    lower_limits: [-10.0, -10.0]
-    upper_limits: [+10.0, +10.0]
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
     smooth_path: True
     hide: True
 
   RobotD:
     name: MobileKukaRobot
-    lower_limits: [-10.0, -10.0]
-    upper_limits: [+10.0, +10.0]
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
     smooth_path: True
   RobotDi:
     name: MobileKukaBase
-    lower_limits: [-10.0, -10.0]
-    upper_limits: [+10.0, +10.0]
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
     smooth_path: True
     hide: True
 
   RobotE:
     name: MobileKukaRobot
-    lower_limits: [-10.0, -10.0]
-    upper_limits: [+10.0, +10.0]
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
     smooth_path: True
   RobotEi:
     name: MobileKukaBase
-    lower_limits: [-10.0, -10.0]
-    upper_limits: [+10.0, +10.0]
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
     smooth_path: True
     hide: True
 
   RobotF:
     name: MobileKukaRobot
-    lower_limits: [-10.0, -10.0]
-    upper_limits: [+10.0, +10.0]
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
     smooth_path: True
   RobotFi:
     name: MobileKukaBase
-    lower_limits: [-10.0, -10.0]
-    upper_limits: [+10.0, +10.0]
+    lower_limits: [-7.0, -7.0]
+    upper_limits: [+7.0, +7.0]
     smooth_path: True
     hide: True
 
   RobotG:
     name: MobileKukaRobot
-    lower_limits: [-10.0, -10.0]
-    upper_limits: [+10.0, +10.0]
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
     smooth_path: True
   RobotGi:
     name: MobileKukaBase
-    lower_limits: [-10.0, -10.0]
-    upper_limits: [+10.0, +10.0]
+    lower_limits: [-7.0, -7.0]
+    upper_limits: [+7.0, +7.0]
     smooth_path: True
     hide: True
 
   RobotH:
     name: MobileKukaRobot
-    lower_limits: [-10.0, -10.0]
-    upper_limits: [+10.0, +10.0]
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
     smooth_path: True
   RobotHi:
     name: MobileKukaBase
-    lower_limits: [-10.0, -10.0]
-    upper_limits: [+10.0, +10.0]
+    lower_limits: [-5.0, -7.0]
+    upper_limits: [+5.0, +7.0]
     smooth_path: True
     hide: True
 

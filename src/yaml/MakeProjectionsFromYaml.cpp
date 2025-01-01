@@ -30,12 +30,7 @@ std::string GetRootRobotNameFromYamlFilename(const std::string& filename) {
   throw std::out_of_range("Requires at least one root robot in yaml file.");
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Make projections
-////////////////////////////////////////////////////////////////////////////////
-
 ompl::multilevel::ProjectionPtr MakeProjectionFromNode(const YAML::Node& node, const ompl::base::SpaceInformationPtr& parent, const ompl::base::SpaceInformationPtr& child, const RobotPtr& parent_robot) {
-
   if(!node["name"]) {
     throw std::domain_error("Requires a name to create a projection.");
   }
@@ -133,9 +128,6 @@ void MakeProjectionsFromYamlFilename(const std::string& filename, const dart::si
             throw std::runtime_error("Could not add child");
           }
         }
-        // auto pairwise_collision_checker = std::make_shared<DartMultiRobotCollisionChecker>(world, child_robots_of_parent);
-        // parent->setStateValidityChecker(pairwise_collision_checker);
-        // parent->setStateValidityCheckingResolution(0.001);
 
         if(node["task_space"]) {
           if(node["task_space"].as<bool>()) {

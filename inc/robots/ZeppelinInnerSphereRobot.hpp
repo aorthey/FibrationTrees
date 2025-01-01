@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma once
-
 #include "robots/SphereRobot.hpp"
 
 class ZeppelinInnerSphereRobot : public SphereRobot {

@@ -1,0 +1,69 @@
+name: Drones
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: True
+
+obstacles:
+
+  Obstacle1:
+    name: Hut
+    type: urdf
+    filename: objects/hut_05.urdf
+    position: [0.0, 0.0, 0.0]
+
+robots:
+
+  Robot1:
+    name: Drone
+    root: True
+
+  Robot1i:
+    name: SphereRobot
+    radius: 0.05
+    hide: False
+
+projections:
+  Projection1:
+    name: ProjectionSubspace
+    connection: [Robot1, Robot1i]
+
+problem:
+  start:
+    type: task
+    Robot1i: 
+      config: [+1.5, -1.0, 0.1]
+    # Robot2i: 
+    #   config: [+1.5, -0.3, 0.1]
+    # Robot3i: 
+    #   config: [+1.5, +0.3, 0.1]
+    # Robot4i: 
+    #   config: [+1.5, +1.0, 0.1]
+    # Robot5i: 
+    #   config: [+1.5, -1.0, 0.3]
+    # Robot6i: 
+    #   config: [+1.5, -0.3, 0.3]
+    # Robot7i: 
+    #   config: [+1.5, +0.3, 0.3]
+    # Robot8i: 
+    #   config: [+1.5, +1.0, 0.3]
+
+  goal:
+    type: task
+    threshold: 0.5
+    Robot1i: 
+      config: [-1.5, -1.0, 0.1]
+    # Robot2i: 
+    #   config: [-1.5, -0.3, 0.1]
+    # Robot3i: 
+    #   config: [-1.5, +0.3, 0.1]
+    # Robot4i: 
+    #   config: [-1.5, +1.0, 0.1]
+    # Robot5i: 
+    #   config: [-1.5, -1.0, 0.3]
+    # Robot6i: 
+    #   config: [-1.5, -0.3, 0.3]
+    # Robot7i: 
+    #   config: [-1.5, +0.3, 0.3]
+    # Robot8i: 
+    #   config: [-1.5, +1.0, 0.3]

@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include "robots/Drone.hpp"
 #include "robots/DiskRobot.hpp"
 #include "robots/CubeRobot.hpp"
 #include "robots/SphereRobot.hpp"
@@ -23,6 +24,7 @@ template <class T>
 class RobotLoaderTest : public testing::Test {};
 
 using RobotTypes = ::testing::Types<
+    Drone,
     DiskRobot,
     SphereRobot, 
     CubeRobot,
@@ -45,7 +47,7 @@ TYPED_TEST(RobotLoaderTest, DefaultLoaderTest) {
   auto si = robot->GetSpaceInformation();
 
   const auto Ndim = si->getStateDimension();
-
+  
   ////////////////////////////////////////////////////////////////////////////////
   OMPL_DEBUG("Created robot %s with %d dimensions.", robot->GetSpaceInformation()->getName().c_str(), Ndim);
   ////////////////////////////////////////////////////////////////////////////////

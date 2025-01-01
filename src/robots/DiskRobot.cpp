@@ -3,9 +3,20 @@
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 
 #include "DartHelper.hpp"
+#include "yaml/SkeletonHelpers.hpp"
 
-dart::dynamics::SkeletonPtr DiskRobot::MakeSkeleton(const YAML::Node& /*node*/) {
-  return createCylinder(State3d(0,0,0), radius_, height_);
+dart::dynamics::SkeletonPtr DiskRobot::MakeSkeleton(const YAML::Node& node) {
+  if(node["radius"]) {
+    radius_ = node["radius"].as<double>();
+  }
+  if(node["height"]) {
+    height_ = node["height"].as<double>();
+  }
+
+  auto skeleton = createCylinder(State3d(0,0,0), radius_, height_);
+  SetSkeletonLowerLimits(skeleton, node, 2u);
+  SetSkeletonUpperLimits(skeleton, node, 2u);
+  return skeleton;
 }
 
 void DiskRobot::SetLimits(const std::pair<State2d, State2d>& limits) {
