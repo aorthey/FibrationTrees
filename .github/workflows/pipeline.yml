@@ -64,6 +64,7 @@ jobs:
         make -j$(nproc)
         
   test:
+    steps:
     - name: Run Tests
       run: |
         cd build
