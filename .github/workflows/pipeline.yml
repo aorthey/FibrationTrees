@@ -10,8 +10,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    outputs:
-      build_dir: ${{ steps.build.outputs.build_dir }}
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -69,7 +67,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: build-artifact
-        path: build
+        path: ${{github.workspace}}/build
 
   ompl-unit-tests:
     runs-on: ubuntu-latest
@@ -83,11 +81,10 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: build-artifact
-        path: ${{ needs.build.outputs.build_dir }}
+        path: ${{github.workspace}}/build
 
     - name: Run Tests
       run: |
-        cd ${{ needs.build.outputs.build_dir }}
         cd ompl-custom/build
         ctest --output-on-failure
 
@@ -96,13 +93,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: test-results
-        path: ${{ needs.build.outputs.build_dir }}/Testing/Temporary/LastOmplUnitTests.log
-
-    - name: Archive build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-artifact
-        path: ${{ needs.build.outputs.build_dir }}
+        path: ${{github.workspace}}/Testing/Temporary/LastOmplUnitTests.log
         
   unit-tests:
     runs-on: ubuntu-latest
@@ -116,11 +107,10 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: build-artifact
-        path: ${{ needs.build.outputs.build_dir }}
+        path: ${{github.workspace}}/build
 
     - name: Run Tests
       run: |
-        cd ${{ needs.build.outputs.build_dir }}
         cd build
         ctest --output-on-failure -L unit
 
@@ -129,10 +119,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: test-results
-        path: ${{ needs.build.outputs.build_dir }}/Testing/Temporary/LastUnitTests.log
-
-    - name: Archive build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-artifact
-        path: ${{ needs.build.outputs.build_dir }}
+        path: ${{github.workspace}}/Testing/Temporary/LastUnitTests.log
