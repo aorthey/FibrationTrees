@@ -23,11 +23,11 @@ HopfFibrationMotionValidator::~HopfFibrationMotionValidator() {
     hopf_fibration_projection_->getFiberSpace()->freeState(fiberState1_);
 }
 
-bool HopfFibrationMotionValidator::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
+bool HopfFibrationMotionValidator::checkMotion(const ompl::base::State *, const ompl::base::State *) const {
   throw std::runtime_error("Not yet implemented");
 }
 
-bool HopfFibrationMotionValidator::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const {
+bool HopfFibrationMotionValidator::checkMotion(const ompl::base::State *, const ompl::base::State *, std::pair<ompl::base::State *, double>&) const {
   throw std::runtime_error("Not yet implemented");
 }
 

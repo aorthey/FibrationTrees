@@ -5,7 +5,7 @@
 
 bool SampleValidLift(const ompl::multilevel::ProjectionPtr& projection, const ompl::base::SpaceInformationPtr& si, 
     const size_t max_iterations, const ompl::base::State *xBase, ompl::base::State *xBundle) {
-  int iterations=0;
+  size_t iterations=0;
   while(iterations++ < max_iterations) {
     projection->lift(xBase, xBundle);
     if(si->getStateValidityChecker()->isValid(xBundle)) {

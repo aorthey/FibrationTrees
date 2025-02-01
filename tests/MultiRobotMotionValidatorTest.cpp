@@ -39,17 +39,18 @@ void CheckMultiRobotEdge(
   std::vector<RobotPtr> robots = {robot1, robot2};
   auto multi_robot = MultiRobot::MakeMultiRobot(robots);
 
-  ////////////////////////////////////////////////////////////////////////////////
-  ////OMPL Setup
-  //
-  //           factor (both robots)
-  //           /                 \
-  //         /                     \
-  //     child1 (robot1)        child2 (robot2)
-  //        |                        |
-  //  grand_child1 (point1)    grand_child2 (point2)
-  //
-  ////////////////////////////////////////////////////////////////////////////////
+  /*
+   *
+   * OMPL Setup
+   * 
+   *          factor (both robots)
+   *          /                 \
+   *        /                     \
+   *    child1 (robot1)        child2 (robot2)
+   *       |                        |
+   * grand_child1 (point1)    grand_child2 (point2)
+   * 
+   */
   auto factor = multi_robot->GetSpaceInformation();
 
   auto child1 = robot1->GetSpaceInformation();

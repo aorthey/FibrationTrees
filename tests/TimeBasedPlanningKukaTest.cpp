@@ -167,7 +167,6 @@ void TestConnection(
     double t_start, double t_goal, bool expect_true = true) 
 {
   auto factor = robot->GetSpaceInformation();
-  const double kEndTime = robot->GetTMax();
 
   auto start_state = MakeState({x_start, -0.0, 0.0, -1.0, 0.0, +1.57, -1, 2, 0.24, -0.21});
   auto goal_state = MakeState({x_goal, -0.0, 0.0, 0.0, 0.0, -1.57, +1, 2, 0.24, -0.21});

@@ -14,8 +14,6 @@ class TaskSpaceMobileTimeBased : public ompl::base::CompoundStateSpace {
 
   ~TaskSpaceMobileTimeBased();
 
-  //void interpolate(const ompl::base::State *from, const ompl::base::State *to, double t, ompl::base::State *state) const override;
-
   double distance(const ompl::base::State *from, const ompl::base::State *to) const override;
 
   bool isMetricSpace() const override;
@@ -23,6 +21,8 @@ class TaskSpaceMobileTimeBased : public ompl::base::CompoundStateSpace {
   double getVMax() const;
 
  protected:
+  RobotPtr robot_;
+
   /** \brief The maximum velocity of the space. */
   double vMax_;
 
@@ -30,5 +30,4 @@ class TaskSpaceMobileTimeBased : public ompl::base::CompoundStateSpace {
   double eps_ = std::numeric_limits<float>::epsilon();
 
   KinematicsSolverPtr kinematics_solver_;
-  RobotPtr robot_;
 };

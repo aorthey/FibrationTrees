@@ -10,7 +10,6 @@ EigenPath::EigenPath() {
 }
 
 EigenPath::EigenPath(const RobotPtr& robot, const ompl::base::PathPtr& path) {
-  const auto& si = path->getSpaceInformation();
   ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
   auto states = pgeo.getStates();
   configs_.clear();
@@ -135,20 +134,20 @@ double EigenPath::GetLength() const {
   return total_length_;
 }
 
-void EigenPath::Save(const std::string& filename) {
+void EigenPath::Save(const std::string& /*filename*/) {
   // std::ofstream out(filename);
   // boost::archive::text_oarchive oa(out);
   // oa << *this;
   OMPL_ERROR("NYI");
 }
 
-void EigenPath::Load(const std::string& filename) {
+void EigenPath::Load(const std::string& /*filename*/) {
   // std::ifstream input(filename);
   // boost::archive::text_iarchive ia(input);
   // ia >> *this;
   OMPL_ERROR("NYI");
 }
-EigenPath EigenPath::FromFile(const std::string& filename) {
+EigenPath EigenPath::FromFile(const std::string& /*filename*/) {
   EigenPath path;
   // {
   //   std::ifstream input(filename);

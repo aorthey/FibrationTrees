@@ -73,7 +73,7 @@ ompl::multilevel::ProjectionPtr MakeProjectionFromNode(const YAML::Node& node, c
   }
 }
 
-void MakeProjectionsFromYamlFilename(const std::string& filename, const dart::simulation::WorldPtr& world, 
+void MakeProjectionsFromYamlFilename(const std::string& filename, const dart::simulation::WorldPtr&, 
     const ompl::multilevel::FactoredSpaceInformationPtr& root, const RobotPtr& root_robot, 
     const std::unordered_map<std::string, RobotPtr>& child_robots) {
 

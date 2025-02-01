@@ -48,7 +48,7 @@ bool CanMakeMultiRobotFromNode(const YAML::Node& node,
 }
 
 RobotPtr MakeMultiRobotFromNode(const YAML::Node& node,
-    const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles,
+    const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>&,
     std::unordered_map<std::string, RobotPtr> child_robots) {
 
   if(!node["name"]) {

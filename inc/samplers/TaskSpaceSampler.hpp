@@ -14,9 +14,9 @@ class TaskSpaceSampler : public ompl::base::StateSampler {
     void sampleGaussian(ompl::base::State *state, const ompl::base::State *mean, double stdDev) override;
 
   protected:
-    KinematicsSolverPtr kinematics_solver_;
-    std::pair<State3d, State3d> limits_;
     RobotPtr robot_;
+    std::pair<State3d, State3d> limits_;
+    KinematicsSolverPtr kinematics_solver_;
 };
 
 ompl::base::StateSamplerPtr allocateTaskSpaceSampler(const RobotPtr& robot, const std::pair<State3d, State3d>& limits);

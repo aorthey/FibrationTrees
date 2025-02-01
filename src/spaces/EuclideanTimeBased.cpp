@@ -39,8 +39,6 @@ double EuclideanTimeBased::distance(const ompl::base::State *from, const ompl::b
     return Inf;
   }
 
-  const auto *cstate_from = from->as<ompl::base::CompoundState>();
-  const auto *cstate_to = to->as<ompl::base::CompoundState>();
   return ompl::base::CompoundStateSpace::distance(from, to);
 }
 

@@ -85,9 +85,10 @@ class MultiRobotCollisionChecker : public ompl::base::StateValidityChecker
     bool isValid(const ompl::base::State *state) const override;
 
  protected:
+    dart::simulation::WorldPtr world_;
+
     std::vector<RobotPtr> robots_;
     MultiRobotPtr multi_robot_;
 
-    dart::simulation::WorldPtr world_;
     CollisionCheckerPtr collision_checker_;
 };

@@ -147,7 +147,7 @@ TYPED_TEST(RobotLoaderTest, JointLimitTest) {
   auto lb = skeleton->getPositionLowerLimits();
   auto ub = skeleton->getPositionUpperLimits();
 
-  for(size_t k = 0; k < lb.size(); k++) {
+  for(size_t k = 0; k < (size_t) lb.size(); k++) {
     if(!skeleton->getDof(k)->hasPositionLimit()) {
       continue;
     }

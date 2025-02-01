@@ -24,7 +24,7 @@ StateXd EuclideanRobot::StateToEigen(const ompl::base::State* state) const {
 
 void EuclideanRobot::EigenToState(const StateXd& v, ompl::base::State* state) const {
   double *state_R = state->as<ompl::base::RealVectorStateSpace::StateType>()->values;
-  for(size_t k = 0; k < v.configuration.size(); k++) {
+  for(size_t k = 0; k < (size_t) v.configuration.size(); k++) {
     state_R[k] = v.configuration[k];
   }
 }

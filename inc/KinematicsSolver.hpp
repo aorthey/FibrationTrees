@@ -9,10 +9,10 @@
 OMPL_CLASS_FORWARD(KinematicsSolver);
 
 const bool kDebugInfo = false;
-const float kStepSize = 0.05; //was 0.1. Best results for 0.01
-const float kIntermediateStatesStepSize = 0.01; //was 0.01
+const double kStepSize = 0.05; //was 0.1. Best results for 0.01
+const double kIntermediateStatesStepSize = 0.01; //was 0.01
 const size_t kMaxNonIncreasingIterations = 10;
-const float kOutOfBoundsJointLimitPadding = 0.0;//1e-2;
+const double kOutOfBoundsJointLimitPadding = 0.0;//1e-2;
 const size_t kDefaultMaxIKIterations = 10;
 
 class KinematicsSolver {

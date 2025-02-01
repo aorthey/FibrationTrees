@@ -26,12 +26,12 @@ void TaskSpaceMultiRobotSampler::sampleUniform(ompl::base::State *state) {
       auto skeleton = robot->GetSkeleton();
       auto invalid_state = GetRandomPosition(skeleton);
       auto lb = skeleton->getPositionLowerLimits();
-      for(size_t k = 0; k < invalid_state.configuration.size(); k++) {
+      for(size_t k = 0; k < (size_t) invalid_state.configuration.size(); k++) {
         eigen_vectors.configuration[current_dimension + k] = lb[k] - 1.0;
       }
     } else {
       auto q = maybe_ik_solution.value().configuration;
-      for(size_t k = 0; k < q.size(); k++) {
+      for(size_t k = 0; k < (size_t) q.size(); k++) {
         eigen_vectors.configuration[current_dimension + k] = q[k];
       }
     }
@@ -40,10 +40,10 @@ void TaskSpaceMultiRobotSampler::sampleUniform(ompl::base::State *state) {
   joint_robot_->EigenToState(eigen_vectors, state);
 }
 
-void TaskSpaceMultiRobotSampler::sampleUniformNear(ompl::base::State *state, const ompl::base::State *near, double distance) {
+void TaskSpaceMultiRobotSampler::sampleUniformNear(ompl::base::State*, const ompl::base::State*, double) {
   throw std::runtime_error("Not yet implemented");
 }
-void TaskSpaceMultiRobotSampler::sampleGaussian(ompl::base::State *state, const ompl::base::State *mean, double stdDev) {
+void TaskSpaceMultiRobotSampler::sampleGaussian(ompl::base::State*, const ompl::base::State*, double) {
   throw std::runtime_error("Not yet implemented");
 }
 

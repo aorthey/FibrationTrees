@@ -108,7 +108,6 @@ TEST(KinematicsSolverTest, ConfigEdgeIKSameConfigTest) {
   KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(manipulator);
   dart::math::Random::setSeed(0);
 
-  const auto N = manipulator->getNumDofs();
   auto start = MakeState({1.61707, -0.713562, 1.95916, -1.70716, 0.124328, -0.775085, 2.52864});
 
   auto configs = kinematics_solver->solve_edge_ik_with_config(start, start);
@@ -187,12 +186,9 @@ TEST(KinematicsSolverTest, JointFlipTest) {
   EXPECT_TRUE(maybe_start_frame.has_value());
   auto maybe_goal_frame = kinematics_solver->solve_fk(goal);
   EXPECT_TRUE(maybe_goal_frame.has_value());
-  auto start_frame = maybe_start_frame.value();
-  auto goal_frame = maybe_goal_frame.value();
 
   auto configs = kinematics_solver->solve_edge_ik_with_config(start, goal);
   EXPECT_GT(configs.size(), 2u);
-  //CheckFrontAndBackConfigs(kinematics_solver, configs, start_frame, goal_frame);
   EXPECT_TRUE(CheckStraightLineAccuracy(kinematics_solver, configs));
 }
 

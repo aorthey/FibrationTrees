@@ -21,10 +21,10 @@ void TaskSpaceSampler::sampleUniform(ompl::base::State *state) {
   }
 }
 
-void TaskSpaceSampler::sampleUniformNear(ompl::base::State *state, const ompl::base::State *near, double distance) {
+void TaskSpaceSampler::sampleUniformNear(ompl::base::State*, const ompl::base::State*, double) {
   throw std::runtime_error("Not yet implemented");
 }
-void TaskSpaceSampler::sampleGaussian(ompl::base::State *state, const ompl::base::State *mean, double stdDev) {
+void TaskSpaceSampler::sampleGaussian(ompl::base::State*, const ompl::base::State*, double) {
   throw std::runtime_error("Not yet implemented");
 }
 

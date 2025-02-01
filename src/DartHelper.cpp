@@ -33,7 +33,7 @@ void PrintSkeletonInfo(const dart::dynamics::SkeletonPtr& skeleton) {
   auto ub = skeleton->getPositionUpperLimits();
 
   std::cout << "Current Config " << std::endl;
-  for(size_t k = 0; k < config.size(); k++) {
+  for(size_t k = 0; k < (size_t)config.size(); k++) {
     std::cout << lb[k] << " <= " << config[k] << " <= " << ub[k] << std::endl;
   }
 }
@@ -233,7 +233,6 @@ dart::dynamics::SkeletonPtr createFromURDF(const std::string& urdf_name, const S
     dart::dynamics::SkeletonPtr object
       = loader.parseSkeleton(urdf_name);
 
-    static int count = 0;
     object->setMobile(false);
 
     auto body = object->getRootBodyNode();

@@ -6,10 +6,10 @@
 struct StateAndTcp {
   StateXd config;
   State3d tcp;
-  float error{0.0f};
+  double error{0.0f};
 };
 
-float ComputeError(const StateAndTcp& start, const StateAndTcp& goal) {
+double ComputeError(const StateAndTcp& start, const StateAndTcp& goal) {
   return Distance(goal.tcp, start.tcp);
 }
 
@@ -57,13 +57,12 @@ std::optional<State3d> KinematicsSolver::solve_fk(const StateXd& state) {
   auto config = state.configuration;
   auto lb = skeleton_->getPositionLowerLimits();
   auto ub = skeleton_->getPositionUpperLimits();
-  for(size_t k = 0; k < config.size(); k++) {
+  for(size_t k = 0; k < (size_t) config.size(); k++) {
     if(config[k] < (lb[k] - kOutOfBoundsJointLimitPadding) || config[k] > (ub[k] + kOutOfBoundsJointLimitPadding) || config[k] != config[k]) {
       return std::nullopt;
     }
   }
   skeleton_->setConfiguration(config);
-  auto t = skeleton_->getBodyNode(endeffector_)->getTransform().translation();
   return skeleton_->getBodyNode(endeffector_)->getTransform().translation();
 }
 
@@ -82,8 +81,8 @@ bool KinematicsSolver::AddConfig(const StateXd& config, std::vector<StateXd>& co
     return false;
   }
 
-  int num_steps = dist / kIntermediateStatesStepSize;
-  for(size_t k = 1; k<num_steps;k++) {
+  size_t num_steps = dist / kIntermediateStatesStepSize;
+  for(size_t k = 1; k < num_steps;k++) {
     auto next = last_config + k * kIntermediateStatesStepSize * (config - last_config);
     if(!solve_fk(next).has_value()) {
       return false;
@@ -106,8 +105,8 @@ TangentVector KinematicsSolver::ComputeJointLimitForce(const StateXd& state) con
   auto config = state.configuration;
   TangentVector dx(config.size());
   dx.setZero();
-  const float kThreshold = 0.5;
-  for(size_t k = 0; k < config.size(); k++) {
+  const double kThreshold = 0.5;
+  for(size_t k = 0; k < (size_t)config.size(); k++) {
     if(config[k] < lb[k] + kThreshold)
     {
       dx[k] = (lb[k] + kThreshold - config[k]);

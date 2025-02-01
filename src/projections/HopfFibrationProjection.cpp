@@ -112,7 +112,6 @@ void HopfFibrationProjection::lift(const ompl::base::State *xBase,
   auto x1 = (1+x)/n;
   auto x2 = (y)/n;
   auto x3 = (z)/n;
-  auto x4 = 0.0;
 
   auto qw = -x1 * std::sin(lambda);
   auto qx = +x1 * std::cos(lambda);

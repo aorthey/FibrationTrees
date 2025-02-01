@@ -9,6 +9,7 @@
     }
     return ::osg::Vec3(item.at(0), item.at(1), item.at(2));
   }
+  throw std::runtime_error("Could not find item " + item_name + " in yaml.");
 }
 Visualizer MakeViewerFromYamlFilename(const std::string& filename,
     const dart::simulation::WorldPtr& world) {

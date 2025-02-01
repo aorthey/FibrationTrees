@@ -13,7 +13,7 @@ TEST(DartLoaderTest, LoadUrdfTest) {
   const auto lb = manipulator->getPositionLowerLimits();
   const auto ub = manipulator->getPositionUpperLimits();
   const auto config = manipulator->getConfiguration().mPositions;
-  for(size_t k = 0; k < config.size(); k++) {
+  for(size_t k = 0; k < (size_t) config.size(); k++) {
     EXPECT_LT(config[k], ub[k]);
     EXPECT_GT(config[k], lb[k]);
   }

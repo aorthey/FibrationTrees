@@ -1,18 +1,20 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.8)
-set(CMAKE_CXX_STANDARD 20)
-set(CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_CXX_STANDARD 20)
+SET(CXX_STANDARD_REQUIRED ON)
 PROJECT(FibrationTrees VERSION 0.1)
 
-execute_process(COMMAND whoami OUTPUT_VARIABLE current_user OUTPUT_STRIP_TRAILING_WHITESPACE)
+EXECUTE_PROCESS(COMMAND whoami OUTPUT_VARIABLE current_user OUTPUT_STRIP_TRAILING_WHITESPACE)
 MESSAGE("USER: ${current_user}")
 
-add_compile_definitions("PROGRAM_FOLDER_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
+ADD_COMPILE_DEFINITIONS("PROGRAM_FOLDER_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
 
 ENABLE_TESTING()
 
 ################################################################################
 ## DEBUG BUILD
 SET(CMAKE_CXX_FLAGS "-g")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror")
+
 ################################################################################
 INCLUDE(GoogleTest)
 

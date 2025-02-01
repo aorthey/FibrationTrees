@@ -56,7 +56,7 @@ void Robot::SetCollisionChecker(const CollisionCheckerPtr& collision_checker) {
   collision_checker_ = collision_checker;
 }
 
-float Robot::StateToTime(const ompl::base::State* state) const {
+float Robot::StateToTime(const ompl::base::State* /*state*/) const {
   return -1.0f;
 }
 void Robot::TimeToState(const float /*time*/, ompl::base::State* /*state*/) const {
@@ -84,7 +84,7 @@ void Robot::SetConfiguration(const StateXd& config) {
 bool Robot::HasValidJointLimits(const Eigen::VectorXd& config) const {
   auto lb = skeleton_->getPositionLowerLimits();
   auto ub = skeleton_->getPositionUpperLimits();
-  for(size_t k = 0; k < config.size(); k++) {
+  for(size_t k = 0; k < (size_t) config.size(); k++) {
     const auto& value = config[k];
     if(!std::isfinite(value) || value < lb[k] || value > ub[k]) {
       //OMPL_WARN("Out of limits: %f is not in [%f, %f] (index %d).", value, lb[k], ub[k], k);
@@ -128,7 +128,7 @@ CollisionCheckerPtr Robot::MakeCollisionChecker(
   return collision_checker;
 }
 
-ompl::base::MotionValidatorPtr Robot::MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& robot) {
+ompl::base::MotionValidatorPtr Robot::MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr&) {
   return factor->getMotionValidator();
 }
 

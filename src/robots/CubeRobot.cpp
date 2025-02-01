@@ -67,7 +67,6 @@ StateXd CubeRobot::StateToEigen(const ompl::base::State* state) const {
 }
 
 void CubeRobot::EigenToState(const StateXd& v, ompl::base::State* state) const {
-  auto N = v.configuration.size();
   auto *state_SE2 = state->as<ompl::base::SE2StateSpace::StateType>();
 
   state_SE2->setX(v.configuration[0]);

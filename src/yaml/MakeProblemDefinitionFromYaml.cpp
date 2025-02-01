@@ -19,15 +19,19 @@ ompl::base::GoalPtr MakeGoalRegionFromGoalNode(const YAML::Node& node, const omp
   if(goal_type == "task" || goal_type == "joint") {
     auto goal_region = std::make_shared<ompl::base::GoalState>(factor);
     goal_region->setState(goal);
-    const auto goal_threshold = node["threshold"].as<double>();
-    goal_region->setThreshold(goal_threshold);
+    if(node["threshold"]) {
+      const auto goal_threshold = node["threshold"].as<double>();
+      goal_region->setThreshold(goal_threshold);
+    }
     return goal_region;
   } else if(goal_type == "time") {
     auto robot_in_time = std::static_pointer_cast<TimeBasedMobileKukaRobotTaskSpace>(robot);
     robot_in_time->TimeToState(robot_in_time->GetTMax(), goal);
     auto time_goal = std::make_shared<TimeGoal>(robot_in_time, robot_in_time->GetVMax(), start, goal);
-    const auto goal_threshold = node["threshold"].as<double>();
-    time_goal->setThreshold(0.5);
+    if(node["threshold"]) {
+      const auto goal_threshold = node["threshold"].as<double>();
+      time_goal->setThreshold(goal_threshold);
+    }
     return time_goal;
   } else {
     OMPL_ERROR("Goal type %s not found.", goal_type.c_str());

@@ -96,7 +96,6 @@ StateXd Drone::StateToEigen(const ompl::base::State* state) const {
 }
 
 void Drone::EigenToState(const StateXd& v, ompl::base::State* state) const {
-  auto N = v.size();
   auto *state_R3 = state->as<ompl::base::CompoundState>()->as<ompl::base::RealVectorStateSpace::StateType>(0);
   auto *state_R2 = state->as<ompl::base::CompoundState>()->as<ompl::base::RealVectorStateSpace::StateType>(1);
   auto *state_SO2 = state->as<ompl::base::CompoundState>()->as<ompl::base::SO2StateSpace::StateType>(2);
