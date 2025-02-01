@@ -139,11 +139,28 @@ obstacles:
     size: [0.25, 0.25, 2.0]
 
 robots:
-  Robot0:
+  RobotA:
     name: MultiRobot
-    robots: [Robot1, Robot2, Robot3]
+    robots: [RobotB, Robot1]
     root: True
-    smooth_path: True
+  RobotAi:
+    name: MultiRobot
+    robots: [RobotB, Robot1i]
+
+  RobotB:
+    name: MultiRobot
+    robots: [RobotC, Robot2]
+  RobotBi:
+    name: MultiRobot
+    robots: [RobotC, Robot2i]
+
+  RobotC:
+    name: MultiRobot
+    robots: [Robot4, Robot3]
+  RobotCi:
+    name: MultiRobot
+    robots: [Robot4, Robot3i]
+
   Robot1:
     name: MobileKukaRobot
     color: [0.7, 0.5, 0.5, 1.0]
@@ -159,61 +176,65 @@ robots:
     color: [0.5, 0.7, 0.5, 1.0]
     smooth_path: False
     hide: False
-  # Robot4:
-  #   name: MobileKukaRobot
-  #   color: [0.7, 0.7, 0.5, 1.0]
-  #   smooth_path: False
-  #   hide: False
+  Robot4:
+    name: MobileKukaRobot
+    color: [0.7, 0.7, 0.5, 1.0]
+    smooth_path: False
+    hide: False
+
   Robot1i:
     name: MobileKukaBase
     color: [0.7, 0.5, 0.5, 1.0]
-    smooth_path: False
+    smooth_path: True
     hide: True
   Robot2i:
     name: MobileKukaBase
     color: [0.5, 0.5, 0.7, 1.0]
-    smooth_path: False
+    smooth_path: True
     hide: True
   Robot3i:
     name: MobileKukaBase
     color: [0.5, 0.7, 0.5, 1.0]
-    smooth_path: False
+    smooth_path: True
     hide: True
-  # Robot4i:
-  #   name: MobileKukaBase
-  #   color: [0.7, 0.7, 0.5, 1.0]
-  #   smooth_path: False
-  #   hide: True
+  Robot4i:
+    name: MobileKukaBase
+    color: [0.7, 0.7, 0.5, 1.0]
+    smooth_path: True
+    hide: True
 
 projections:
 
-  Projection0:
-    name: ProjectionMultiRobot
-    parent: Robot0
-    task_space: False
-    children: [Robot1, Robot2, Robot3]
-  Projection1:
+  ProjectionA:
+    name: Projection_XSE2RN_XR2
+    connection: [RobotA, RobotAi]
+  ProjectionAi:
+    name: ProjectionSubspace
+    connection: [RobotAi, RobotB]
+  ProjectionB:
+    name: Projection_XSE2RN_XR2
+    connection: [RobotB, RobotBi]
+  ProjectionBi:
+    name: ProjectionSubspace
+    connection: [RobotBi, RobotC]
+  ProjectionC:
+    name: Projection_XSE2RN_XR2
+    connection: [RobotC, RobotCi]
+  ProjectionCi:
+    name: ProjectionSubspace
+    connection: [RobotCi, Robot4]
+
+  ProjectionD:
     name: Projection_SE2RN_R2
-    connection: [Robot1, Robot1i]
-    task_space: False
-  Projection2:
-    name: Projection_SE2RN_R2
-    connection: [Robot2, Robot2i]
-    task_space: False
-  Projection3:
-    name: Projection_SE2RN_R2
-    connection: [Robot3, Robot3i]
-    task_space: False
-  # Projection4:
-  #   name: Projection_SE2RN_R2
-  #   connection: [Robot4, Robot4i]
-  #   task_space: False
+    connection: [Robot4, Robot4i]
+
 
 problem:
   start:
     type: joint
     config: [-1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0,
              +1.0, +1.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             -1.0, +1.0, 0, 0, 0, 0, 0, 0, 0, 0,
              +1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0]
 
   goal:
@@ -221,14 +242,5 @@ problem:
     threshold: 0.5
     config: [+1.0, +1.0, 0, 0, 0, 0, 0, 0, 0, 0,
              -1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             +1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0,
              -1.0, +1.0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-#planner_settings:
-#  FibrationRrt:
-#    #goal_bias: 0.1
-#    #path_restriction_sampling_bias: 0.1
-#    #path_restriction_surrounding_sampling_bias: 0.0
-#    #sampling_perturbation_bias: 0.0
-#    use_section_search: True
-#    selector_function_type: exponential
-#    #range: 1000

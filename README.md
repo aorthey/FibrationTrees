@@ -69,6 +69,12 @@ MultiRobot-Easy
 - [x]  [ ]  [ ]  MobileNavigation [Needs to find solutions < 720s!]
 - [x]  [x]  [ ]  ReedsSheppCars
 
+
+What could affect the runtime of fibrations ?
+-- Size of robots could affect it
+-- Distance to goal
+
+
 Multirobot-hard
 - [x]  [x]  [ ]  CubeRobots
 - [ ]  [ ]  [ ]  Drones with Different Sizes

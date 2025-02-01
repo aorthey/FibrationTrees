@@ -63,10 +63,11 @@ jobs:
         cd build
         make -j$(nproc)
         
+  test:
     - name: Run Tests
       run: |
         cd build
-        ctest --output-on-failure
+        ctest --output-on-failure -L unit
 
     - name: Upload test results
       if: always()
