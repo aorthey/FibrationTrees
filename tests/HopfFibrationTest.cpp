@@ -2,7 +2,7 @@
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 #include <ompl/base/spaces/special/SphereStateSpace.h>
 #include <ompl/base/spaces/SO3StateSpace.h>
-#include "projections/HopfFibration.hpp"
+#include "projections/HopfFibrationProjection.hpp"
 #include "validators/HopfFibrationMotionValidator.hpp"
 #include "State.hpp"
 #include "Common.hpp"
@@ -28,7 +28,7 @@ class HopfFibrationTest : public testing::Test {
     factor = std::make_shared<ompl::multilevel::FactoredSpaceInformation>(total_space);
     child = std::make_shared<ompl::multilevel::FactoredSpaceInformation>(base_space);
 
-    hopf_fibration = std::make_shared<HopfFibration>(factor, child);
+    hopf_fibration = std::make_shared<HopfFibrationProjection>(factor, child);
     factor->addChild(child, hopf_fibration);
     hopf_motion_validator = std::make_shared<HopfFibrationMotionValidator>(factor, hopf_fibration);
     factor->setMotionValidator(hopf_motion_validator);
@@ -41,7 +41,7 @@ class HopfFibrationTest : public testing::Test {
 
   std::shared_ptr<ompl::multilevel::FactoredSpaceInformation> factor;
   std::shared_ptr<ompl::multilevel::FactoredSpaceInformation> child;
-  std::shared_ptr<HopfFibration> hopf_fibration;
+  std::shared_ptr<HopfFibrationProjection> hopf_fibration;
   std::shared_ptr<HopfFibrationMotionValidator> hopf_motion_validator;
 
 };

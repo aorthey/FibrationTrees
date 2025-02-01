@@ -29,6 +29,7 @@ bool SampleValidLift(const ompl::multilevel::ProjectionPtr& projection, const om
 
 std::optional<ompl::base::State*> ComputeValidIKState(const ompl::base::SpaceInformationPtr& si, 
     const ompl::multilevel::ProjectionPtr& projection, const State3d& point);
+
 std::optional<ompl::base::State*> ComputeValidTotalState(const ompl::multilevel::FactoredSpaceInformationPtr& factor, 
     const std::unordered_map<std::string, ompl::base::State*>& leaf_node_states, 
     size_t max_resample_iterations = kMaxResampleIteration);

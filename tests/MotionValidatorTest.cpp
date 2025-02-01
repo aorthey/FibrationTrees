@@ -11,7 +11,7 @@
 #include "OmplHelper.hpp"
 #include "KinematicsSolver.hpp"
 #include "validators/MotionValidatorTaskSpaceTranslation.hpp"
-#include "projections/ProjectionTaskSpace.hpp"
+#include "projections/TaskSpaceProjection.hpp"
 #include "robots/KukaRobotTaskSpace.hpp"
 #include "robots/SphereRobot.hpp"
 #include "robots/RobotFactory.hpp"

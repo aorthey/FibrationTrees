@@ -7,8 +7,7 @@ TimeGoal::TimeGoal(const RobotPtr &robot, float vMax, const ompl::base::State *s
   auto s1 = robot_->StateToEigen(start);
   auto s2 = robot_->StateToEigen(goal);
   if(!IsReachableInTime(s1, s2, vMax)) {
-    OMPL_ERROR("TimeGoal Not Reachable");
-    throw "CannotReachInTime";
+    throw std::runtime_error("Cannot reach goal in time with velocity " + std::to_string(vMax));
   }
 
   minTime_ = GetMinimumReachableTime(s1, s2, vMax);

@@ -8,10 +8,11 @@
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 
 #include <fstream>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
+#include <functional>
 #include <yaml-cpp/yaml.h>
 
-#include "projections/HopfFibration.hpp"
+#include "projections/HopfFibrationProjection.hpp"
 #include "validators/HopfFibrationMotionValidator.hpp"
 #include "State.hpp"
 #include "FilePath.hpp"
@@ -130,7 +131,7 @@ YAML::Node ToYaml(const EigenSearchTree<T>& tree) {
   return node;
 }
 
-YAML::Node S3EdgeToYaml(const std::shared_ptr<HopfFibration>& hopf_fibration, const ompl::base::State* s1, const ompl::base::State* s2) {
+YAML::Node S3EdgeToYaml(const std::shared_ptr<HopfFibrationProjection>& hopf_fibration, const ompl::base::State* s1, const ompl::base::State* s2) {
   auto bundle_space = hopf_fibration->getBundle();
   auto base_space = hopf_fibration->getBase();
   auto fiber_space = hopf_fibration->getFiberSpace();
@@ -175,7 +176,7 @@ YAML::Node S3EdgeToYaml(const std::shared_ptr<HopfFibration>& hopf_fibration, co
   return node;
 }
 
-YAML::Node S2EdgeToYaml(const std::shared_ptr<HopfFibration>& hopf_fibration, const ompl::base::State* s1, const ompl::base::State* s2) {
+YAML::Node S2EdgeToYaml(const std::shared_ptr<HopfFibrationProjection>& hopf_fibration, const ompl::base::State* s1, const ompl::base::State* s2) {
   auto bundle_space = hopf_fibration->getBundle();
   auto base_space = hopf_fibration->getBase();
   auto fiber_space = hopf_fibration->getFiberSpace();
@@ -229,7 +230,7 @@ int main()
 
   child->setStateValidityChecker(std::make_shared<ompl::base::AllValidStateValidityChecker>(child));
 
-  auto hopf_fibration = std::make_shared<HopfFibration>(factor, child);
+  auto hopf_fibration = std::make_shared<HopfFibrationProjection>(factor, child);
   factor->addChild(child, hopf_fibration);
 
   auto hopf_motion_validator = std::make_shared<HopfFibrationMotionValidator>(factor, hopf_fibration);
@@ -253,16 +254,16 @@ int main()
   planner->setProblemDefinition(pdef);
   planner->setup();
 
-  planner->setRange(factor->getName(), 0.5);
-  planner->setGoalBias(factor->getName(), 0.2);
+  planner->setLocalRange(factor->getName(), 0.5);
+  planner->setLocalGoalBias(factor->getName(), 0.2);
   planner->setSmoothIntermediateSolutions(false);
 
   //Only move towards goal, then sample exclusively on path
-  planner->setRange(child->getName(), 1.0);
-  planner->setGoalBias(child->getName(), 1.0);
-  planner->setPathRestrictionSamplingBias(child->getName(), 1.0);
-  planner->setPathRestrictionSurroundingSamplingBias(child->getName(), 0.0);
-  planner->setSamplingPerturbationBias(child->getName(), 0.0);
+  planner->setLocalRange(child->getName(), 1.0);
+  planner->setLocalGoalBias(child->getName(), 1.0);
+  planner->setLocalPathRestrictionSamplingBias(child->getName(), 1.0);
+  planner->setLocalPathRestrictionSurroundingSamplingBias(child->getName(), 0.0);
+  planner->setLocalSamplingPerturbationBias(child->getName(), 0.0);
 
   planner->setSelectorFunctionType(ompl::multilevel::SelectorFunctionType::kLastLevel);
 
@@ -280,11 +281,11 @@ int main()
 
   ompl::base::PlannerData sphere_data(child);
   planner->getPlannerData(sphere_data);
-  auto sphere_tree = PlannerDataToSearchTree<Eigen::Vector3f>(sphere_data, boost::bind( &ompl::base::SphereStateSpace::toVector, base_space, _1 ));
+  auto sphere_tree = PlannerDataToSearchTree<Eigen::Vector3f>(sphere_data, std::bind( &ompl::base::SphereStateSpace::toVector, base_space, std::placeholders::_1 ));
 
   ompl::base::PlannerData so3_data(factor);
   planner->getPlannerData(so3_data);
-  auto so3_tree = PlannerDataToSearchTree<Eigen::Vector3f>(so3_data, boost::bind( &HopfFibration::toVector, hopf_fibration, _1 ));
+  auto so3_tree = PlannerDataToSearchTree<Eigen::Vector3f>(so3_data, std::bind( &HopfFibrationProjection::toVector, hopf_fibration, std::placeholders::_1 ));
 
   auto filename = GetDataFolder() + "hopffibration_trees.dat";
 

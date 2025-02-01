@@ -35,6 +35,7 @@ std::optional<ompl::base::State*> ComputeValidIKState(const ompl::base::SpaceInf
 std::optional<ompl::base::State*> ComputeValidTotalState(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const std::unordered_map<std::string, ompl::base::State*>& leaf_node_states, size_t max_resample_iterations) {
   ompl::base::State *state = factor->allocState();
 
+  OMPL_INFORM("Trying to find valid total state for %d iterations.", max_resample_iterations);
   size_t samples = 0;
   while(samples++ < max_resample_iterations) {
     factor->liftLeafStates(leaf_node_states, state);

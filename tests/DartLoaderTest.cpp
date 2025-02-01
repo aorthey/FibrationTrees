@@ -7,7 +7,7 @@
 TEST(DartLoaderTest, LoadUrdfTest) {
   dart::utils::DartLoader loader;
   dart::dynamics::SkeletonPtr manipulator
-    = loader.parseSkeleton(GetDataFolder() + "robots/kuka_lwr/kuka.urdf");
+    = loader.parseSkeleton(GetDataFolder() + "robots/kuka_lwr/kuka_endeffector.urdf");
   auto numDofs = manipulator->getNumDofs();
   EXPECT_EQ(numDofs, 13u);
   const auto lb = manipulator->getPositionLowerLimits();

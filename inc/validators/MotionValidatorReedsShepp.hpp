@@ -9,6 +9,7 @@
 const float kMinimumSpacing = 0.05; //minimal distance between two joint configurations (was 0.25)
 
 class MotionValidatorReedsShepp : public ompl::multilevel::TaskSpaceMotionValidator
+//class MotionValidatorReedsShepp : public ompl::base::DiscreteMotionValidator
 {
  public:
   MotionValidatorReedsShepp() = delete;

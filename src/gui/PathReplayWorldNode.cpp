@@ -5,6 +5,9 @@
 #include "OmplHelper.hpp"
 #include "DartHelper.hpp"
 
+const double kVisualizationStepSize = 0.01; //was 0.01
+const double kTimingStepSize = 0.01;
+
 PathReplayWorldNode::PathReplayWorldNode(dart::simulation::WorldPtr world)
   : dart::gui::osg::RealTimeWorldNode(std::move(world))
 {
@@ -16,8 +19,6 @@ PathReplayWorldNode::PathReplayWorldNode(dart::simulation::WorldPtr world)
 
 PathReplayWorldNode::~PathReplayWorldNode() {
 }
-
-const float kVisualizationStepSize = 0.1; //was 0.01
 
 std::vector<State3d> MakeEdgeVertices(const RobotPtr& robot, const ompl::base::SpaceInformationPtr& si, const ompl::base::State* s1, const ompl::base::State* s2, std::vector<StateXd>& configs) {
   const auto L = si->distance(s1, s2);
@@ -46,29 +47,77 @@ void PathReplayWorldNode::AddPath(const RobotPtr& robot, const ompl::base::PathP
   if(ompl_path == nullptr) {
     return;
   }
-  auto path = std::make_shared<EigenPath>(robot, ompl_path);
-
-  const float t_start = path->GetStartTime();
-  const float t_end = path->GetEndTime();
-
+  ////////////////////////////////////////////////////////////////////////////////
   //Move along path, and compute Tcp positions. Then create line segments from them to display.
+  ////////////////////////////////////////////////////////////////////////////////
 
   std::vector<std::vector<State3d>> vertices;
-  const auto s = path->GetConfigAt(t_start);
-  const auto frames = robot->GetFK(s);
+
+  auto factor = ompl_path->getSpaceInformation();
+  if(!factor->isSetup()) {
+    factor->setup();
+  }
+  auto gpath = ompl_path->as<ompl::geometric::PathGeometric>();
+  auto states = gpath->getStates();
+
+  //Init vertices
+  const auto frames = robot->GetFK(robot->StateToEigen(states.front()));
   for(size_t k = 0; k < frames.size(); k++) {
     std::vector<State3d> vector;
     vertices.push_back(vector);
   }
 
-  const float kTimingStepSize = 0.01;
-  for(float t = t_start; t < t_end+kTimingStepSize; t+=kTimingStepSize) {
-    const auto s1 = path->GetConfigAt(t);
-    const auto frames = robot->GetFK(s1);
-    for(size_t k = 0; k < frames.size(); k++) {
-      vertices.at(k).push_back(frames.at(k));
+  //Interpolate along path
+  auto result = factor->allocState();
+  std::vector<StateXd> eigen_states;
+
+  for(size_t k = 1; k < states.size(); k++) {
+    auto s1 = states.at(k-1);
+    auto s2 = states.at(k);
+    auto nd = std::max(2u, factor->getStateSpace()->validSegmentCount(s1, s2) + 1);
+
+    for(size_t n = 0; n < nd; n++) {
+      auto s = (double)n / (double)(nd - 1);
+      factor->getStateSpace()->interpolate(s1, s2, s, result);
+      auto v = robot->StateToEigen(result);
+      eigen_states.push_back(v);
+
+      const auto frames = robot->GetFK(v);
+      for(size_t k = 0; k < frames.size(); k++) {
+        vertices.at(k).push_back(frames.at(k));
+      }
     }
   }
+  factor->freeState(result);
+
+  auto path = std::make_shared<EigenPath>(eigen_states);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// Old time-based evaluation
+  ////////////////////////////////////////////////////////////////////////////////
+  // auto path = std::make_shared<EigenPath>(robot, ompl_path);
+
+  // const double t_start = path->GetStartTime();
+  // const double t_end = path->GetEndTime();
+  //TODO: Should interpolate here?
+  // std::vector<std::vector<State3d>> vertices;
+  // const auto s = path->GetConfigAt(t_start);
+  // const auto frames = robot->GetFK(s);
+  // for(size_t k = 0; k < frames.size(); k++) {
+  //   std::vector<State3d> vector;
+  //   vertices.push_back(vector);
+  // }
+  // for(double t = t_start; t < t_end+kTimingStepSize; t+=kTimingStepSize) {
+  //   const auto s1 = path->GetConfigAt(t);
+  //   const auto frames = robot->GetFK(s1);
+  //   for(size_t k = 0; k < frames.size(); k++) {
+  //     vertices.at(k).push_back(frames.at(k));
+  //   }
+  // }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// 
+  ////////////////////////////////////////////////////////////////////////////////
   for(const auto& vertices_frame : vertices) {
     auto frame_line = getWorld()->addSimpleFrame(createLineSegmentFrame(vertices_frame, color, kPathLineWidth));
     solution_path_frames_.push_back(frame_line);
@@ -80,6 +129,7 @@ void PathReplayWorldNode::AddPath(const RobotPtr& robot, const ompl::base::PathP
     start_time_ = std::min(start_time_, path->GetStartTime());
     end_time_ = std::max(end_time_, path->GetEndTime());
   }
+  OMPL_INFORM("Set time interval to [%.2f, %.2f]", start_time_, end_time_);
   current_time_ = start_time_;
   robot_and_path_.push_back(std::make_pair(robot, path));
 }
@@ -208,11 +258,11 @@ std::string PathReplayWorldNode::getCurrentJointConfiguration() const {
   return s;
 }
 
-float PathReplayWorldNode::getCurrentPosition() const {
+double PathReplayWorldNode::getCurrentPosition() const {
   return current_time_;
 }
 
-float PathReplayWorldNode::getStepSize() const {
+double PathReplayWorldNode::getStepSize() const {
   return step_size_;
 }
 
@@ -238,22 +288,21 @@ void PathReplayWorldNode::PrintKeyPressEvents() const {
   for(const auto& event : events_) {
     std::cout << std::string{event.key} << ": " << event.description << std::endl;
   }
-  std::cout << "Current view: " << std::to_string(mViewer->getVerticalFieldOfView()) << std::endl;
 }
 
-void PathReplayWorldNode::setEndTime(float end_time) {
+void PathReplayWorldNode::setEndTime(double end_time) {
   end_time_ = end_time;
 }
 
 void PathReplayWorldNode::CreateKeyPressEvents() {
-  events_.push_back({'h', "display key options", [&](){PrintKeyPressEvents();}});
-  events_.push_back({'s', "play/pause planned path", [&](){toggleStartStop();}});
-  events_.push_back({'r', "reverse execution direction", [&](){toggleReverse();}});
-  events_.push_back({'n', "decrease execution speed", [&](){decreaseSpeed();}});
-  events_.push_back({'m', "increase execution speed", [&](){increaseSpeed();}});
-  events_.push_back({'1', "show/hide solution path", [&](){toggleSolutionPathVisibility();}});
-  events_.push_back({'2', "show/hide planner data", [&](){togglePlannerDataVisibility();}});
-  events_.push_back({'8', "store planner path", 
+  events_.push_back({'h', "Display key options", [&](){PrintKeyPressEvents();}});
+  events_.push_back({'s', "Play/pause planned path", [&](){toggleStartStop();}});
+  events_.push_back({'r', "Reverse execution direction", [&](){toggleReverse();}});
+  events_.push_back({'n', "Decrease execution speed", [&](){decreaseSpeed();}});
+  events_.push_back({'m', "Increase execution speed", [&](){increaseSpeed();}});
+  events_.push_back({'1', "Show/hide solution path", [&](){toggleSolutionPathVisibility();}});
+  events_.push_back({'2', "Show/hide planner data", [&](){togglePlannerDataVisibility();}});
+  events_.push_back({'8', "Store planner path", 
       [&](){
         for(const auto& [robot, path] : robot_and_path_) {
           auto name = "eigen_path_"+robot->GetName();
@@ -261,7 +310,7 @@ void PathReplayWorldNode::CreateKeyPressEvents() {
           OMPL_INFORM("Save path %s", name.c_str()); 
         }
       }});
-  events_.push_back({'9', "load planner path", 
+  events_.push_back({'9', "Load planner path", 
       [&](){
         for(const auto& [robot, path] : robot_and_path_) {
           auto name = "fail_eigen_path_"+robot->GetName();
@@ -269,65 +318,29 @@ void PathReplayWorldNode::CreateKeyPressEvents() {
           OMPL_INFORM("Load path %s", name.c_str()); 
         }
       }});
-  events_.push_back({'p', "output current robot info", 
+  events_.push_back({'p', "Print current robot info", 
       [&](){
+        std::cout << std::string(80, '*') << std::endl;
         for(const auto& [robot, _] : robot_and_path_) {
           PrintSkeletonInfo(robot->GetSkeleton());
         }
+        auto n = getWorld()->getNumSkeletons();
+        for(size_t k = 0; k < n; k++) {
+          auto skeleton = getWorld()->getSkeleton(k);
+          std::cout << std::string(80, '*') << std::endl;
+          PrintSkeletonInfo(skeleton);
+        }
       }});
-}
-
-PathReplayEventHandler::PathReplayEventHandler(PathReplayWorldNode* world_node)
-{
-  world_node_ = world_node;
-}
-
-bool PathReplayEventHandler::handle(
-    const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter&) 
-{
-  if (ea.getEventType() == osgGA::GUIEventAdapter::KEYDOWN)
-  {
-    const auto events = world_node_->GetKeyPressEvents();
-    for(const auto& event : events) {
-      if(ea.getKey() != event.key) {
-        continue;
-      }
-      event.function();
-      return true;
-    }
-  }
-  return false;
-}
-
-TextWidget::TextWidget(
-      dart::gui::osg::ImGuiViewer* viewer, PathReplayWorldNode* world_node)
-    : viewer_(viewer),
-      world_node_(world_node)
-{
-}
-
-void TextWidget::render()
-{
-  ImGui::SetNextWindowPos(ImVec2(10, 20));
-  ImGui::SetNextWindowSize(ImVec2(240, 320));
-  ImGui::SetNextWindowBgAlpha(0.5f);
-  if (!ImGui::Begin(
-          "Path Control",
-          nullptr,
-          ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar
-              | ImGuiWindowFlags_HorizontalScrollbar))
-  {
-    ImGui::End();
-    return;
-  }
-
-  //ImGui::Text("Path position: %.2f (%s)\nPath speed: %f)", 
-      //world_node_->getCurrentPosition(), 
-  //ImGui::Text("%s", viewer_->getInstructions().c_str());
-  ImGui::Text("Path position: %.2f (%s)\nPath speed: %f)", 
-      world_node_->getCurrentPosition(), 
-      (world_node_->isRunning() ? "running" : "pause"),
-      world_node_->getStepSize());
-  //ImGui::Text("Config : %s", world_node_->getCurrentJointConfiguration().c_str());
-  ImGui::End();
+  events_.push_back({'V', "Load saved view for this scene", 
+      [&](){
+        if(!view_matrix_.has_value()) {
+          OMPL_WARN("No view loadable for this scene.");
+          return;
+        }
+        mViewer->getCameraManipulator()->setByMatrix(view_matrix_.value());
+      }});
+  events_.push_back({'v', "Save current view for this scene", 
+      [&](){
+        view_matrix_ = mViewer->getCameraManipulator()->getMatrix();
+      }});
 }

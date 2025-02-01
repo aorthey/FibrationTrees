@@ -16,14 +16,12 @@
 #include "yaml/MakeFromYaml.hpp"
 #include "yaml/MakePlannerFromYaml.hpp"
 
-const double kDefaultMinimalTimeout = 1.0;
+const double kDefaultMinimalTimeout = 0.1;
 const size_t kDefaultMinimalRunCount = 1U;
 
-double GetTimeout(const YAML::Node& node) {
-  if(node["dry"]) {
-    if(node["dry"].as<bool>()) {
-      return kDefaultMinimalTimeout;
-    }
+double GetTimeout(const YAML::Node& node, const FibrationTreesBenchmakerArguments& program_options) {
+  if(program_options.HasValue("dry")) {
+    return kDefaultMinimalTimeout;
   }
   if(!node["timeout"]) {
     return kDefaultMinimalTimeout;
@@ -31,11 +29,9 @@ double GetTimeout(const YAML::Node& node) {
   return node["timeout"].as<double>();
 }
 
-size_t GetRunCount(const YAML::Node& node) {
-  if(node["dry"]) {
-    if(node["dry"].as<bool>()) {
-      return kDefaultMinimalRunCount;
-    }
+size_t GetRunCount(const YAML::Node& node, const FibrationTreesBenchmakerArguments& program_options) {
+  if(program_options.HasValue("dry")) {
+    return kDefaultMinimalRunCount;
   }
   if(!node["run_count"]) {
     return kDefaultMinimalRunCount;
@@ -82,8 +78,8 @@ int FibrationTreesBenchmakerExecuter(const int argc, const char* argv[]) {
 
     auto [factor, pdef, root_robot, child_robots, dynamic_obstacles] = MakeFactoredSpaceInformationFromYamlFilename(filename, world);
 
-    auto timeout = GetTimeout(node);
-    auto run_count = GetRunCount(node);
+    const auto timeout = GetTimeout(node, program_options);
+    const auto run_count = GetRunCount(node, program_options);
     auto scenario_name = node["name"].as<std::string>();
     auto planner_names = node["planners"].as<std::vector<std::string>>();
 
@@ -102,7 +98,21 @@ int FibrationTreesBenchmakerExecuter(const int argc, const char* argv[]) {
 
     auto output_filename = MakeOutputFilename(filename);
     SaveBenchmarkToDatabase(output_filename, benchmark_result);
+    OMPL_INFORM("Saved benchmark to file logs/%s.db", output_filename.c_str());
+
+    if(root_node["ompl_benchmark_plotter"]) {
+      auto plotter = root_node["ompl_benchmark_plotter"];
+
+      if (plotter["options"]) {
+        std::string option_str = "";
+        for (const auto& option : plotter["options"]) {
+          option_str += option.as<std::string>() + " ";
+        }
+        std::cout << "Option: " << option_str << std::endl;
+      }
+    }
   }
+
 
   return 0;
 

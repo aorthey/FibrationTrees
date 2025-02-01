@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<robot name="maze">
+  <link name="root">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 1.57" />
+      <geometry>
+        <mesh filename="boilerroom.stl" scale="0.15 0.15 0.15"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 1.57" />
+      <geometry>
+        <mesh filename="boilerroom.stl" scale="0.15 0.15 0.15"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>

@@ -7,6 +7,7 @@
 MotionValidatorReedsShepp::MotionValidatorReedsShepp(
     const ompl::base::SpaceInformationPtr &si)
   : ompl::multilevel::TaskSpaceMotionValidator(si)
+  //: ompl::base::DiscreteMotionValidator(si)
 {
   lastValidState_ = si->allocState();
   reeds_shepp_motion_validator_ = std::make_shared<ompl::base::ReedsSheppMotionValidator>(si);
@@ -40,4 +41,3 @@ std::vector<ompl::base::State*> MotionValidatorReedsShepp::propagateMotion(const
 
   return MakeInterpolatedPathSegment(si_, s1, lastValidState_);
 }
-

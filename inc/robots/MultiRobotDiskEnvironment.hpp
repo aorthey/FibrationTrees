@@ -3,7 +3,7 @@
 #include <ompl/base/SpaceInformation.h>
 #include <ompl/base/StateSpace.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
-#include <ompl/multilevel/datastructures/projections/RN_RM.h>
+#include <ompl/multilevel/datastructures/projections/RNToRMProjection.h>
 
 using namespace ompl::base;
 using namespace ompl::multilevel;
@@ -108,7 +108,7 @@ class MultiRobotDiskEnvironment {
             return true;
           }
         );
-        auto projection = std::make_shared<Projection_RN_RM>(factor->getStateSpace(), robot_space, std::vector<size_t>({2*k, 2*k+1}));
+        auto projection = std::make_shared<RNToRMProjection>(factor->getStateSpace(), robot_space, std::vector<size_t>({2*k, 2*k+1}));
         factor->addChild(robot_factor, projection);
       }
       factor->setStateValidityChecker(
@@ -149,7 +149,7 @@ class MultiRobotDiskEnvironment {
           }
         );
 
-        auto projection = std::make_shared<Projection_RN_RM>(current->getStateSpace(), robot_space);
+        auto projection = std::make_shared<RNToRMProjection>(current->getStateSpace(), robot_space);
         current->addChild(robot_factor, projection);
         current = robot_factor;
       }

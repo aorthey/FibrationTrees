@@ -1,11 +1,11 @@
 #pragma once
 
 #include <ompl/base/spaces/RealVectorStateSpace.h>
-#include "projections/ProjectionTaskSpace.hpp"
 #include "OmplHelper.hpp"
 #include "robots/Robot.hpp"
 
 OMPL_CLASS_FORWARD(TaskSpace);
+OMPL_CLASS_FORWARD(KinematicsSolver);
 
 class TaskSpace : public ompl::base::RealVectorStateSpace {
  public:

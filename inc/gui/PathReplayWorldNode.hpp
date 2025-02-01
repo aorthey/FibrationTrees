@@ -10,13 +10,13 @@
 #include "EigenPath.hpp"
 
 const State3d kRoadmapColorVertex = State3d(0.2, 0.8, 0.2);
-const float kRoadmapLineWidth = 3.0;
-const float kPathLineWidth = 5.0;
+const double kRoadmapLineWidth = 3.0;
+const double kPathLineWidth = 5.0;
 
-const float kDefaultStepSize = 0.001;
+const double kDefaultStepSize = 0.001;
 
-const float kMaxStepSize = 0.1;
-const float kMinStepSize = 0.00001;
+const double kMaxStepSize = 0.1;
+const double kMinStepSize = 0.00001;
 
 struct KeyPressEvent {
   char key;
@@ -42,14 +42,14 @@ public:
   void decreaseSpeed();
   void increaseSpeed();
 
-  void setEndTime(float end_time);
+  void setEndTime(double end_time);
 
   void togglePlannerDataVisibility();
   void toggleSolutionPathVisibility();
   void toggleFrameVisibility(const std::vector<std::string>& frame_names);
 
-  float getCurrentPosition() const;
-  float getStepSize() const;
+  double getCurrentPosition() const;
+  double getStepSize() const;
   bool isRunning() const;
   std::string getCurrentJointConfiguration() const;
 
@@ -73,35 +73,15 @@ protected:
   std::vector<std::pair<RobotPtr, std::shared_ptr<EigenPath>>> robot_and_path_;
   CollisionCheckerPtr collision_checker_;
 
-  float step_size_{kDefaultStepSize};
+  double step_size_{kDefaultStepSize};
 
-  float start_time_;
-  float end_time_;
-  float current_time_;
+  double start_time_;
+  double end_time_;
+  double current_time_;
 
   bool pause_;
   bool reverse_;
+
+  std::optional<osg::Matrixd> view_matrix_;
 };
 
-class PathReplayEventHandler : public osgGA::GUIEventHandler
-{
-public:
-  PathReplayEventHandler(PathReplayWorldNode* world_node);
-
-  bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter&) override;
-
-private:
-  PathReplayWorldNode* world_node_;
-};
-
-class TextWidget : public dart::gui::osg::ImGuiWidget
-{
-public:
-  TextWidget(dart::gui::osg::ImGuiViewer* viewer, PathReplayWorldNode* world_node);
-
-  void render() override;
-
-protected:
-  osg::ref_ptr<dart::gui::osg::ImGuiViewer> viewer_;
-  PathReplayWorldNode* world_node_;
-};

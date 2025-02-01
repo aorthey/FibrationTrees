@@ -4,13 +4,13 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="uploads_files_2883707_warehouse6.stl" scale="0.5 0.5 0.5"/>
+        <mesh filename="uploads_files_2883707_warehouse6_simple.stl" scale="0.5 0.5 0.5"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="uploads_files_2883707_warehouse6.stl" scale="0.5 0.5 0.5"/>
+        <mesh filename="uploads_files_2883707_warehouse6_simple.stl" scale="0.5 0.5 0.5"/>
       </geometry>
     </collision>
   </link>

@@ -44,6 +44,9 @@ ENDFOREACH(DEPENDENCY)
 
 INCLUDE_DIRECTORIES(SYSTEM inc)
 
+################################################################################
+# Build library and dependencies
+################################################################################
 FOREACH(SOURCETYPE cpp hpp)
   FILE(GLOB_RECURSE SUBDIR_SRC src/*.${SOURCETYPE})
   SET(SOURCE_FILES ${SOURCE_FILES} ${SUBDIR_SRC})
@@ -53,7 +56,6 @@ ADD_LIBRARY(FibrationTrees STATIC ${SOURCE_FILES})
 FOREACH(DEPENDENCY ${DEPENDENCIES})
   TARGET_LINK_LIBRARIES(FibrationTrees ${${DEPENDENCY}_LIBRARIES})
 ENDFOREACH(DEPENDENCY)
-#TARGET_LINK_LIBRARIES(FibrationTrees ompl::ompl)
 TARGET_LINK_LIBRARIES(FibrationTrees yaml-cpp)
 TARGET_LINK_LIBRARIES(FibrationTrees Boost::program_options)
 
@@ -77,10 +79,37 @@ LIST(SORT TEST_SOURCES)
 
 FOREACH(EXEC_FILENAME ${TEST_SOURCES})
   GET_FILENAME_COMPONENT(EXEC ${EXEC_FILENAME} NAME_WE)
-  MESSAGE("-- Add test ${EXEC}")
+  MESSAGE("-- Add Test ${EXEC}")
   ADD_EXECUTABLE(${EXEC} ${EXEC_FILENAME})
-  GTEST_ADD_TESTS(TARGET ${EXEC})
+  ADD_TEST(NAME ${EXEC} COMMAND ${EXEC})
   TARGET_LINK_LIBRARIES(${EXEC} gtest gtest_main FibrationTrees)
+  TARGET_COMPILE_DEFINITIONS(${EXEC} PRIVATE -DGTEST_BREAK_ON_FAILURE=1)
+  SET_TESTS_PROPERTIES(${EXEC} PROPERTIES LABELS "unit")
+  SET_TESTS_PROPERTIES(${EXEC} PROPERTIES TIMEOUT 30)
 ENDFOREACH(EXEC_FILENAME)
 
-SET_TESTS_PROPERTIES(${noArgsTests} PROPERTIES TIMEOUT 10)
+################################################################################
+# Build integration tests
+################################################################################
+FILE(GLOB INTEGRATION_TEST_SOURCES tests/integration/*.cpp)
+LIST(SORT INTEGRATION_TEST_SOURCES)
+
+FOREACH(EXEC_FILENAME ${INTEGRATION_TEST_SOURCES})
+  GET_FILENAME_COMPONENT(EXEC ${EXEC_FILENAME} NAME_WE)
+  MESSAGE("-- Add Integration Test ${EXEC}")
+  ADD_EXECUTABLE(${EXEC} ${EXEC_FILENAME})
+  ADD_TEST(NAME ${EXEC} COMMAND ${EXEC})
+  TARGET_LINK_LIBRARIES(${EXEC} gtest gtest_main FibrationTrees)
+  TARGET_COMPILE_DEFINITIONS(${EXEC} PRIVATE -DGTEST_BREAK_ON_FAILURE=1)
+
+  SET_TESTS_PROPERTIES(${EXEC} PROPERTIES LABELS "integration")
+  SET_TESTS_PROPERTIES(${EXEC} PROPERTIES TIMEOUT 300)
+ENDFOREACH(EXEC_FILENAME)
+
+ADD_CUSTOM_TARGET(integration-tests
+    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -L integration
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+
+## Run only unit tests on executing "make test"
+set(CMAKE_CTEST_ARGUMENTS --output-on-failure -L unit)

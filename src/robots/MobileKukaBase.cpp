@@ -61,6 +61,6 @@ ompl::multilevel::FactoredSpaceInformationPtr MobileKukaBase::MakeSpaceInformati
   return factor;
 }
 
-ompl::base::MotionValidatorPtr MobileKukaBase::MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& /*robot*/) {
-  return std::make_shared<DefaultMotionValidator>(factor);
-}
+// ompl::base::MotionValidatorPtr MobileKukaBase::MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& /*robot*/) {
+//   return std::make_shared<DefaultMotionValidator>(factor);
+// }

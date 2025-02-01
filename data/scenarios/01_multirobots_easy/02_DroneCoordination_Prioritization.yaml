@@ -1,0 +1,264 @@
+name: DroneCoordination
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: False
+
+obstacles:
+  Obstacle0:
+    name: Floor
+    type: floor
+    height: -0.25
+
+  Obstacle1:
+    name: Cylinder
+    type: cylinder
+    position: [-0.5, 0.0, 0.0]
+    size: [0.2, 1.5]
+
+  Obstacle2:
+    name: Cylinder
+    type: cylinder
+    position: [-0.0, 0.2, 0.0]
+    size: [0.15, 1.0]
+
+  Obstacle3:
+    name: Cylinder
+    type: cylinder
+    position: [-0.5, -0.3, 0.0]
+    size: [0.3, 1.5]
+
+  Obstacle4:
+    name: Cylinder
+    type: cylinder
+    position: [-1.0, 0.8, 0.0]
+    size: [0.05, 2.5]
+
+  Obstacle5:
+    name: Cylinder
+    type: cylinder
+    position: [-0.6, 1.2, 0.0]
+    size: [0.08, 0.8]
+
+robots:
+  RobotA:
+    name: MultiRobot
+    robots: [RobotB, Robot8]
+    root: True
+    hide: True
+    smooth_path: False
+
+  RobotAi:
+    name: MultiRobot
+    robots: [RobotB, Robot8i]
+    hide: True
+    smooth_path: False
+
+  RobotB:
+    name: MultiRobot
+    robots: [RobotC, Robot7]
+    hide: True
+    smooth_path: False
+
+  RobotC:
+    name: MultiRobot
+    robots: [RobotD, Robot6]
+    hide: True
+    smooth_path: False
+
+  RobotD:
+    name: MultiRobot
+    robots: [RobotE, Robot5]
+    hide: True
+    smooth_path: False
+
+  RobotE:
+    name: MultiRobot
+    robots: [RobotF, Robot4]
+    hide: True
+    smooth_path: False
+
+  RobotF:
+    name: MultiRobot
+    robots: [RobotG, Robot3]
+    hide: True
+    smooth_path: False
+
+  RobotG:
+    name: MultiRobot
+    robots: [Robot1, Robot2]
+    hide: True
+    smooth_path: False
+
+  RobotBi:
+    name: MultiRobot
+    robots: [RobotC, Robot7i]
+    hide: True
+    smooth_path: False
+
+  RobotCi:
+    name: MultiRobot
+    robots: [RobotD, Robot6i]
+    hide: True
+    smooth_path: False
+
+  RobotDi:
+    name: MultiRobot
+    robots: [RobotE, Robot5i]
+    hide: True
+    smooth_path: False
+
+  RobotEi:
+    name: MultiRobot
+    robots: [RobotF, Robot4i]
+    hide: True
+    smooth_path: False
+
+  RobotFi:
+    name: MultiRobot
+    robots: [RobotG, Robot3i]
+    hide: True
+    smooth_path: False
+
+  RobotGi:
+    name: MultiRobot
+    robots: [Robot1, Robot2i]
+    hide: True
+    smooth_path: False
+
+  Robot1:
+    name: ZeppelinRobot
+  Robot1i:
+    name: SphereRobot
+    radius: 0.05
+    lower_limits:  [-1.5, -1.5, -0.5]
+    upper_limits:  [+1.5, +1.5, +1.5]
+    hide: True
+  Robot2:
+    name: ZeppelinRobot
+  Robot2i:
+    name: SphereRobot
+    radius: 0.05
+    lower_limits:  [-1.5, -1.5, -0.5]
+    upper_limits:  [+1.5, +1.5, +1.5]
+    hide: True
+  Robot3:
+    name: ZeppelinRobot
+  Robot3i:
+    name: SphereRobot
+    radius: 0.05
+    lower_limits:  [-1.5, -1.5, -0.5]
+    upper_limits:  [+1.5, +1.5, +1.5]
+    hide: True
+  Robot4:
+    name: ZeppelinRobot
+  Robot4i:
+    name: SphereRobot
+    radius: 0.05
+    lower_limits:  [-1.5, -1.5, -0.5]
+    upper_limits:  [+1.5, +1.5, +1.5]
+    hide: True
+  Robot5:
+    name: ZeppelinRobot
+  Robot5i:
+    name: SphereRobot
+    radius: 0.05
+    lower_limits:  [-1.5, -1.5, -0.5]
+    upper_limits:  [+1.5, +1.5, +1.5]
+    hide: True
+  Robot6:
+    name: ZeppelinRobot
+  Robot6i:
+    name: SphereRobot
+    radius: 0.05
+    lower_limits:  [-1.5, -1.5, -0.5]
+    upper_limits:  [+1.5, +1.5, +1.5]
+    hide: True
+  Robot7:
+    name: ZeppelinRobot
+  Robot7i:
+    name: SphereRobot
+    radius: 0.05
+    lower_limits:  [-1.5, -1.5, -0.5]
+    upper_limits:  [+1.5, +1.5, +1.5]
+    hide: True
+  Robot8:
+    name: ZeppelinRobot
+  Robot8i:
+    name: SphereRobot
+    radius: 0.05
+    lower_limits:  [-1.5, -1.5, -0.5]
+    upper_limits:  [+1.5, +1.5, +1.5]
+    hide: True
+
+projections:
+
+  ProjectionAi:
+    name: Projection_XR3SO2_XR3
+    connection: [RobotA, RobotAi]
+  ProjectionA:
+    name: ProjectionSubspace
+    connection: [RobotAi, RobotB]
+  ProjectionB:
+    name: ProjectionSubspace
+    connection: [RobotBi, RobotC]
+  ProjectionBi:
+    name: Projection_XR3SO2_XR3
+    connection: [RobotB, RobotBi]
+  ProjectionC:
+    name: ProjectionSubspace
+    connection: [RobotCi, RobotD]
+  ProjectionCi:
+    name: Projection_XR3SO2_XR3
+    connection: [RobotC, RobotCi]
+  ProjectionD:
+    name: ProjectionSubspace
+    connection: [RobotDi, RobotE]
+  ProjectionDi:
+    name: Projection_XR3SO2_XR3
+    connection: [RobotD, RobotDi]
+  ProjectionE:
+    name: ProjectionSubspace
+    connection: [RobotEi, RobotF]
+  ProjectionEi:
+    name: Projection_XR3SO2_XR3
+    connection: [RobotE, RobotEi]
+  ProjectionF:
+    name: ProjectionSubspace
+    connection: [RobotFi, RobotG]
+  ProjectionFi:
+    name: Projection_XR3SO2_XR3
+    connection: [RobotF, RobotFi]
+  ProjectionG:
+    name: ProjectionSubspace
+    connection: [RobotGi, Robot1]
+  ProjectionGi:
+    name: Projection_XR3SO2_XR3
+    connection: [RobotG, RobotGi]
+  ProjectionHi:
+    name: Projection_R3SO2_R3
+    connection: [Robot1, Robot1i]
+
+problem:
+  start:
+    type: joint
+    config: [ +1.5, -1.0, 0.1, 0.0,
+              +1.5, -0.3, 0.1, 0.0,
+              +1.5, +0.3, 0.1, 0.0,
+              +1.5, +1.0, 0.1, 0.0,
+              +1.5, -1.0, 0.3, 0.0,
+              +1.5, -0.3, 0.3, 0.0,
+              +1.5, +0.3, 0.3, 0.0,
+              +1.5, +1.0, 0.3, 0.0]
+
+  goal:
+    type: joint
+    threshold: 0.5
+    config: [ -1.5, -1.0, 0.1, 0.0,
+              -1.5, -0.3, 0.1, 0.0,
+              -1.5, +0.3, 0.1, 0.0,
+              -1.5, +1.0, 0.1, 0.0,
+              -1.5, -1.0, 0.3, 0.0,
+              -1.5, -0.3, 0.3, 0.0,
+              -1.5, +0.3, 0.3, 0.0,
+              -1.5, +1.0, 0.3, 0.0]

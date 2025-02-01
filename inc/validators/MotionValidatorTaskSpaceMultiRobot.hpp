@@ -6,12 +6,13 @@
 #include <ompl/multilevel/datastructures/TaskSpaceMotionValidator.h>
 
 #include "KinematicsSolver.hpp"
+#include "robots/MultiRobot.hpp"
 
 class MotionValidatorTaskSpaceMultiRobot : public ompl::multilevel::TaskSpaceMotionValidator
 {
 public:
     MotionValidatorTaskSpaceMultiRobot() = delete;
-    explicit MotionValidatorTaskSpaceMultiRobot(const ompl::multilevel::FactoredSpaceInformationPtr& si);
+    explicit MotionValidatorTaskSpaceMultiRobot(const ompl::multilevel::FactoredSpaceInformationPtr& si, const std::shared_ptr<MultiRobot>& multi_robot);
     ~MotionValidatorTaskSpaceMultiRobot() override;
 
     bool checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const override;

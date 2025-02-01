@@ -1,6 +1,7 @@
 #include "input/FibrationTreesSolverExecuter.hpp"
 
 #include <iostream>
+#include <chrono>
 
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 #include <ompl/multilevel/planners/FibrationRRT.h>
@@ -13,6 +14,12 @@
 #include "gui/Visualizer.hpp"
 #include "yaml/MakeFromYaml.hpp"
 #include "yaml/MakePlannerFromYaml.hpp"
+#include "yaml/MakeViewerFromYaml.hpp"
+
+using namespace std::chrono;
+using time_clock = std::chrono::steady_clock;
+using std::chrono::seconds;
+
 
 int FibrationTreesSolverExecuter(const int argc, const char* argv[]) {
   dart::math::Random::setSeed(0);
@@ -36,7 +43,7 @@ int FibrationTreesSolverExecuter(const int argc, const char* argv[]) {
   }
 
   if(!program_options.HasValue("planning")) {
-    Visualizer visualizer(world);
+    Visualizer visualizer = MakeViewerFromYamlFilename(filename, world);
     visualizer.Run();
     return 0;
   }
@@ -46,6 +53,7 @@ int FibrationTreesSolverExecuter(const int argc, const char* argv[]) {
   ////////////////////////////////////////////////////////////////////////////////
 
   auto input_planner_name = program_options.Get<std::string>("planning");
+  OMPL_INFORM("Input planner %s", input_planner_name.c_str());
 
   auto planner = MakePlannerFromYaml(input_filename, input_planner_name, factor, child_robots);
   planner->setProblemDefinition(pdef);
@@ -55,13 +63,30 @@ int FibrationTreesSolverExecuter(const int argc, const char* argv[]) {
   // Run planner
   ////////////////////////////////////////////////////////////////////////////////
 
+  auto time_start = time_clock::now();
+
   auto ptc = TimeOrSolutionPtc(pdef, program_options.Get<double>("timeout"));
   ompl::base::PlannerStatus status = planner->solve(ptc);
+
+  auto time_end = time_clock::now();
+  auto duration = std::chrono::duration_cast<seconds>(time_end - time_start);
+
+  if(status) {
+    OMPL_INFORM("\n%s\nSolved planning problem with %s in %ds.\n%s\n", std::string(80, '*').c_str(), 
+        input_planner_name.c_str(), duration.count(), std::string(80, '*').c_str());
+  } else {
+    OMPL_ERROR("\n%s\nFailed to solve planning problem with %s in %ds.\n%s\n", std::string(80, '*').c_str(), 
+        input_planner_name.c_str(), duration.count(), std::string(80, '*').c_str());
+  }
 
   ////////////////////////////////////////////////////////////////////////////////
   // Visualize results
   ////////////////////////////////////////////////////////////////////////////////
-  Visualizer visualizer(world);
+  if(program_options.HasValue("command-line-mode")) {
+    return 0;
+  }
+
+  Visualizer visualizer = MakeViewerFromYamlFilename(filename, world);
   visualizer.SetCollisionChecker(root_robot->GetCollisionChecker());
 
   for(const auto& child_robot : child_robots) {

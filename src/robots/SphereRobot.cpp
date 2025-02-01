@@ -9,7 +9,6 @@ dart::dynamics::SkeletonPtr SphereRobot::MakeSkeleton(const YAML::Node& node) {
   if(node["radius"]) {
     radius_ = node["radius"].as<double>();
   }
-  std::cout << radius_ << std::endl;
   auto skeleton = createSphere(radius_);
   SetSkeletonLowerLimits(skeleton, node, 3u);
   SetSkeletonUpperLimits(skeleton, node, 3u);

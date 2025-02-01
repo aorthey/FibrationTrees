@@ -33,6 +33,6 @@ bool FibrationTreesBenchmakerArguments::Setup(const int argc, const char* argv[]
   return true;
 };
 
-bool FibrationTreesBenchmakerArguments::HasValue(const std::string& name) {
+bool FibrationTreesBenchmakerArguments::HasValue(const std::string& name) const {
   return variables_map_.count(name);
 }

@@ -4,7 +4,7 @@
 #include <ompl/base/DiscreteMotionValidator.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 #include <ompl/multilevel/datastructures/TaskSpaceMotionValidator.h>
-#include "projections/HopfFibration.hpp"
+#include "projections/HopfFibrationProjection.hpp"
 
 const auto kEdgeEpsilon = 0.05;
 const auto kStereographicDistanceThreshold = 0.2;
@@ -13,7 +13,7 @@ class HopfFibrationMotionValidator : public ompl::multilevel::TaskSpaceMotionVal
 {
  public:
   HopfFibrationMotionValidator() = delete;
-  explicit HopfFibrationMotionValidator(const ompl::base::SpaceInformationPtr& bundle, const std::shared_ptr<HopfFibration>& hopf_fibration);
+  explicit HopfFibrationMotionValidator(const ompl::base::SpaceInformationPtr& bundle, const std::shared_ptr<HopfFibrationProjection>& hopf_fibration_projection);
   virtual ~HopfFibrationMotionValidator() override;
 
   bool checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const override;
@@ -25,7 +25,7 @@ class HopfFibrationMotionValidator : public ompl::multilevel::TaskSpaceMotionVal
   bool MaybeRepairState(ompl::base::State *bundleState, const std::vector<ompl::base::State*> lastStates) const;
   double StereographicDistance(const ompl::base::State *s1, const ompl::base::State *s2) const;
 
-  std::shared_ptr<HopfFibration> hopf_fibration_;
+  std::shared_ptr<HopfFibrationProjection> hopf_fibration_projection_;
 
   ompl::base::State* baseState1_;
   ompl::base::State* baseState2_;

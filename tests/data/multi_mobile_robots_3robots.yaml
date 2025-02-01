@@ -1,0 +1,47 @@
+name: MultiRobotDecomposition
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: True
+
+obstacles:
+  Obstacle0:
+    name: Floor
+    type: floor
+    height: -0.15
+    color: [0.99, 0.99, 0.99, 1.0]
+    width: 20.0
+
+robots:
+  RobotGlobal:
+    name: MultiRobot
+    robots: [RobotA, RobotB, RobotC]
+    root: True
+
+  RobotA:
+    name: MobileKukaRobot
+  RobotB:
+    name: MobileKukaRobot
+  RobotC:
+    name: MobileKukaRobot
+
+projections:
+
+  Projection0:
+    name: ProjectionMultiRobot
+    parent: RobotGlobal
+    children: [RobotA, RobotB, RobotC]
+
+problem:
+  start:
+    type: joint
+    config: [-2.0, -2.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             -0.0, +2.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             +2.0, +2.0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+  goal:
+    type: joint
+    threshold: 0.5
+    config: [+2.0, +2.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             -0.0, -2.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             -2.0, -2.0, 0, 0, 0, 0, 0, 0, 0, 0]

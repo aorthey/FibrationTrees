@@ -13,7 +13,6 @@
 #include "robots/SphereRobot.hpp"
 #include "robots/TimeBasedMobileKukaRobotTaskSpace.hpp"
 #include "robots/TimeBasedSphereRobot.hpp"
-#include "robots/ZeppelinInnerSphereRobot.hpp"
 #include "robots/ZeppelinRobot.hpp"
 #include "robots/RobotFactory.hpp"
 
@@ -35,7 +34,6 @@ using RobotTypes = ::testing::Types<
     MobileKukaBase,
     MobileKukaRobot, 
     MobileKukaRobotTaskSpace, 
-    ZeppelinInnerSphereRobot,
     ZeppelinRobot
 >;
 

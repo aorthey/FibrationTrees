@@ -1,6 +1,7 @@
 #include "spaces/TaskSpace.hpp"
 
 #include "EigenPath.hpp"
+#include "KinematicsSolver.hpp"
 #include "Common.hpp"
 
 TaskSpace::TaskSpace(const RobotPtr& robot) 

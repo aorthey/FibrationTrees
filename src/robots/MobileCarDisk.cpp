@@ -1,6 +1,5 @@
 #include "robots/MobileCarDisk.hpp"
 
-#include <ompl/base/spaces/ReedsSheppStateSpace.h>
 #include "FilePath.hpp"
 
 dart::dynamics::SkeletonPtr MobileCarDisk::MakeSkeleton(const YAML::Node& /*node*/) {

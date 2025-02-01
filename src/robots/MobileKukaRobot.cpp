@@ -47,19 +47,20 @@ dart::dynamics::SkeletonPtr MobileKukaRobot::MakeSkeleton(const YAML::Node& node
 
 ompl::multilevel::FactoredSpaceInformationPtr MobileKukaRobot::MakeSpaceInformation(const RobotPtr& robot) {
   KinematicsSolverPtr kinematics_solver = std::make_shared<KinematicsSolver>(robot->GetSkeleton());
-  auto numDofs = robot->GetSkeleton()->getNumDofs() - 3;
+  auto numDofsAll = robot->GetSkeleton()->getNumDofs();
+  auto numDofsManipulator = numDofsAll - 3;
 
-  auto spaceRN = std::make_shared<ompl::base::RealVectorStateSpace>(numDofs);
+  auto spaceRN = std::make_shared<ompl::base::RealVectorStateSpace>(numDofsManipulator);
   auto spaceSE2 = std::make_shared<ompl::base::SE2StateSpace>();
   auto space = spaceSE2 + spaceRN;
 
   ////////////////////////////////////////////////////////////////////////////////
   // Set Bounds RN
   ////////////////////////////////////////////////////////////////////////////////
-  ompl::base::RealVectorBounds bounds(numDofs);
+  ompl::base::RealVectorBounds bounds(numDofsManipulator);
   const auto lb = robot->GetSkeleton()->getPositionLowerLimits();
   const auto ub = robot->GetSkeleton()->getPositionUpperLimits();
-  for(size_t k =0; k< numDofs; k++) {
+  for(size_t k =0; k< numDofsManipulator; k++) {
     bounds.setLow(k, lb[k+3]);
     bounds.setHigh(k, ub[k+3]);
   }
@@ -112,6 +113,11 @@ void MobileKukaRobot::EigenToState(const StateXd& v, ompl::base::State* state) c
 
 std::vector<State3d> MobileKukaRobot::GetFK(const StateXd& config) const {
   auto endeffector = "base_link_robot";
+  if(config.configuration != config.configuration) {
+    OMPL_ERROR("Detected NaN value for FK config.");
+    std::cout << "set config " << config << " for robot " << GetName() << std::endl;
+    exit(0);
+  }
   skeleton_->setConfiguration(config.configuration);
   return std::vector<State3d>({skeleton_->getBodyNode(endeffector)->getTransform().translation()});
 }

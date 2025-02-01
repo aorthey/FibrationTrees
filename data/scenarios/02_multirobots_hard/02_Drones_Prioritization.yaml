@@ -1,0 +1,116 @@
+name: Drones
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: True
+
+obstacles:
+
+  Obstacle1:
+    name: Hut
+    type: urdf
+    filename: objects/hut_05.urdf
+    position: [0.0, 0.0, -1.0]
+
+robots:
+  Robot32:
+    name: MultiRobot
+    robots: [Robot30, RobotA]
+    root: True
+    hide: True
+    smooth_path: True
+  Robot31:
+    name: MultiRobot
+    robots: [Robot30, RobotAi]
+    hide: True
+    smooth_path: True
+  Robot30:
+    name: MultiRobot
+    robots: [RobotC, RobotB]
+    hide: True
+    smooth_path: True
+  Robot29:
+    name: MultiRobot
+    robots: [RobotC, RobotBi]
+    hide: True
+    smooth_path: True
+
+  RobotA:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: True
+  RobotAi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.17
+    smooth_path: True
+    hide: False
+
+  RobotB:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: True
+  RobotBi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+
+  RobotC:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: True
+  RobotCi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+
+projections:
+
+  ProjectionA:
+    name: Projection_XR3R2SO2_XR3
+    connection: [Robot32, Robot31]
+  ProjectionB:
+    name: ProjectionSubspace
+    connection: [Robot31, Robot30]
+  ProjectionC:
+    name: Projection_XR3R2SO2_XR3
+    connection: [Robot30, Robot29]
+  ProjectionD:
+    name: ProjectionSubspace
+    connection: [Robot29, RobotC]
+  ProjectionE:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotC, RobotCi]
+
+problem:
+  start:
+    type: joint
+    config: [
+      +1.0, -0.5, 0.0, 0, 0, 0,
+      +1.0, +0.5, 0.0, 0, 0, 0,
+      +1.0, -0.0, 0.0, 0, 0, 0
+    ]
+
+  goal:
+    type: joint
+    threshold: 0.5
+    config: [
+      +1.0, -0.5, 4.0, 0, 0, 0,
+      +1.0, +0.5, 4.0, 0, 0, 0,
+      +1.0, -0.0, 4.0, 0, 0, 0
+    ]
+
+planner_settings:
+  FibrationRrt:
+    use_section_search: False
+    selector_function_type: last_level

@@ -1,12 +1,26 @@
 #include "gui/Visualizer.hpp"
+
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
+#include <osgGA/FirstPersonManipulator>
 
 #include "DartHelper.hpp"
 #include "OmplHelper.hpp"
 #include "Common.hpp"
+#include "gui/PathReplayEventHandler.hpp"
 
-Visualizer::Visualizer(const dart::simulation::WorldPtr& world) {
+CameraData MakeDefaultCameraData() {
+  CameraData data;
+  data.eye = ::osg::Vec3(-10, -10, 5);
+  data.center = ::osg::Vec3(0, 0, 0);
+  data.up = ::osg::Vec3(0, 0, 1);
+  return data;
+}
 
+Visualizer::Visualizer(const dart::simulation::WorldPtr& world) 
+  : Visualizer(world, MakeDefaultCameraData()) {
+}
+
+Visualizer::Visualizer(const dart::simulation::WorldPtr& world, const CameraData& camera_data) {
   viewer = new dart::gui::osg::ImGuiViewer();
 
   world_node = new PathReplayWorldNode(world);
@@ -20,16 +34,20 @@ Visualizer::Visualizer(const dart::simulation::WorldPtr& world) {
   // viewer->getImGuiHandler()->addWidget(
   //     std::make_shared<TextWidget>(viewer, world_node.get()));
 
-  viewer->setUpViewInWindow(0, 0, 640, 480);
+  //viewer->setUpViewInWindow(0, 0, 1200, 800);
 
-  const auto& eye = ::osg::Vec3(-3, 0, 2);
-  const auto& center = ::osg::Vec3(0, 0, 0.5);
-  const auto& up = ::osg::Vec3(0, 0, 1);
+  const auto& eye = camera_data.eye;
+  const auto& center = camera_data.center;
+  const auto& up = camera_data.up;
 
+  //auto manip = new osgGA::FirstPersonManipulator();
+  //viewer->setCameraManipulator(manip);
   viewer->getCameraManipulator()->setHomePosition(eye, center, up);
   viewer->setCameraManipulator(viewer->getCameraManipulator()); //update 
 
   viewer->simulate(true);
+
+
 }
 
 void Visualizer::SetEndTime(float end_time) {
@@ -49,7 +67,7 @@ void Visualizer::AddPlanner(const RobotPtr& robot, const ompl::base::PlannerPtr&
     OMPL_ERROR("Robot SpaceInformation");
     robot->GetSpaceInformation()->printSettings(std::cout);
     OMPL_ERROR("-----------------------------------------------");
-    throw "InvalidStateSpace";
+    throw std::runtime_error("Invalid state space");
   }
 
   if(displayPlannerData) {
@@ -69,19 +87,9 @@ void Visualizer::AddPlanner(const RobotPtr& robot, const ompl::base::PlannerPtr&
   {
     auto path = pdef->getSolutionPath();
     ompl::geometric::PathGeometric &pgeo = *static_cast<ompl::geometric::PathGeometric *>(path.get());
-    OMPL_INFORM("Found path with %d states.", pgeo.getStateCount());
-    //for(const auto& state : pgeo.getStates()) {
-      //path->getSpaceInformation()->printState(state);
-      //const auto config = robot->StateToEigen(state);
-      //const auto tcps = robot->GetFK(config);
-      //std::cout << "EndEffector position is " <<std::endl;
-      //for(const auto& tcp : tcps) {
-        //std::cout << "\t" << tcp << std::endl;
-      //}
-    //}
-    OMPL_INFORM("Interpolate path...");
+    //OMPL_INFORM("Interpolate path...");
     //pgeo.interpolate();
-    OMPL_INFORM("Add path to visualizer...");
+    OMPL_INFORM("Add path with %d states to visualizer.", pgeo.getStateCount());
     world_node->AddPath(robot, path, kDefaultPathColor);
   }
 }

@@ -3,7 +3,6 @@
 #include <dart/dynamics/TranslationalJoint.hpp>
 
 #include "Common.hpp"
-#include "Config.hpp"
 #include "OmplHelper.hpp"
 
 void PrintSkeletonInfo(const dart::dynamics::SkeletonPtr& skeleton) {
@@ -219,11 +218,6 @@ dart::dynamics::SkeletonPtr createSphere(float radius) {
     auto shapeNode = body->createShapeNodeWith<dart::dynamics::VisualAspect, dart::dynamics::CollisionAspect, dart::dynamics::DynamicsAspect>(shape);
     shapeNode->getVisualAspect()->setColor(State3d(0.5, 0.0, 0.5));
 
-    auto ll = MakeState(ReadConfigVariable<std::vector<double>>("sphere_robot_lower_limit"));
-    auto ul = MakeState(ReadConfigVariable<std::vector<double>>("sphere_robot_upper_limit"));
-    sphere->setPositionLowerLimits(ll.configuration);
-    sphere->setPositionUpperLimits(ul.configuration);
-
     body->setName(name);
 
     return sphere;
@@ -257,7 +251,7 @@ void addCoordinateFrameToWorld(const dart::simulation::WorldPtr& world) {
   auto frame_z = std::make_shared<dart::dynamics::SimpleFrame>(dart::dynamics::Frame::World(), "coordinate_frame_z");
 
   const float kCoordinateFrameLength = 0.5;
-  State3d origin(-0.0, -0.0, 0.0);
+  State3d origin(0.0, 0.0, 0.0);
   State3d ex(kCoordinateFrameLength, 0, 0);
   State3d ey(0, kCoordinateFrameLength, 0);
   State3d ez(0, 0, kCoordinateFrameLength);

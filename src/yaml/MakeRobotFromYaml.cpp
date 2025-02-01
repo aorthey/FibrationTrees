@@ -1,6 +1,7 @@
 #include "yaml/MakeRobotFromYaml.hpp"
 
 #include <ompl/util/Console.h>
+#include <ompl/multilevel/datastructures/TaskSpaceMotionValidator.h>
 
 #include "yaml/MakeFromYamlHelpers.hpp"
 
@@ -15,12 +16,12 @@
 #include "robots/MobileCarDisk.hpp"
 #include "robots/RobotFactory.hpp"
 #include "robots/ZeppelinRobot.hpp"
-#include "robots/ZeppelinInnerSphereRobot.hpp"
 #include "robots/MultiRobot.hpp"
 #include "robots/KukaRobotTaskSpace.hpp"
 #include "robots/MobileKukaRobotTaskSpace.hpp"
 #include "robots/TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints.hpp"
 #include "robots/TimeBasedMobileKukaRobotTaskSpace.hpp"
+#include "validators/MotionValidatorTaskSpaceMultiRobot.hpp"
 
 RobotPtr MakeAnyRobotFromNode(const YAML::Node& node,
     const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles,
@@ -71,11 +72,32 @@ RobotPtr MakeMultiRobotFromNode(const YAML::Node& node,
   auto multi_robot = MultiRobot::MakeMultiRobot(robots_for_multirobot);
   OMPL_DEBUG(">> Create multi robot %s from robots: %s", multi_robot->GetName().c_str(), ToString(robot_names).c_str());
 
-  auto pairwise_collision_checker = std::make_shared<MultiRobotCollisionChecker>(world, multi_robot);
-
   auto si = multi_robot->GetSpaceInformation();
+
+  auto pairwise_collision_checker = std::make_shared<MultiRobotCollisionChecker>(world, multi_robot);
   si->setStateValidityChecker(pairwise_collision_checker);
   si->setStateValidityCheckingResolution(0.001);
+
+  bool task_space_robot = false;
+  if(node["task_space"]) {
+    if(node["task_space"].as<bool>()) {
+      auto motion_validator = std::make_shared<MotionValidatorTaskSpaceMultiRobot>(si, multi_robot);
+      si->setMotionValidator(motion_validator);
+      task_space_robot = true;
+    }
+  }
+
+  if(!task_space_robot) {
+    //If the multi robot does not interpolate in task space, then all subrobots
+    //should also not interpolate in task space
+    for(const auto& robot : robots_for_multirobot) {
+      auto motion_validator = robot->GetSpaceInformation()->getMotionValidator();
+      if(std::dynamic_pointer_cast<ompl::multilevel::TaskSpaceMotionValidator>(motion_validator) != nullptr) {
+        throw std::runtime_error("Multi robot has no task space interpolation, but subrobot " + robot->GetName() + " has.");
+      }
+    }
+  }
+
 
   return multi_robot;
 }
@@ -119,9 +141,6 @@ RobotPtr MakeAtomicRobotFromNode(const YAML::Node& node,
 
   } else if(name == "ZeppelinRobot") {
     robot = MakeRobot<ZeppelinRobot>(world, obstacles, node);
-
-  } else if(name == "ZeppelinInnerSphereRobot") {
-    robot = MakeRobot<ZeppelinInnerSphereRobot>(world, obstacles, node);
 
   } else if(name == "CubeRobot") {
     robot = MakeRobot<CubeRobot>(world, obstacles, node);
@@ -167,12 +186,30 @@ RobotPtr MakeAtomicRobotFromNode(const YAML::Node& node,
   return robot;
 }
 
+void CheckSingletonRootRobot(const YAML::Node& yaml_robots) {
+  size_t number_of_root_robots = 0;
+  for(const auto& yaml_robot : yaml_robots) {
+    const auto node = yaml_robot.second;
+
+    if(node["root"]) {
+      if(node["root"].as<bool>()) {
+        number_of_root_robots++;
+      }
+    }
+  }
+  if(number_of_root_robots != 1) {
+    throw std::out_of_range("Requires exactly one root robot, but yaml has " + std::to_string(number_of_root_robots));
+  }
+}
+
 std::unordered_map<std::string, RobotPtr> MakeChildRobotsFromYamlFilename(const std::string& filename, 
     const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles) {
 
   std::unordered_map<std::string, RobotPtr> robots;
   YAML::Node config = YAML::LoadFile(filename);
   const auto yaml_robots = config["robots"];
+
+  CheckSingletonRootRobot(yaml_robots);
 
   //Make all atomic robots
   for(const auto& yaml_robot : yaml_robots) {

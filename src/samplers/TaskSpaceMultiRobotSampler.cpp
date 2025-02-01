@@ -41,10 +41,10 @@ void TaskSpaceMultiRobotSampler::sampleUniform(ompl::base::State *state) {
 }
 
 void TaskSpaceMultiRobotSampler::sampleUniformNear(ompl::base::State *state, const ompl::base::State *near, double distance) {
-  throw "NYI";
+  throw std::runtime_error("Not yet implemented");
 }
 void TaskSpaceMultiRobotSampler::sampleGaussian(ompl::base::State *state, const ompl::base::State *mean, double stdDev) {
-  throw "NYI";
+  throw std::runtime_error("Not yet implemented");
 }
 
 ompl::base::StateSamplerPtr allocateTaskSpaceMultiRobotSampler(const RobotPtr& joint_robot, const std::vector<RobotPtr>& robots, const std::vector<std::pair<State3d, State3d>>& limits) {

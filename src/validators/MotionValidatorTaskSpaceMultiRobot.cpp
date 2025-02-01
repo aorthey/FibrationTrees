@@ -5,20 +5,19 @@
 
 bool kDebug = false;
 
-MotionValidatorTaskSpaceMultiRobot::MotionValidatorTaskSpaceMultiRobot(const ompl::multilevel::FactoredSpaceInformationPtr& factor)
+MotionValidatorTaskSpaceMultiRobot::MotionValidatorTaskSpaceMultiRobot(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const std::shared_ptr<MultiRobot>& multi_robot)
   : ompl::multilevel::TaskSpaceMotionValidator(factor)
 {
-  for(const auto& child : factor->getChildren()) {
-    motion_validators_.push_back(child->getMotionValidator());
+  for(const auto& child : multi_robot->GetSubRobots()) {
+    motion_validators_.push_back(child->GetSpaceInformation()->getMotionValidator());
   }
   auto space = factor->getStateSpace()->as<ompl::base::CompoundStateSpace>();
   for(size_t k = 0; k < space->getSubspaceCount(); k++) {
     lastValids_.push_back(space->getSubspace(k)->allocState());
   }
   if(space->getSubspaceCount() != motion_validators_.size()) {
-    OMPL_ERROR("Number of subspaces and number of motion validators does not match up (%d != %d).", 
-        space->getSubspaceCount(), motion_validators_.size());
-    throw "InvalidNumber";
+    throw std::out_of_range("Number of subspaces and number of motion validators does not match up: " 
+        + std::to_string(space->getSubspaceCount()) + " != " + std::to_string(motion_validators_.size()));
   }
   tmpStateOnTotalSpace_ = factor->allocState();
 }
@@ -38,8 +37,7 @@ bool MotionValidatorTaskSpaceMultiRobot::checkMotion(const ompl::base::State *s1
 
 bool MotionValidatorTaskSpaceMultiRobot::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const {
   if(lastValid.first == nullptr) {
-    OMPL_ERROR("Last valid state is required.");
-    throw "NYI";
+    throw std::runtime_error("Last valid state is required.");
   }
 
   auto s1_compound = s1->as<ompl::base::CompoundState>();
@@ -148,7 +146,7 @@ std::vector<ompl::base::State*> MotionValidatorTaskSpaceMultiRobot::propagateMot
     }
 
     ////////////////////////////////////////////////////////////////////////////////
-    // Check that resulting states are valid 
+    // Check that resulting state is valid 
     ////////////////////////////////////////////////////////////////////////////////
     if(!si_->isValid(state)) {
       return result;

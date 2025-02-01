@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<robot name="dragon_ddk">
+  <link name="world"/>
+  <link name="empty_link_x"/>
+  <link name="empty_link_y"/>
+  <link name="empty_link_z"/>
+  <link name="empty_link_roll"/>
+  <link name="empty_link_pitch"/>
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <mesh filename="meshes/dddk2.stl"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="blue">
+        <color rgba=".3 .3 .9 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="meshes/dddk2.stl"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <material name="blue">
+        <color rgba=".3 .3 .9 1"/>
+      </material>
+    </collision>
+  </link>
+  <joint name="joint_translation_x" type="prismatic">
+    <origin xyz="-0.0 -0.0 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <parent link="world"/>
+    <child link="empty_link_x"/>
+    <limit effort="1" lower="-10.0" upper="10.0" velocity="1"/>
+  </joint>
+  <joint name="joint_translation_y" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <parent link="empty_link_x"/>
+    <child link="empty_link_y"/>
+    <limit effort="1" lower="-10.0" upper="10.0" velocity="1"/>
+  </joint>
+  <joint name="joint_translation_z" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="empty_link_y"/>
+    <child link="empty_link_z"/>
+    <limit effort="1" lower="-10.0" upper="10.0" velocity="1"/>
+  </joint>
+  <joint name="joint_translation_roll" type="revolute">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <parent link="empty_link_z"/>
+    <child link="empty_link_roll"/>
+    <limit effort="100" lower="-3.1415" upper="3.1415" velocity="1"/>
+  </joint>
+  <joint name="joint_translation_pitch" type="revolute">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <parent link="empty_link_roll"/>
+    <child link="empty_link_pitch"/>
+    <limit effort="100" lower="-3.1415" upper="3.1415" velocity="1"/>
+  </joint>
+  <joint name="joint_translation_yaw" type="revolute">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="empty_link_pitch"/>
+    <child link="base_link"/>
+    <limit effort="100" lower="-3.1415" upper="3.1415" velocity="1"/>
+  </joint>
+</robot>

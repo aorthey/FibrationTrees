@@ -14,7 +14,7 @@
 #include "OmplHelper.hpp"
 #include "KinematicsSolver.hpp"
 #include "validators/MotionValidatorTaskSpaceTranslation.hpp"
-#include "projections/ProjectionTaskSpace.hpp"
+#include "projections/TaskSpaceProjection.hpp"
 #include "validators/MotionValidatorTaskSpaceMultiRobot.hpp"
 #include "robots/KukaRobotTaskSpace.hpp"
 #include "robots/MultiRobot.hpp"
@@ -62,19 +62,19 @@ void CheckMultiRobotEdge(
   const auto limits = std::make_pair(State3d(-1.5, -0.1, 0.0), State3d(1.5, 0.1, 2.0));
   point1->SetLimits(limits);
   auto grand_child1 = point1->GetSpaceInformation();
-  auto projection1 = std::make_shared<ProjectionTaskSpace>(child1, grand_child1, robot1);
+  auto projection1 = std::make_shared<TaskSpaceProjection>(child1, grand_child1, robot1);
   child1->addChild(grand_child1, projection1);
 
   auto point2 = MakeRobot<SphereRobot>(world);
   point2->SetLimits(limits);
   auto grand_child2 = point2->GetSpaceInformation();
-  auto projection2 = std::make_shared<ProjectionTaskSpace>(child2, grand_child2, robot2);
+  auto projection2 = std::make_shared<TaskSpaceProjection>(child2, grand_child2, robot2);
   child2->addChild(grand_child2, projection2);
   ////////////////////////////////////////////////////////////////////////////////
   ////Add subspace projections
   ////////////////////////////////////////////////////////////////////////////////
-  auto projection_to_1 = std::make_shared<ompl::multilevel::Projection_Subspace>(factor, child1, 0);
-  auto projection_to_2 = std::make_shared<ompl::multilevel::Projection_Subspace>(factor, child2, 1);
+  auto projection_to_1 = std::make_shared<ompl::multilevel::SubspaceProjection>(factor, child1, 0);
+  auto projection_to_2 = std::make_shared<ompl::multilevel::SubspaceProjection>(factor, child2, 1);
 
   bool computer_fiber_space = false;
   EXPECT_TRUE(factor->addChild(child1, projection_to_1, computer_fiber_space));
@@ -83,7 +83,7 @@ void CheckMultiRobotEdge(
   auto pairwise_collision_checker = std::make_shared<MultiRobotCollisionChecker>(world, multi_robot);
   factor->setStateValidityChecker(pairwise_collision_checker);
 
-  auto motion_validator = std::make_shared<MotionValidatorTaskSpaceMultiRobot>(factor);
+  auto motion_validator = std::make_shared<MotionValidatorTaskSpaceMultiRobot>(factor, multi_robot);
   factor->setMotionValidator(motion_validator);
 
   auto task_start1 = grand_child1->allocState();
@@ -232,8 +232,8 @@ protected:
     std::vector<RobotPtr> robots = {robot1, robot2};
     multi_robot = MultiRobot::MakeMultiRobot(robots);
     factor = multi_robot->GetSpaceInformation();
-    auto projection_to_1 = std::make_shared<ompl::multilevel::Projection_Subspace>(factor, space1, 0);
-    auto projection_to_2 = std::make_shared<ompl::multilevel::Projection_Subspace>(factor, space2, 1);
+    auto projection_to_1 = std::make_shared<ompl::multilevel::SubspaceProjection>(factor, space1, 0);
+    auto projection_to_2 = std::make_shared<ompl::multilevel::SubspaceProjection>(factor, space2, 1);
     bool computer_fiber_space = false;
     EXPECT_TRUE(factor->addChild(space1, projection_to_1, computer_fiber_space));
     EXPECT_TRUE(factor->addChild(space2, projection_to_2, computer_fiber_space));

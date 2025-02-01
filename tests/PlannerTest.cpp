@@ -8,8 +8,6 @@
 #include "TimeOrSolutionTerminationCondition.hpp"
 
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
-#include <ompl/multilevel/datastructures/projections/Relaxation.h>
-#include <ompl/multilevel/datastructures/projections/RN_RM.h>
 #include <ompl/multilevel/planners/FibrationRRT.h>
 #include <ompl/geometric/planners/rrt/RRT.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>

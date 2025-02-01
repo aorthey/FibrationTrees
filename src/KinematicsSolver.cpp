@@ -21,11 +21,10 @@ KinematicsSolver::KinematicsSolver(const dart::dynamics::SkeletonPtr& skeleton)
   : skeleton_(skeleton) 
 {
   endeffector_ = skeleton_->getBodyNode(skeleton_->getNumBodyNodes() - 1)->getName();
-  if(skeleton_->getBodyNode(endeffector_)==nullptr) 
+  if(skeleton_->getBodyNode(endeffector_) == nullptr) 
   {
-    throw "EndeffectorDoesNotExist";
+    throw std::runtime_error("Endeffector " + endeffector_ + " does not exists on robot.");
   }
-
 }
 
 std::optional<StateXd> KinematicsSolver::solve_ik(const State3d& frame, size_t max_iterations) {
@@ -60,9 +59,6 @@ std::optional<State3d> KinematicsSolver::solve_fk(const StateXd& state) {
   auto ub = skeleton_->getPositionUpperLimits();
   for(size_t k = 0; k < config.size(); k++) {
     if(config[k] < (lb[k] - kOutOfBoundsJointLimitPadding) || config[k] > (ub[k] + kOutOfBoundsJointLimitPadding) || config[k] != config[k]) {
-      // std::cout << "Out of limits of " << k << "-th dof : " << lb[k] << "<" << config[k] << "<" << ub[k] << std::endl;
-      // std::cout << "Rejecting config " << config << std::endl;
-      // exit(0);
       return std::nullopt;
     }
   }

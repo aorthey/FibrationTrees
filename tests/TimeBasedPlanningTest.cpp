@@ -8,7 +8,7 @@
 #include "TimeGoal.hpp"
 #include "TimeOrSolutionTerminationCondition.hpp"
 
-#include <ompl/multilevel/datastructures/projections/TimeBasedProjection.h>
+#include <ompl/multilevel/datastructures/projections/XTimeToXProjection.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 #include <ompl/multilevel/planners/FibrationRRT.h>
 #include <ompl/base/terminationconditions/IterationTerminationCondition.h>
@@ -44,7 +44,7 @@ TEST(TimeBasedPlanningTest, Simple) {
   auto factor1 = robot_in_time->GetSpaceInformation();
   auto factor2 = robot->GetSpaceInformation();
 
-  auto projection_time_dimension = std::make_shared<ompl::multilevel::Projection_TimeBased>(factor1->getStateSpace(), factor2->getStateSpace());
+  auto projection_time_dimension = std::make_shared<ompl::multilevel::XTimeToXProjection>(factor1->getStateSpace(), factor2->getStateSpace());
   factor1->addChild(factor2, projection_time_dimension);
 
   factor1->printFactorization(std::cout);

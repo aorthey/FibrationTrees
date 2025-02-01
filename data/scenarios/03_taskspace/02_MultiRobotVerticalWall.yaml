@@ -1,0 +1,95 @@
+name: MultiRobotVerticalWall
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: False
+
+robots:
+  RobotAll:
+    name: MultiRobot
+    robots: [Robot1, Robot2]
+    smooth_path: False
+    show_path: True
+    task_space: True
+    root: True
+
+  Robot1:
+    name: KukaRobotTaskSpace
+    smooth_path: False
+    show_path: True
+    task_space: True
+    translation: [0, -0.15, 0]
+
+  Robot1Tcp:
+    name: SphereRobot
+    lower_limits: [0.38, -0.5, 0]
+    upper_limits: [0.43, +0.5, 2]
+    smooth_path: True
+    show_path: True
+    hide: True
+
+  Robot2:
+    name: KukaRobotTaskSpace
+    smooth_path: False
+    show_path: True
+    translation: [0, 0.15, 0]
+
+  Robot2Tcp:
+    name: SphereRobot
+    lower_limits: [0.38, -0.5, 0]
+    upper_limits: [0.43, +0.5, 2]
+    smooth_path: True
+    show_path: True
+    hide: True
+
+obstacles:
+  Obstacle1:
+    name: Floor
+    type: floor
+
+  Obstacle2:
+    name: Box
+    type: box
+    position: [0.5, 0.0, 0.75]
+    size: [0.16, 2.0, 1.5]
+
+projections:
+  Projection0:
+    name: ProjectionMultiRobot
+    parent: RobotAll
+    children: [Robot1, Robot2]
+
+  Projection1:
+    name: ProjectionTaskSpace
+    connection: [Robot1, Robot1Tcp]
+
+  Projection2:
+    name: ProjectionTaskSpace
+    connection: [Robot2, Robot2Tcp]
+
+problem:
+
+  start:
+    type: task
+    max_iterations: 200
+    Robot1Tcp:
+      config: [0.4, -0.2, 1.0]
+    Robot2Tcp:
+      config: [0.4, 0.0, 1.0]
+
+  goal:
+    type: task
+    threshold: 0.05
+    max_iterations: 200
+    Robot1Tcp:
+      config: [+0.4, +0.2, +0.7] #[+0.4, +0.1, +0.7]
+      visualize: True
+    Robot2Tcp:
+      config: [+0.4, -0.2, +0.6] #[+0.4, -0.2, +0.6]
+      visualize: True
+
+
+##Start
+#-0.956085,-0.722608,-0.690743,-0.793237,2.27242,-0.771233,-1.34351
+#0.959495,-0.214579,1.5866,-0.918908,1.85751,-0.408643,-0.291335
+

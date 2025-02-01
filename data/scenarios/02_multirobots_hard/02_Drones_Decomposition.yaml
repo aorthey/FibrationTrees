@@ -1,0 +1,353 @@
+name: Drones
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: True
+
+obstacles:
+
+  Obstacle1:
+    name: Hut
+    type: urdf
+    filename: objects/hut_05.urdf
+    position: [0.0, 0.0, -1.0]
+
+robots:
+
+  RobotAll:
+    name: MultiRobot
+    robots: [RobotA, RobotB, RobotC, RobotD, RobotE, RobotF, RobotG, RobotH, RobotJ, RobotK, RobotL, RobotM, RobotN, RobotO, RobotP, RobotQ]
+    root: True
+    smooth_path: True
+
+  RobotA:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: False
+  RobotAi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+
+  RobotB:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: False
+  RobotBi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+
+  RobotC:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: False
+  RobotCi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+
+  RobotD:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: False
+  RobotDi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+
+  RobotE:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: False
+  RobotEi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+
+  RobotF:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: False
+  RobotFi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+
+  RobotG:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: False
+  RobotGi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+
+  RobotH:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: False
+  RobotHi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+
+  RobotJ:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: False
+  RobotJi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+
+  RobotK:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: False
+  RobotKi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+
+  RobotL:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: False
+  RobotLi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+  RobotM:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: False
+  RobotMi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+  RobotN:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: False
+  RobotNi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+  RobotO:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: False
+  RobotOi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+  RobotP:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: False
+  RobotPi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+  RobotQ:
+    name: Drone
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    smooth_path: False
+  RobotQi:
+    name: SphereRobot
+    lower_limits: [-10.0, -10.0, -10.0]
+    upper_limits: [+10.0, +10.0, +10.0]
+    radius: 0.2
+    smooth_path: True
+    hide: False
+
+projections:
+
+  Projection0:
+    name: ProjectionMultiRobot
+    parent: RobotAll
+    task_space: False
+    children: [RobotA, RobotB, RobotC, RobotD, RobotE, RobotF, RobotG, RobotH, RobotJ, RobotK, RobotL, RobotM, RobotN, RobotO, RobotP, RobotQ]
+
+  ProjectionA:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotA, RobotAi]
+  ProjectionB:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotB, RobotBi]
+  ProjectionC:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotC, RobotCi]
+  ProjectionD:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotD, RobotDi]
+  ProjectionE:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotE, RobotEi]
+  ProjectionF:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotF, RobotFi]
+  ProjectionG:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotG, RobotGi]
+  ProjectionH:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotH, RobotHi]
+  ProjectionJ:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotJ, RobotJi]
+  ProjectionK:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotK, RobotKi]
+  ProjectionL:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotL, RobotLi]
+  ProjectionM:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotM, RobotMi]
+  ProjectionN:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotN, RobotNi]
+  ProjectionO:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotO, RobotOi]
+  ProjectionP:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotP, RobotPi]
+  ProjectionQ:
+    name: Projection_R3R2SO2_R3
+    connection: [RobotQ, RobotQi]
+
+problem:
+  start:
+    type: task
+    RobotAi: 
+      config: [+1.0, +1.0, 0.0]
+    RobotBi: 
+      config: [+1.0, +0.5, 0.0]
+    RobotCi: 
+      config: [+1.0, -0.0, 0.0]
+    RobotDi: 
+      config: [+1.0, -0.5, 0.0]
+    RobotEi: 
+      config: [+1.0, -1.0, 0.0]
+    RobotFi: 
+      config: [0.0, +1.0, 0.0]
+    RobotGi: 
+      config: [0.0, +0.5, 0.0]
+    RobotHi: 
+      config: [0.0, +0.0, 0.0]
+    RobotJi: 
+      config: [0.0, -0.5, 0.0]
+    RobotKi: 
+      config: [0.0, -1.0, 0.0]
+    RobotLi: 
+      config: [+2.0, +1.0, 0.0]
+    RobotMi: 
+      config: [+2.0, +0.5, 0.0]
+    RobotNi: 
+      config: [+2.0, +0.0, 0.0]
+    RobotOi: 
+      config: [+2.0, -0.5, 0.0]
+    RobotPi: 
+      config: [+2.0, -1.0, 0.0]
+    RobotQi: 
+      config: [+2.0, -1.5, 0.0]
+
+  goal:
+    type: task
+    threshold: 0.5
+    RobotAi: 
+      config: [+1.0, +1.0, +4.0]
+    RobotBi: 
+      config: [+1.0, +0.5, +4.0]
+    RobotCi: 
+      config: [+1.0, -0.0, +4.0]
+    RobotDi: 
+      config: [+1.0, -0.5, +4.0]
+    RobotEi: 
+      config: [+1.0, -1.0, +4.0]
+    RobotFi: 
+      config: [0.0, +1.0, +4.0]
+    RobotGi: 
+      config: [0.0, +0.5, +4.0]
+    RobotHi: 
+      config: [0.0, +0.0, +4.0]
+    RobotJi: 
+      config: [0.0, -0.5, +4.0]
+    RobotKi: 
+      config: [0.0, -1.0, +4.0]
+    RobotLi: 
+      config: [-1.0, +1.0, +4.5]
+    RobotMi: 
+      config: [-1.0, +0.5, +4.5]
+    RobotNi: 
+      config: [-1.0, +0.0, +4.5]
+    RobotOi: 
+      config: [-1.0, -0.5, +4.5]
+    RobotPi: 
+      config: [-1.0, -1.0, +4.5]
+    RobotQi: 
+      config: [-1.0, -1.5, +4.5]

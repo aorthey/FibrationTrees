@@ -1,0 +1,261 @@
+name: MobileRobotNagivation
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: True
+
+obstacles:
+  Obstacle0:
+    name: Floor
+    type: floor
+    height: -0.255
+    color: [0.99, 0.99, 0.99, 1.0]
+    width: 5.0
+  Obstacle1:
+    name: Box
+    type: box
+    position: [0.0, 0.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle2:
+    name: Box
+    type: box
+    position: [-1.0, 0.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle3:
+    name: Box
+    type: box
+    position: [+1.0, 0.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle4:
+    name: Box
+    type: box
+    position: [0.0, 1.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle5:
+    name: Box
+    type: box
+    position: [0.0, -1.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle6:
+    name: Box
+    type: box
+    position: [-1.0, -2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle7:
+    name: Box
+    type: box
+    position: [-0.0, -2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle8:
+    name: Box
+    type: box
+    position: [+1.0, -2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle9:
+    name: Box
+    type: box
+    position: [-1.0, +2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle10:
+    name: Box
+    type: box
+    position: [-0.0, +2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle11:
+    name: Box
+    type: box
+    position: [+1.0, +2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle12:
+    name: Box
+    type: box
+    position: [+2.0, +1.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle13:
+    name: Box
+    type: box
+    position: [+2.0, +0.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle14:
+    name: Box
+    type: box
+    position: [+2.0, -1.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle13:
+    name: Box
+    type: box
+    position: [+2.0, +2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle14:
+    name: Box
+    type: box
+    position: [+2.0, -2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle12:
+    name: Box
+    type: box
+    position: [-2.0, +1.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle13:
+    name: Box
+    type: box
+    position: [-2.0, +0.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle14:
+    name: Box
+    type: box
+    position: [-2.0, -1.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle13:
+    name: Box
+    type: box
+    position: [-2.0, +2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle14:
+    name: Box
+    type: box
+    position: [-2.0, -2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+
+robots:
+  Robot0:
+    name: MultiRobot
+    robots: [Robot1, Robot2, Robot3]
+    root: True
+    smooth_path: True
+  Robot1:
+    name: MobileKukaRobot
+    color: [0.7, 0.5, 0.5, 1.0]
+    smooth_path: False
+    hide: False
+  Robot2:
+    name: MobileKukaRobot
+    color: [0.5, 0.5, 0.7, 1.0]
+    smooth_path: False
+    hide: False
+  Robot3:
+    name: MobileKukaRobot
+    color: [0.5, 0.7, 0.5, 1.0]
+    smooth_path: False
+    hide: False
+  # Robot4:
+  #   name: MobileKukaRobot
+  #   color: [0.7, 0.7, 0.5, 1.0]
+  #   smooth_path: False
+  #   hide: False
+  Robot1i:
+    name: MobileKukaBase
+    color: [0.7, 0.5, 0.5, 1.0]
+    smooth_path: False
+    hide: True
+  Robot2i:
+    name: MobileKukaBase
+    color: [0.5, 0.5, 0.7, 1.0]
+    smooth_path: False
+    hide: True
+  Robot3i:
+    name: MobileKukaBase
+    color: [0.5, 0.7, 0.5, 1.0]
+    smooth_path: False
+    hide: True
+  # Robot4i:
+  #   name: MobileKukaBase
+  #   color: [0.7, 0.7, 0.5, 1.0]
+  #   smooth_path: False
+  #   hide: True
+
+projections:
+
+  Projection0:
+    name: ProjectionMultiRobot
+    parent: Robot0
+    task_space: False
+    children: [Robot1, Robot2, Robot3]
+  Projection1:
+    name: Projection_SE2RN_R2
+    connection: [Robot1, Robot1i]
+    task_space: False
+  Projection2:
+    name: Projection_SE2RN_R2
+    connection: [Robot2, Robot2i]
+    task_space: False
+  Projection3:
+    name: Projection_SE2RN_R2
+    connection: [Robot3, Robot3i]
+    task_space: False
+  # Projection4:
+  #   name: Projection_SE2RN_R2
+  #   connection: [Robot4, Robot4i]
+  #   task_space: False
+
+# problem:
+#   start:
+#     type: task
+#     Robot1i: 
+#       config: [-1.0, -1.0]
+#     Robot2i: 
+#       config: [+1.0, +1.0]
+#     Robot3i: 
+#       config: [+1.0, -1.0]
+#     # Robot4i: 
+#     #   config: [-1.0, +1.0]
+
+#   goal:
+#     type: task
+#     threshold: 0.5
+#     Robot1i: 
+#       config: [+1.0, +1.0]
+#       threshold: 0.1
+#     Robot2i: 
+#       config: [-1.0, -1.0]
+#       threshold: 0.1
+#     Robot3i: 
+#       config: [-1.0, +1.0]
+#       threshold: 0.1
+#     # Robot4i: 
+#     #   config: [+1.0, -1.0]
+#     #   threshold: 0.1
+problem:
+  start:
+    type: joint
+    config: [-1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             +1.0, +1.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             +1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+  goal:
+    type: joint
+    threshold: 0.5
+    config: [+1.0, +1.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             -1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             -1.0, +1.0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+planner_settings:
+  FibrationRrt:
+    #goal_bias: 0.1
+    #path_restriction_sampling_bias: 0.1
+    #path_restriction_surrounding_sampling_bias: 0.0
+    #sampling_perturbation_bias: 0.0
+    use_section_search: False
+    selector_function_type: exponential
+    #range: 1000

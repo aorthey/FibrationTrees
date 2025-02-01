@@ -20,10 +20,15 @@ bool HasParameter(const YAML::Node& node, const ompl::base::PlannerPtr& planner,
     return false;
   }
 
+  if(!node["planner_settings"][planner_name][parameter_name]) {
+    return false;
+  }
+
   return planner->params().hasParam(parameter_name);
 }
 
 void SetParameter(const YAML::Node& node, const ompl::base::PlannerPtr& planner, const std::string& planner_name, const std::string& parameter_name) {
+  std::cout << planner_name << ", " << parameter_name << std::endl;
   if(!HasParameter(node, planner, planner_name, parameter_name)) {
     return;
   }
@@ -52,7 +57,7 @@ ompl::base::PlannerPtr MakePlannerFromYaml(const YAML::Node& node, const std::st
     fplanner->setName(planner_name);
     fplanner->setSmoothIntermediateSolutions(false);
     for(const auto& child_robot : child_robots) {
-      fplanner->setSmoothIntermediateSolutions(child_robot.second->GetName(), child_robot.second->ShouldSmoothPath());
+      fplanner->setLocalSmoothIntermediateSolutions(child_robot.second->GetName(), child_robot.second->ShouldSmoothPath());
     }
 
     SetParameter(node, planner, planner_name, "goal_bias");
@@ -70,9 +75,22 @@ ompl::base::PlannerPtr MakePlannerFromYaml(const YAML::Node& node, const std::st
           } else if (selector_function_type == "uniform") {
             OMPL_INFORM("Set uniform selector function type.");
             fplanner->setSelectorFunctionType(ompl::multilevel::SelectorFunctionType::kUniform);
+          } else if (selector_function_type == "last_level") {
+            OMPL_INFORM("Set last level selector function type.");
+            fplanner->setSelectorFunctionType(ompl::multilevel::SelectorFunctionType::kLastLevel);
           } else {
             throw std::runtime_error("Unknown selector function type:" + selector_function_type);
           }
+        }
+        if(node["planner_settings"][planner_name]["use_section_search"]) {
+          auto use_section_search = node["planner_settings"][planner_name]["use_section_search"].as<bool>();
+
+          if(use_section_search) {
+            fplanner->setEnableSectionSearch();
+          } else {
+            fplanner->setDisableSectionSearch();
+          }
+
         }
       }
     }

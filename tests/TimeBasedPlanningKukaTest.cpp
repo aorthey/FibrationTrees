@@ -6,7 +6,7 @@
 #include "DartHelper.hpp"
 #include "OmplHelper.hpp"
 #include "KinematicsSolver.hpp"
-#include "projections/ProjectionTaskSpace.hpp"
+#include "projections/TaskSpaceProjection.hpp"
 #include "gui/Visualizer.hpp"
 #include "robots/KukaRobotTaskSpace.hpp"
 #include "robots/MobileKukaRobotTaskSpace.hpp"
@@ -29,7 +29,7 @@
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/multilevel/datastructures/FactoredSpaceInformation.h>
 #include <ompl/multilevel/planners/FibrationRRT.h>
-#include <ompl/multilevel/datastructures/projections/TimeBasedProjection.h>
+#include <ompl/multilevel/datastructures/projections/XTimeToXProjection.h>
 
 float kObstacleEndTime = 20.0;
 

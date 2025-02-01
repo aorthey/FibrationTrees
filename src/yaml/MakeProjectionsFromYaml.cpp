@@ -1,17 +1,23 @@
 #include "yaml/MakeProjectionsFromYaml.hpp"
 
 #include <ompl/multilevel/datastructures/projections/SubspaceProjection.h>
-#include <ompl/multilevel/datastructures/projections/SubspaceFiberedProjection.h>
-#include <ompl/multilevel/datastructures/projections/RNSO2_RN.h>
-#include <ompl/multilevel/datastructures/projections/SE2RN_R2.h>
-#include <ompl/multilevel/datastructures/projections/XRN_X_SE2.h>
-#include <ompl/multilevel/datastructures/projections/RN_RM.h>
+#include <ompl/multilevel/datastructures/projections/FiberedSubspaceProjection.h>
+#include <ompl/multilevel/datastructures/projections/RNSO2ToRNProjection.h>
+#include <ompl/multilevel/datastructures/projections/SE2RNToR2Projection.h>
+#include <ompl/multilevel/datastructures/projections/SE2RNToSE2Projection.h>
+#include <ompl/multilevel/datastructures/projections/RNToRMProjection.h>
+#include <ompl/multilevel/datastructures/projections/R3R2SO2ToR3Projection.h>
+#include <ompl/multilevel/datastructures/projections/R3SO2ToR3Projection.h>
+
+#include <ompl/multilevel/datastructures/projections/XR3R2SO2ToXR3Projection.h>
+#include <ompl/multilevel/datastructures/projections/XR3SO2ToXR3Projection.h>
+#include <ompl/multilevel/datastructures/projections/XSE2RNToXR2Projection.h>
+
 #include <ompl/multilevel/datastructures/Projection.h>
-#include <ompl/multilevel/datastructures/projections/TimeBasedProjection.h>
+#include <ompl/multilevel/datastructures/projections/XTimeToXProjection.h>
 
 #include "robots/Robot.hpp"
-#include "projections/ProjectionTaskSpace.hpp"
-#include "validators/MotionValidatorTaskSpaceMultiRobot.hpp"
+#include "projections/TaskSpaceProjection.hpp"
 
 std::string GetRootRobotNameFromYamlFilename(const std::string& filename) {
 
@@ -36,19 +42,31 @@ ompl::multilevel::ProjectionPtr MakeProjectionFromNode(const YAML::Node& node, c
   }
   const std::string name = node["name"].as<std::string>();
   if(name == "ProjectionTaskSpace") {
-    return std::make_shared<ProjectionTaskSpace>(parent, child, parent_robot);
+    return std::make_shared<TaskSpaceProjection>(parent, child, parent_robot);
   } else if(name == "Projection_RNSO2_RN") {
-    return std::make_shared<ompl::multilevel::Projection_RNSO2_RN>(parent->getStateSpace(), child->getStateSpace());
+    return std::make_shared<ompl::multilevel::RNSO2ToRNProjection>(parent->getStateSpace(), child->getStateSpace());
+
+  } else if(name == "Projection_R3R2SO2_R3") {
+    return std::make_shared<ompl::multilevel::R3R2SO2ToR3Projection>(parent->getStateSpace(), child->getStateSpace());
+  } else if(name == "Projection_XR3R2SO2_XR3") {
+    return std::make_shared<ompl::multilevel::XR3R2SO2ToXR3Projection>(parent->getStateSpace(), child->getStateSpace());
+  } else if(name == "Projection_R3SO2_R3") {
+    return std::make_shared<ompl::multilevel::R3SO2ToR3Projection>(parent->getStateSpace(), child->getStateSpace());
+  } else if(name == "Projection_XR3SO2_XR3") {
+    return std::make_shared<ompl::multilevel::XR3SO2ToXR3Projection>(parent->getStateSpace(), child->getStateSpace());
+  } else if(name == "Projection_XSE2RN_XR2") {
+    return std::make_shared<ompl::multilevel::XSE2RNToXR2Projection>(parent->getStateSpace(), child->getStateSpace());
+
   } else if(name == "Projection_SE2RN_R2") {
-    return std::make_shared<ompl::multilevel::Projection_SE2RN_R2>(parent->getStateSpace(), child->getStateSpace());
+    return std::make_shared<ompl::multilevel::SE2RNToR2Projection>(parent->getStateSpace(), child->getStateSpace());
   } else if(name == "Projection_SE2RN_SE2") {
-    return std::make_shared<ompl::multilevel::Projection_SE2RN_SE2>(parent->getStateSpace(), child->getStateSpace());
+    return std::make_shared<ompl::multilevel::SE2RNToSE2Projection>(parent->getStateSpace(), child->getStateSpace());
   } else if(name == "Projection_RN_RM") {
-    return std::make_shared<ompl::multilevel::Projection_RN_RM>(parent->getStateSpace(), child->getStateSpace());
+    return std::make_shared<ompl::multilevel::RNToRMProjection>(parent->getStateSpace(), child->getStateSpace());
   } else if(name == "Projection_TimeBased") {
-    return std::make_shared<ompl::multilevel::Projection_TimeBased>(parent->getStateSpace(), child->getStateSpace());
+    return std::make_shared<ompl::multilevel::XTimeToXProjection>(parent->getStateSpace(), child->getStateSpace());
   } else if(name == "ProjectionSubspace") {
-    return std::make_shared<ompl::multilevel::Projection_FiberedSubspace>(parent->getStateSpace(), child->getStateSpace());
+    return std::make_shared<ompl::multilevel::FiberedSubspaceProjection>(parent->getStateSpace(), child->getStateSpace());
   } else {
     OMPL_ERROR("Could not find a projection with name %s", name.c_str());
     throw std::domain_error("No projection with this name.");
@@ -83,7 +101,6 @@ void MakeProjectionsFromYamlFilename(const std::string& filename, const dart::si
         OMPL_ERROR("Could not add projection for child %s", child->getName().c_str());
         throw std::out_of_range("Unknown projection type.");
       }
-
     } else if(projection_name == "ProjectionMultiRobot") {
       auto parent_name = node["parent"].as<std::string>();
 
@@ -108,7 +125,7 @@ void MakeProjectionsFromYamlFilename(const std::string& filename, const dart::si
         auto child = child_robot->GetSpaceInformation();
         OMPL_INFORM(" -> %s", child_name.c_str());
 
-        auto projection = std::make_shared<ompl::multilevel::Projection_FiberedSubspace>(parent->getStateSpace(), child->getStateSpace());
+        auto projection = std::make_shared<ompl::multilevel::FiberedSubspaceProjection>(parent->getStateSpace(), child->getStateSpace());
 
         if(!parent->addChild(child, projection, true)) {
           throw std::runtime_error("Could not add child");
@@ -121,21 +138,19 @@ void MakeProjectionsFromYamlFilename(const std::string& filename, const dart::si
           OMPL_INFORM(" -> %s", child_name.c_str());
           child_robots_of_parent.push_back(child_robot);
 
-          auto projection = std::make_shared<ompl::multilevel::Projection_Subspace>(parent->getStateSpace(), child->getStateSpace(), subspace_index);
+          auto projection = std::make_shared<ompl::multilevel::SubspaceProjection>(parent->getStateSpace(), child->getStateSpace(), subspace_index);
           subspace_index++;
 
           if(!parent->addChild(child, projection, false)) {
             throw std::runtime_error("Could not add child");
           }
         }
-
-        if(node["task_space"]) {
-          if(node["task_space"].as<bool>()) {
-            auto motion_validator = std::make_shared<MotionValidatorTaskSpaceMultiRobot>(parent);
-            parent->setMotionValidator(motion_validator);
-          }
-        }
-
+        // if(node["task_space"]) {
+        //   if(node["task_space"].as<bool>()) {
+        //     auto motion_validator = std::make_shared<MotionValidatorTaskSpaceMultiRobot>(parent);
+        //     parent->setMotionValidator(motion_validator);
+        //   }
+        // }
       }
 
     } else {

@@ -13,11 +13,10 @@
 #include "yaml/SkeletonHelpers.hpp"
 
 dart::dynamics::SkeletonPtr Drone::MakeSkeleton(const YAML::Node& node) {
-  const std::string urdf_name = GetDataFolder() + "robots/drone.urdf";
+  const std::string urdf_name = GetDataFolder() + "robots/dddk_with_joints.urdf";
   dart::utils::DartLoader loader;
   dart::utils::DartLoader::Options options;
-  //options.mDefaultRootJointType = dart::utils::DartLoader::RootJointType::FIXED;
-  options.mDefaultRootJointType = dart::utils::DartLoader::RootJointType::FLOATING;
+  options.mDefaultRootJointType = dart::utils::DartLoader::RootJointType::FIXED;
   loader.setOptions(options);
 
   dart::dynamics::SkeletonPtr skeleton
@@ -50,8 +49,6 @@ ompl::multilevel::FactoredSpaceInformationPtr Drone::MakeSpaceInformation(const 
   ompl::base::RealVectorBounds bounds(3);
   auto lb = robot->GetSkeleton()->getPositionLowerLimits();
   auto ub = robot->GetSkeleton()->getPositionUpperLimits();
-  std::cout << robot->GetSkeleton()->getNumDofs() << std::endl;
-  std::cout << lb.size() << std::endl;
   for(size_t k = 0; k < 3; k++) {
     bounds.setLow(k, lb[k]);
     bounds.setHigh(k, ub[k]);
@@ -77,6 +74,7 @@ ompl::multilevel::FactoredSpaceInformationPtr Drone::MakeSpaceInformation(const 
 }
 
 StateXd Drone::StateToEigen(const ompl::base::State* state) const {
+
   auto N = GetDimension();
   Eigen::VectorXd v(N);
 
@@ -92,6 +90,7 @@ StateXd Drone::StateToEigen(const ompl::base::State* state) const {
   v[4] = state_R2->values[1];
 
   v[5] = state_SO2->value;
+
 
   return MakeState(v);
 }
