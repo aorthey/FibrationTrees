@@ -13,7 +13,7 @@ ENABLE_TESTING()
 ################################################################################
 ## DEBUG BUILD
 SET(CMAKE_CXX_FLAGS "-g")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror -Wno-error=deprecated-declarations")
 
 ################################################################################
 INCLUDE(GoogleTest)
