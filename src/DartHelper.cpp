@@ -284,6 +284,16 @@ void addCoordinateFrameToWorld(const dart::simulation::WorldPtr& world) {
 void changeBodyColor(const dart::dynamics::SkeletonPtr& skeleton, const Eigen::Vector4d& color) 
 {
   for(const auto& body_node : skeleton->getBodyNodes()) {
+    // body_node->eachShapeNodeWith<dart::dynamics::VisualAspect>(
+    //     [](const ShapeNode* node) {
+    //       auto properties(node->getVisualAspect()->getProperties());
+    //       properties.mHidden = false;
+    //       properties.mShadowed = true;
+    //       properties.mUseDefaultColor = true;
+    //       properties.mRGBA = color;
+    //       node->getVisualAspect()->setProperties(properties);
+    //     }
+    // );
     auto shapeNodes = body_node->getShapeNodesWith<dart::dynamics::VisualAspect>();
     for(const auto& node : shapeNodes) {
       auto properties(node->getVisualAspect()->getProperties());
@@ -304,6 +314,13 @@ void hideSkeleton(const dart::dynamics::SkeletonPtr& skeleton, bool enable) {
       properties.mHidden = enable;
       node->getVisualAspect()->setProperties(properties);
     }
+    // body_node->eachShapeNodeWith<dart::dynamics::VisualAspect>(
+    //     [](const ShapeNode* node) {
+    //       auto properties(node->getVisualAspect()->getProperties());
+    //       properties.mHidden = enable;
+    //       node->getVisualAspect()->setProperties(properties);
+    //     }
+    // );
   }
 }
 

@@ -65,7 +65,7 @@ jobs:
 
     - name: 'Tar build files'
       run: |
-        tar -cf build.tar build/ ompl-custom/build/
+        tar -cf build.tar build/ ompl-custom/
 
     - name: 'Upload artifact'
       uses: actions/upload-artifact@v4
@@ -82,14 +82,12 @@ jobs:
     - name: Retrieve Build Artifacts
       uses: actions/download-artifact@v4
       with:
-        name: build-artifact-ompl
+        name: build-artifacts
         path: build
 
     - name: Untar
       run: |
         tar xfv build.tar
-        cd ompl-custom/build
-        sudo make install
 
     - name: Run Tests
       run: |
