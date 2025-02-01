@@ -65,8 +65,7 @@ jobs:
 
     - name: 'Tar build files'
       run: |
-        tar -cvf build.tar build
-        tar -cvf build_ompl.tar ompl-custom/build
+        tar -cf build.tar build/ ompl-custom/build/
 
     - name: 'Upload artifact'
       uses: actions/upload-artifact@v4
@@ -74,25 +73,11 @@ jobs:
         name: build-artifacts
         path: build.tar
 
-    - name: 'Upload artifact'
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-artifacts-ompl
-        path: build_ompl.tar
-
-    # - name: Archive build artifacts
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: build-artifact
-    #     path: ${{github.workspace}}/build
-
   ompl-unit-tests:
     runs-on: ubuntu-latest
     needs: build
     timeout-minutes: 30
     steps:
-    # - name: Checkout
-    #   uses: actions/checkout@v4
 
     - name: Retrieve Build Artifacts
       uses: actions/download-artifact@v4
@@ -101,7 +86,10 @@ jobs:
         path: build
 
     - name: Untar
-      run: tar xfv build_ompl.tar -C ompl-custom
+      run: |
+        tar xfv build.tar
+        cd ompl-custom/build
+        sudo make install
 
     - name: Run Tests
       run: |
@@ -120,14 +108,6 @@ jobs:
     needs: build
     timeout-minutes: 30
     steps:
-    # - name: Checkout
-    #   uses: actions/checkout@v4
-
-    # - name: Retrieve Build Artifacts
-    #   uses: actions/download-artifact@v4
-    #   with:
-    #     name: build-artifact
-    #     path: ${{github.workspace}}/build
 
     - name: Download build artifacts
       uses: actions/download-artifact@v4
@@ -135,7 +115,10 @@ jobs:
         name: build-artifacts
 
     - name: Untar
-      run: tar xfv build.tar
+      run: |
+        tar xfv build.tar
+        cd ompl-custom/build
+        sudo make install
 
     - name: Run Tests
       run: |
