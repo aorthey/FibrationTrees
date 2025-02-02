@@ -50,18 +50,23 @@ jobs:
         mkdir build
         cd build
         cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/ompl-custom
-        make -j$(nproc) && make test && sudo make install
+        make -j$(nproc) && sudo make install
 
     - name: Run Ompl Unit Tests
       run: |
         cd ompl-custom/build
         ctest --output-on-failure
-        
+
     - name: Configure CMake
       run: |
         mkdir build
         cd build
         cmake ..
+
+    - name: Build
+      run: |
+        cd build
+        make -j$(nproc)
 
     - name: Unit Tests
       run: |
