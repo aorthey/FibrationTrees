@@ -83,7 +83,6 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: build-artifacts
-        path: build
 
     - name: Untar
       run: |
@@ -115,8 +114,6 @@ jobs:
     - name: Untar
       run: |
         tar xfv build.tar
-        cd ompl-custom/build
-        sudo make install
 
     - name: Run Tests
       run: |
