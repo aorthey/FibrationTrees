@@ -66,7 +66,7 @@ MultiRobot-Easy
  DONE PLAN BENCH
 - [x]  [x]  [ ]  MultiDisks
 - [x]  [x]  [ ]  Drones
-- [x]  [ ]  [ ]  MobileNavigation [Needs to find solutions < 720s!]
+- [x]  [x]  [ ]  MobileNavigation [Needs to find solutions < 720s!]
 - [x]  [x]  [ ]  ReedsSheppCars
 
 
@@ -76,7 +76,7 @@ What could affect the runtime of fibrations ?
 
 
 Multirobot-hard
-- [x]  [x]  [ ]  CubeRobots
+- [x]  [x]  [ ]  CubeRobots  [Different sizes]
 - [ ]  [ ]  [ ]  Drones with Different Sizes
 - [ ]  [ ]  [ ]  Mobile Manips in Cubic Forest?
 - [ ]  [ ]  [ ]  ReedsSheppCars Complex

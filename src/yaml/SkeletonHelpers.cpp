@@ -9,7 +9,6 @@ void SetSkeletonLowerLimits(const dart::dynamics::SkeletonPtr& skeleton, const Y
   if(!node["lower_limits"]) {
     return;
   }
-  std::cout << dof << std::endl;
   const auto lower_limits = node["lower_limits"].as<std::vector<double>>();
   if(lower_limits.size() != dof) {
     throw std::domain_error("CubeRobot lower_limits must be size " + std::to_string(dof) + ".");

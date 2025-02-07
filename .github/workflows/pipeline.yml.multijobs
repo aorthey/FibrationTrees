@@ -50,21 +50,72 @@ jobs:
         mkdir build
         cd build
         cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/ompl-custom
-        make -j$(nproc) && sudo make install
+        make -j$(nproc) && make test && sudo make install
+        
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake ..
 
-    - name: Run Ompl Unit Tests
+    - name: Build
+      run: |
+        cd build
+        make -j$(nproc)
+
+    - name: 'Tar build files'
+      run: |
+        tar -cf build.tar build/ ompl-custom/
+
+    - name: 'Upload artifact'
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: build.tar
+
+  ompl-unit-tests:
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 30
+    steps:
+
+    - name: Retrieve Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts
+
+    - name: Untar
+      run: |
+        tar xfv build.tar
+
+    - name: Run Tests
       run: |
         cd ompl-custom/build
         ctest --output-on-failure
 
-    - name: Configure CMake and Build
-      run: |
-        mkdir build
-        cd build
-        cmake .. 
-        make -j$(nproc)
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: ${{github.workspace}}/Testing/Temporary/LastOmplUnitTests.log
+        
+  unit-tests:
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 30
+    steps:
 
-    - name: Unit Tests
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts
+
+    - name: Untar
+      run: |
+        tar xfv build.tar
+
+    - name: Run Tests
       run: |
         cd build
         ctest --output-on-failure -L unit

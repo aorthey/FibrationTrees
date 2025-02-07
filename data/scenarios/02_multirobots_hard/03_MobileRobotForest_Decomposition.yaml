@@ -141,9 +141,10 @@ obstacles:
 robots:
   Robot0:
     name: MultiRobot
-    robots: [Robot1, Robot2, Robot3]
+    robots: [Robot1, Robot2, Robot3, Robot4]
     root: True
     smooth_path: True
+
   Robot1:
     name: MobileKukaRobot
     color: [0.7, 0.5, 0.5, 1.0]
@@ -159,11 +160,12 @@ robots:
     color: [0.5, 0.7, 0.5, 1.0]
     smooth_path: False
     hide: False
-  # Robot4:
-  #   name: MobileKukaRobot
-  #   color: [0.7, 0.7, 0.5, 1.0]
-  #   smooth_path: False
-  #   hide: False
+  Robot4:
+    name: MobileKukaRobot
+    color: [0.7, 0.7, 0.5, 1.0]
+    smooth_path: False
+    hide: False
+
   Robot1i:
     name: MobileKukaBase
     color: [0.7, 0.5, 0.5, 1.0]
@@ -179,11 +181,11 @@ robots:
     color: [0.5, 0.7, 0.5, 1.0]
     smooth_path: False
     hide: True
-  # Robot4i:
-  #   name: MobileKukaBase
-  #   color: [0.7, 0.7, 0.5, 1.0]
-  #   smooth_path: False
-  #   hide: True
+  Robot4i:
+    name: MobileKukaBase
+    color: [0.7, 0.7, 0.5, 1.0]
+    smooth_path: False
+    hide: True
 
 projections:
 
@@ -191,7 +193,7 @@ projections:
     name: ProjectionMultiRobot
     parent: Robot0
     task_space: False
-    children: [Robot1, Robot2, Robot3]
+    children: [Robot1, Robot2, Robot3, Robot4]
   Projection1:
     name: Projection_SE2RN_R2
     connection: [Robot1, Robot1i]
@@ -204,16 +206,17 @@ projections:
     name: Projection_SE2RN_R2
     connection: [Robot3, Robot3i]
     task_space: False
-  # Projection4:
-  #   name: Projection_SE2RN_R2
-  #   connection: [Robot4, Robot4i]
-  #   task_space: False
+  Projection4:
+    name: Projection_SE2RN_R2
+    connection: [Robot4, Robot4i]
+    task_space: False
 
 problem:
   start:
     type: joint
     config: [-1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0,
              +1.0, +1.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             -1.0, +1.0, 0, 0, 0, 0, 0, 0, 0, 0,
              +1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0]
 
   goal:
@@ -221,14 +224,6 @@ problem:
     threshold: 0.5
     config: [+1.0, +1.0, 0, 0, 0, 0, 0, 0, 0, 0,
              -1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             +1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0,
              -1.0, +1.0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-#planner_settings:
-#  FibrationRrt:
-#    #goal_bias: 0.1
-#    #path_restriction_sampling_bias: 0.1
-#    #path_restriction_surrounding_sampling_bias: 0.0
-#    #sampling_perturbation_bias: 0.0
-#    use_section_search: True
-#    selector_function_type: exponential
-#    #range: 1000

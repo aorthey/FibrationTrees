@@ -241,7 +241,6 @@ std::unordered_map<std::string, RobotPtr> MakeChildRobotsFromYamlFilename(const 
   }
 
   //Make all multi robots
-
   while(true) {
     bool added_new_robot = false;
     for(const auto& yaml_robot : yaml_robots) {
@@ -275,6 +274,8 @@ std::unordered_map<std::string, RobotPtr> MakeChildRobotsFromYamlFilename(const 
     }
   }
 
+  //Verify that all robots have been created.
+  std::vector<std::string> uncreated_robots;
   for(const auto& yaml_robot : yaml_robots) {
     const auto node = yaml_robot.second;
     if(node["root"]) {
@@ -284,8 +285,11 @@ std::unordered_map<std::string, RobotPtr> MakeChildRobotsFromYamlFilename(const 
     }
     const auto key = yaml_robot.first.as<std::string>();
     if(!robots.contains(key)) {
-      throw std::runtime_error("Could not load robot " + key);
+      uncreated_robots.push_back(key);
     }
+  }
+  if(!uncreated_robots.empty()) {
+    throw std::runtime_error("Could not load robots " + ToString(uncreated_robots));
   }
 
   return robots;

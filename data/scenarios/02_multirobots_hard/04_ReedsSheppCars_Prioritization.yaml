@@ -168,4 +168,3 @@ problem:
 planner_settings:
   FibrationRrt:
     use_section_search: False
-    selector_function_type: "last_level"

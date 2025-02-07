@@ -3,19 +3,24 @@ name: MultiDisksComparison
 scenarios:
   Scenario1:
     name: MultiDisks
-    filename: scenarios/01_multirobots/01_MultiDisks.yaml
+    filename: scenarios/01_multirobots/01_MultiDisks_None.yaml
     run_count: 10
     timeout: 180
-    planners: [FibrationRrt-Decomposition, RRTConnect, LBTRRT, RRT, BFMT]
+    planners: [RRTConnect, LBTRRT, RRT, BFMT]
 
-planner_settings:
-  FibrationRrt:
-    range: Inf
-    goal_bias: 0.05
-    path_restriction_sampling_bias: 0.5
-    path_restriction_surrounding_sampling_bias: 0.0
-    sampling_perturbation_bias: 0.0
-    selector_function_type: exponential
+  Scenario2:
+    name: MultiDisks
+    filename: scenarios/01_multirobots/01_MultiDisks_Decomposition.yaml
+    run_count: 10
+    timeout: 180
+    planners: [FibrationRrt-Decomposition]
+
+  Scenario3:
+    name: MultiDisks
+    filename: scenarios/01_multirobots/01_MultiDisks_Prioritization.yaml
+    run_count: 10
+    timeout: 180
+    planners: [FibrationRrt-Prioritization]
 
 ompl_benchmark_plotter:
   options: ["--only-success-graph", "-s"]

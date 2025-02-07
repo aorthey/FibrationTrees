@@ -20,7 +20,7 @@ std::vector<TestParameter> GetScenarios(const std::string& path_name, const doub
 }
 
 std::vector<TestParameter> GetEasyScenarios() {
-  return GetScenarios("scenarios/01_multirobots_easy/", 360.0);
+  return GetScenarios("scenarios/01_multirobots_easy/", 720.0);
 }
 
 std::vector<TestParameter> GetHardScenarios() {

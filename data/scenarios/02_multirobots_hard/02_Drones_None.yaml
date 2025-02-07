@@ -13,170 +13,11 @@ obstacles:
     position: [0.0, 0.0, -1.0]
 
 robots:
-  Robot1:
+
+  RobotAll:
     name: MultiRobot
-    robots: [Robot2, RobotA]
+    robots: [RobotA, RobotB, RobotC, RobotD, RobotE, RobotF, RobotG, RobotH, RobotJ, RobotK, RobotL, RobotM, RobotN, RobotO, RobotP, RobotQ]
     root: True
-    hide: True
-    smooth_path: True
-
-  Robot1i:
-    name: MultiRobot
-    robots: [Robot2, RobotAi]
-    hide: True
-    smooth_path: True
-
-  Robot2:
-    name: MultiRobot
-    robots: [Robot3, RobotB]
-    hide: True
-    smooth_path: True
-  Robot2i:
-    name: MultiRobot
-    robots: [Robot3, RobotBi]
-    hide: True
-    smooth_path: True
-
-  Robot3:
-    name: MultiRobot
-    robots: [Robot4, RobotC]
-    hide: True
-    smooth_path: True
-  Robot3i:
-    name: MultiRobot
-    robots: [Robot4, RobotCi]
-    hide: True
-    smooth_path: True
-
-  Robot4:
-    name: MultiRobot
-    robots: [Robot5, RobotD]
-    hide: True
-    smooth_path: True
-  Robot4i:
-    name: MultiRobot
-    robots: [Robot5, RobotDi]
-    hide: True
-    smooth_path: True
-
-  Robot5:
-    name: MultiRobot
-    robots: [Robot6, RobotE]
-    hide: True
-    smooth_path: True
-  Robot5i:
-    name: MultiRobot
-    robots: [Robot6, RobotEi]
-    hide: True
-    smooth_path: True
-
-  Robot6:
-    name: MultiRobot
-    robots: [Robot7, RobotF]
-    hide: True
-    smooth_path: True
-  Robot6i:
-    name: MultiRobot
-    robots: [Robot7, RobotFi]
-    hide: True
-    smooth_path: True
-
-  Robot7:
-    name: MultiRobot
-    robots: [Robot8, RobotG]
-    hide: True
-    smooth_path: True
-  Robot7i:
-    name: MultiRobot
-    robots: [Robot8, RobotGi]
-    hide: True
-    smooth_path: True
-
-  Robot8:
-    name: MultiRobot
-    robots: [Robot10, RobotH]
-    hide: True
-    smooth_path: True
-  Robot8i:
-    name: MultiRobot
-    robots: [Robot10, RobotHi]
-    hide: True
-    smooth_path: True
-
-  Robot10:
-    name: MultiRobot
-    robots: [Robot11, RobotJ]
-    hide: True
-    smooth_path: True
-  Robot10i:
-    name: MultiRobot
-    robots: [Robot11, RobotJi]
-    hide: True
-    smooth_path: True
-
-  Robot11:
-    name: MultiRobot
-    robots: [Robot12, RobotK]
-    hide: True
-    smooth_path: True
-  Robot11i:
-    name: MultiRobot
-    robots: [Robot12, RobotKi]
-    hide: True
-    smooth_path: True
-
-  Robot12:
-    name: MultiRobot
-    robots: [Robot13, RobotL]
-    hide: True
-    smooth_path: True
-  Robot12i:
-    name: MultiRobot
-    robots: [Robot13, RobotLi]
-    hide: True
-    smooth_path: True
-
-  Robot13:
-    name: MultiRobot
-    robots: [Robot14, RobotM]
-    hide: True
-    smooth_path: True
-  Robot13i:
-    name: MultiRobot
-    robots: [Robot14, RobotMi]
-    hide: True
-    smooth_path: True
-
-  Robot14:
-    name: MultiRobot
-    robots: [Robot15, RobotN]
-    hide: True
-    smooth_path: True
-  Robot14i:
-    name: MultiRobot
-    robots: [Robot15, RobotNi]
-    hide: True
-    smooth_path: True
-  Robot15:
-    name: MultiRobot
-    robots: [Robot16, RobotO]
-    hide: True
-    smooth_path: True
-  Robot15i:
-    name: MultiRobot
-    robots: [Robot16, RobotOi]
-    hide: True
-    smooth_path: True
-
-  Robot16:
-    name: MultiRobot
-    robots: [RobotQ, RobotP]
-    hide: True
-    smooth_path: True
-  Robot16i:
-    name: MultiRobot
-    robots: [RobotQ, RobotPi]
-    hide: True
     smooth_path: True
 
   RobotA:
@@ -190,7 +31,7 @@ robots:
     upper_limits: [+10.0, +10.0, +10.0]
     radius: 0.2
     smooth_path: True
-    hide: True
+    hide: False
 
   RobotB:
     name: Drone
@@ -203,7 +44,7 @@ robots:
     upper_limits: [+10.0, +10.0, +10.0]
     radius: 0.2
     smooth_path: True
-    hide: True
+    hide: False
 
   RobotC:
     name: Drone
@@ -216,7 +57,7 @@ robots:
     upper_limits: [+10.0, +10.0, +10.0]
     radius: 0.2
     smooth_path: True
-    hide: True
+    hide: False
 
   RobotD:
     name: Drone
@@ -229,7 +70,7 @@ robots:
     upper_limits: [+10.0, +10.0, +10.0]
     radius: 0.2
     smooth_path: True
-    hide: True
+    hide: False
 
   RobotE:
     name: Drone
@@ -242,7 +83,7 @@ robots:
     upper_limits: [+10.0, +10.0, +10.0]
     radius: 0.2
     smooth_path: True
-    hide: True
+    hide: False
 
   RobotF:
     name: Drone
@@ -255,7 +96,7 @@ robots:
     upper_limits: [+10.0, +10.0, +10.0]
     radius: 0.2
     smooth_path: True
-    hide: True
+    hide: False
 
   RobotG:
     name: Drone
@@ -268,7 +109,7 @@ robots:
     upper_limits: [+10.0, +10.0, +10.0]
     radius: 0.2
     smooth_path: True
-    hide: True
+    hide: False
 
   RobotH:
     name: Drone
@@ -281,7 +122,7 @@ robots:
     upper_limits: [+10.0, +10.0, +10.0]
     radius: 0.2
     smooth_path: True
-    hide: True
+    hide: False
 
   RobotJ:
     name: Drone
@@ -294,7 +135,7 @@ robots:
     upper_limits: [+10.0, +10.0, +10.0]
     radius: 0.2
     smooth_path: True
-    hide: True
+    hide: False
 
   RobotK:
     name: Drone
@@ -307,7 +148,7 @@ robots:
     upper_limits: [+10.0, +10.0, +10.0]
     radius: 0.2
     smooth_path: True
-    hide: True
+    hide: False
 
   RobotL:
     name: Drone
@@ -320,7 +161,7 @@ robots:
     upper_limits: [+10.0, +10.0, +10.0]
     radius: 0.2
     smooth_path: True
-    hide: True
+    hide: False
   RobotM:
     name: Drone
     lower_limits: [-10.0, -10.0, -10.0]
@@ -332,7 +173,7 @@ robots:
     upper_limits: [+10.0, +10.0, +10.0]
     radius: 0.2
     smooth_path: True
-    hide: True
+    hide: False
   RobotN:
     name: Drone
     lower_limits: [-10.0, -10.0, -10.0]
@@ -344,7 +185,7 @@ robots:
     upper_limits: [+10.0, +10.0, +10.0]
     radius: 0.2
     smooth_path: True
-    hide: True
+    hide: False
   RobotO:
     name: Drone
     lower_limits: [-10.0, -10.0, -10.0]
@@ -356,7 +197,7 @@ robots:
     upper_limits: [+10.0, +10.0, +10.0]
     radius: 0.2
     smooth_path: True
-    hide: True
+    hide: False
   RobotP:
     name: Drone
     lower_limits: [-10.0, -10.0, -10.0]
@@ -368,7 +209,7 @@ robots:
     upper_limits: [+10.0, +10.0, +10.0]
     radius: 0.2
     smooth_path: True
-    hide: True
+    hide: False
   RobotQ:
     name: Drone
     lower_limits: [-10.0, -10.0, -10.0]
@@ -380,118 +221,7 @@ robots:
     upper_limits: [+10.0, +10.0, +10.0]
     radius: 0.2
     smooth_path: True
-    hide: True
-
-projections:
-
-  ProjectionA:
-    name: Projection_XR3R2SO2_XR3
-    connection: [Robot1, Robot1i]
-  ProjectionAi:
-    name: ProjectionSubspace
-    connection: [Robot1i, Robot2]
-
-  ProjectionB:
-    name: Projection_XR3R2SO2_XR3
-    connection: [Robot2, Robot2i]
-  ProjectionBi:
-    name: ProjectionSubspace
-    connection: [Robot2i, Robot3]
-
-  ProjectionC:
-    name: Projection_XR3R2SO2_XR3
-    connection: [Robot3, Robot3i]
-  ProjectionCi:
-    name: ProjectionSubspace
-    connection: [Robot3i, Robot4]
-
-  ProjectionD:
-    name: Projection_XR3R2SO2_XR3
-    connection: [Robot4, Robot4i]
-  ProjectionDi:
-    name: ProjectionSubspace
-    connection: [Robot4i, Robot5]
-
-  ProjectionE:
-    name: Projection_XR3R2SO2_XR3
-    connection: [Robot5, Robot5i]
-  ProjectionEi:
-    name: ProjectionSubspace
-    connection: [Robot5i, Robot6]
-
-  ProjectionEE:
-    name: Projection_XR3R2SO2_XR3
-    connection: [Robot6, Robot6i]
-  ProjectionEEi:
-    name: ProjectionSubspace
-    connection: [Robot6i, Robot7]
-
-  ProjectionF:
-    name: Projection_XR3R2SO2_XR3
-    connection: [Robot7, Robot7i]
-  ProjectionFi:
-    name: ProjectionSubspace
-    connection: [Robot7i, Robot8]
-
-  ProjectionG:
-    name: Projection_XR3R2SO2_XR3
-    connection: [Robot8, Robot8i]
-  ProjectionGi:
-    name: ProjectionSubspace
-    connection: [Robot8i, Robot10]
-
-  ProjectionI:
-    name: Projection_XR3R2SO2_XR3
-    connection: [Robot10, Robot10i]
-  ProjectionIi:
-    name: ProjectionSubspace
-    connection: [Robot10i, Robot11]
-
-  ProjectionJ:
-    name: Projection_XR3R2SO2_XR3
-    connection: [Robot11, Robot11i]
-  ProjectionJi:
-    name: ProjectionSubspace
-    connection: [Robot11i, Robot12]
-
-  ProjectionK:
-    name: Projection_XR3R2SO2_XR3
-    connection: [Robot12, Robot12i]
-  ProjectionKi:
-    name: ProjectionSubspace
-    connection: [Robot12i, Robot13]
-
-  ProjectionL:
-    name: Projection_XR3R2SO2_XR3
-    connection: [Robot13, Robot13i]
-  ProjectionLi:
-    name: ProjectionSubspace
-    connection: [Robot13i, Robot14]
-
-  ProjectionM:
-    name: Projection_XR3R2SO2_XR3
-    connection: [Robot14, Robot14i]
-  ProjectionMi:
-    name: ProjectionSubspace
-    connection: [Robot14i, Robot15]
-
-  ProjectionN:
-    name: Projection_XR3R2SO2_XR3
-    connection: [Robot15, Robot15i]
-  ProjectionNi:
-    name: ProjectionSubspace
-    connection: [Robot15i, Robot16]
-
-  ProjectionO:
-    name: Projection_XR3R2SO2_XR3
-    connection: [Robot16, Robot16i]
-  ProjectionOi:
-    name: ProjectionSubspace
-    connection: [Robot16i, RobotQ]
-
-  ProjectionP:
-    name: Projection_R3R2SO2_R3
-    connection: [RobotQ, RobotQi]
+    hide: False
 
 problem:
   start:
@@ -532,8 +262,3 @@ problem:
              -1.0, -0.5, +4.5, 0.0, 0.0, 0.0,
              -1.0, -1.0, +4.5, 0.0, 0.0, 0.0,
              -1.0, -1.5, +4.5, 0.0, 0.0, 0.0]
-
-planner_settings:
-  FibrationRrt:
-    use_section_search: False
-    selector_function_type: "last_level"
