@@ -1,0 +1,26 @@
+name: MobileRobotForest
+
+scenarios:
+  Scenario1:
+    name: MobileRobotForest
+    filename: scenarios/02_multirobots_hard/03_MobileRobotForest_None.yaml
+    run_count: 10
+    timeout: 3600
+    planners: [RRTConnect, LBTRRT, RRT, BFMT]
+
+  Scenario2:
+    name: MobileRobotForest
+    filename: scenarios/02_multirobots_hard/03_MobileRobotForest_Decomposition.yaml
+    run_count: 10
+    timeout: 3600
+    planners: [FibrationRrt-Decomposition]
+
+  Scenario3:
+    name: MobileRobotForest
+    filename: scenarios/02_multirobots_hard/03_MobileRobotForest_Prioritization.yaml
+    run_count: 10
+    timeout: 3600
+    planners: [FibrationRrt-Prioritization]
+
+ompl_benchmark_plotter:
+  options: ["--only-success-graph", "--title-name MobileRobotForest"]

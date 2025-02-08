@@ -1,0 +1,26 @@
+name: MobileNavigation
+
+scenarios:
+  Scenario1:
+    name: MobileNavigation
+    filename: scenarios/01_multirobots_easy/03_MobileNavigation_None.yaml
+    run_count: 10
+    timeout: 180
+    planners: [RRTConnect, LBTRRT, RRT, BFMT]
+
+  Scenario2:
+    name: MobileNavigation
+    filename: scenarios/01_multirobots_easy/03_MobileNavigation_Decomposition.yaml
+    run_count: 10
+    timeout: 180
+    planners: [FibrationRrt-Decomposition]
+
+  Scenario3:
+    name: MobileNavigation
+    filename: scenarios/01_multirobots_easy/03_MobileNavigation_Prioritization.yaml
+    run_count: 10
+    timeout: 180
+    planners: [FibrationRrt-Prioritization]
+
+ompl_benchmark_plotter:
+  options: ["--only-success-graph", "--title-name MobileNavigation"]

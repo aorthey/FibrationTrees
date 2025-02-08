@@ -1,0 +1,26 @@
+name: DroneCoordination
+
+scenarios:
+  Scenario1:
+    name: DroneCoordination
+    filename: scenarios/01_multirobots_easy/02_DroneCoordination_None.yaml
+    run_count: 10
+    timeout: 180
+    planners: [RRTConnect, LBTRRT, RRT, BFMT]
+
+  Scenario2:
+    name: DroneCoordination
+    filename: scenarios/01_multirobots_easy/02_DroneCoordination_Decomposition.yaml
+    run_count: 10
+    timeout: 180
+    planners: [FibrationRrt-Decomposition]
+
+  Scenario3:
+    name: DroneCoordination
+    filename: scenarios/01_multirobots_easy/02_DroneCoordination_Prioritization.yaml
+    run_count: 10
+    timeout: 180
+    planners: [FibrationRrt-Prioritization]
+
+ompl_benchmark_plotter:
+  options: ["--only-success-graph", "--title-name DroneCoordination"]

@@ -1,0 +1,12 @@
+name: PathVelocityDecomposition
+
+scenarios:
+  Scenario1:
+    name: PathVelocityDecomposition
+    filename: scenarios/03_taskspace/04_PathVelocityDecomposition.yaml
+    run_count: 10
+    timeout: 180
+    planners: [FibrationRrt, RRTtask]
+
+ompl_benchmark_plotter:
+  options: ["--only-success-graph", "--title-name PathVelocityDecomposition"]

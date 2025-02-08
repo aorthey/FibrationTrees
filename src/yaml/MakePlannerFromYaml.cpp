@@ -95,7 +95,7 @@ ompl::base::PlannerPtr MakePlannerFromYaml(const YAML::Node& node, const std::st
       }
     }
 
-  } else if(planner_name == "RrtTask") {
+  } else if(planner_name == "RRTtask") {
     planner = std::make_shared<ompl::multilevel::RRTtask>(factor);
   } else if(planner_name == "RRT") {
     planner = std::make_shared<ompl::geometric::RRT>(factor);

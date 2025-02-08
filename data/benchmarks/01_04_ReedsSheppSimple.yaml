@@ -1,0 +1,26 @@
+name: ReedsSheppSimple
+
+scenarios:
+  Scenario1:
+    name: ReedsSheppSimple
+    filename: scenarios/01_multirobots_easy/04_ReedsSheppSimple_None.yaml
+    run_count: 10
+    timeout: 180
+    planners: [RRTConnect, LBTRRT, RRT, BFMT]
+
+  Scenario2:
+    name: ReedsSheppSimple
+    filename: scenarios/01_multirobots_easy/04_ReedsSheppSimple_Decomposition.yaml
+    run_count: 10
+    timeout: 180
+    planners: [FibrationRrt-Decomposition]
+
+  Scenario3:
+    name: ReedsSheppSimple
+    filename: scenarios/01_multirobots_easy/04_ReedsSheppSimple_Prioritization.yaml
+    run_count: 10
+    timeout: 180
+    planners: [FibrationRrt-Prioritization]
+
+ompl_benchmark_plotter:
+  options: ["--only-success-graph", "--title-name ReedsSheppSimple"]

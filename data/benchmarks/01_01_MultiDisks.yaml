@@ -1,26 +1,26 @@
-name: MultiDisksComparison
+name: MultiDisks
 
 scenarios:
   Scenario1:
     name: MultiDisks
-    filename: scenarios/01_multirobots/01_MultiDisks_None.yaml
+    filename: scenarios/01_multirobots_easy/01_MultiDisks_None.yaml
     run_count: 10
     timeout: 180
     planners: [RRTConnect, LBTRRT, RRT, BFMT]
 
   Scenario2:
     name: MultiDisks
-    filename: scenarios/01_multirobots/01_MultiDisks_Decomposition.yaml
+    filename: scenarios/01_multirobots_easy/01_MultiDisks_Decomposition.yaml
     run_count: 10
     timeout: 180
     planners: [FibrationRrt-Decomposition]
 
   Scenario3:
     name: MultiDisks
-    filename: scenarios/01_multirobots/01_MultiDisks_Prioritization.yaml
+    filename: scenarios/01_multirobots_easy/01_MultiDisks_Prioritization.yaml
     run_count: 10
     timeout: 180
     planners: [FibrationRrt-Prioritization]
 
 ompl_benchmark_plotter:
-  options: ["--only-success-graph", "-s"]
+  options: ["--only-success-graph", "--title-name MultiDisks"]

@@ -66,6 +66,6 @@ void SaveBenchmarkToDatabase(const std::string& name, const ompl::tools::Benchma
 
   std::string db_filename = GetDataFolder() + "logs/"+name+".db";
 
-  auto cmd_log_to_db = "ompl_benchmark_statistics.py "+filename+" -d "+db_filename;
+  auto cmd_log_to_db = "python3 " + GetMainFolder() + "scripts/ompl_benchmark_statistics.py "+filename+" -d "+db_filename;
   system(cmd_log_to_db.c_str());
 }

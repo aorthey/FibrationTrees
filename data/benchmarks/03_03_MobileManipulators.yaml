@@ -1,0 +1,12 @@
+name: MobileManipulators
+
+scenarios:
+  Scenario1:
+    name: MobileManipulators
+    filename: scenarios/03_taskspace/03_MobileManipulators.yaml
+    run_count: 10
+    timeout: 180
+    planners: [FibrationRrt, RRTtask]
+
+ompl_benchmark_plotter:
+  options: ["--only-success-graph", "--title-name MobileManipulators"]
