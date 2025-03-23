@@ -31,7 +31,7 @@
 #include <ompl/multilevel/planners/FibrationRRT.h>
 #include <ompl/multilevel/datastructures/projections/XTimeToXProjection.h>
 
-float kObstacleEndTime = 20.0;
+double kObstacleEndTime = 20.0;
 
 std::pair<RobotPtr, ompl::base::PathPtr> MakeStraightRobotPath(
     const std::vector<double>& start_xy,
@@ -169,7 +169,11 @@ void TestConnection(
   auto factor = robot->GetSpaceInformation();
 
   auto start_state = MakeState({x_start, -0.0, 0.0, -1.0, 0.0, +1.57, -1, 2, 0.24, -0.21});
+  start_state.time = t_start;
+
   auto goal_state = MakeState({x_goal, -0.0, 0.0, 0.0, 0.0, -1.57, +1, 2, 0.24, -0.21});
+  goal_state.time = t_goal;
+
   auto start = factor->allocState();
   auto goal = factor->allocState();
 
@@ -192,6 +196,8 @@ void TestConnection(
   EXPECT_GT(segment_length, 0.0);
   EXPECT_GT(segment_fraction, 0.0);
   EXPECT_GT(ceil(dist/factor->getStateSpace()->getLongestValidSegmentLength()), 1.0);
+
+  EXPECT_TRUE(IsReachableInTime(start_state, goal_state, robot->GetVMax()));
 
   if(expect_true) {
     EXPECT_TRUE(validator->checkMotion(start, goal));
@@ -246,6 +252,7 @@ TEST(TimeBasedPlanningKukaTest, MotionValidatorDynamicObstacleTest) {
 TEST(TimeBasedPlanningKukaTest, MotionValidatorDynamicObstaclePropagateMotionTest) {
   dart::simulation::WorldPtr world(new dart::simulation::World);
   std::vector<std::pair<RobotPtr, ompl::base::PathPtr>> dynamic_obstacles;
+
   dynamic_obstacles.push_back(MakeStraightRobotPath({+0.0, -1.0}, {+0.0, +1.0}, kObstacleEndTime, world, {}));
   dynamic_obstacles.push_back(MakeStraightRobotPath({+1.0, +1.0}, {+1.0, +1.0}, kObstacleEndTime, world, {}));
 
@@ -280,4 +287,54 @@ TEST(TimeBasedPlanningKukaTest, MotionValidatorDynamicObstaclePropagateMotionTes
   auto states = validator->propagateMotion(start, goal);
   EXPECT_GT(states.size(), 2u);
   factor->printState(states.back());
+}
+
+TEST(TimeBasedPlanningKukaTest, MotionValidatorDynamicObstacleTimingTest) {
+  dart::simulation::WorldPtr world(new dart::simulation::World);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  ////Create dynamic_obstacles
+  ////////////////////////////////////////////////////////////////////////////////
+
+  std::vector<std::pair<RobotPtr, ompl::base::PathPtr>> dynamic_obstacles;
+  auto kObstacleEndTime = 0.33 * kDefaultTMax;
+  dynamic_obstacles.push_back(MakeStraightRobotPath({+0.0, -1.0}, {+0.0, +1.0}, kObstacleEndTime, world, {}));
+  //dynamic_obstacles.push_back(MakeStraightRobotPath({+1.0, -1.0}, {+1.0, +0.0}, 0.5*kObstacleEndTime, world, {}));
+
+  std::vector<dart::dynamics::SkeletonPtr> all_obstacles;
+  for(const auto& dynamic_obstacle: dynamic_obstacles) {
+    all_obstacles.push_back(dynamic_obstacle.first->GetSkeleton());
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  ////Create Robots
+  ////////////////////////////////////////////////////////////////////////////////
+
+  auto robot_in_time = MakeRobot<TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints>(world, all_obstacles);
+  for(const auto& dynamic_obstacle: dynamic_obstacles) {
+    robot_in_time->AddDynamicalObstacle(dynamic_obstacle);
+  }
+
+  robot_in_time->SetTMax(4*kObstacleEndTime);
+  robot_in_time->SetVMax(Inf);
+
+  auto factor = robot_in_time->GetSpaceInformation();
+  factor->setup();
+
+  ////////////////////////////////////////////////////////////////////////////////
+  ////Check lower time than obstacles.
+  ////////////////////////////////////////////////////////////////////////////////
+  //Collision when moving with same speed
+  OMPL_INFORM("Check motion when moving with same speed.");
+  TestConnection(robot_in_time, -1.0, +1.0, 0.0, kObstacleEndTime, false);
+
+  //No collision when moving slower
+  OMPL_INFORM("Check motion when moving slower");
+  TestConnection(robot_in_time, -1.0, +1.0, 0.0, 3.0*kObstacleEndTime, true);
+
+  //No collision when moving faster
+  OMPL_INFORM("Check motion when moving faster.");
+  TestConnection(robot_in_time, -1.0, +1.0, 0.0, 0.1*kObstacleEndTime, true);
+
+  // TestConnection(robot_in_time, -1.0, +0.0, 0.0, 3*kObstacleEndTime, true);
 }

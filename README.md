@@ -2,7 +2,7 @@
 
 Light-weight frontend to create fibration trees for multi-robot motion planning problems and to visualize path planning results.
 
-[![ContinuousIntegrationPipeline](https://github.com/aorthey/FibrationTrees/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/aorthey/FibrationTrees/actions/workflows/c-cpp.yml)
+[![ContinuousIntegrationPipeline](https://github.com/aorthey/FibrationTrees/actions/workflows/pipeline.yml/badge.svg)](https://github.com/aorthey/FibrationTrees/actions/workflows/pipeline.yml)
 
 # Dependencies
 ```

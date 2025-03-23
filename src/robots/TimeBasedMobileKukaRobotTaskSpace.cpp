@@ -59,6 +59,7 @@ void TimeBasedMobileKukaRobotTaskSpace::TimeToState(const float time, ompl::base
     state->as<ompl::base::CompoundState>()->as<ompl::base::TimeStateSpace::StateType>(3)->position = 0.0;
   }
   if(time > GetTMax()) {
+    OMPL_WARN("Time is out of bounds");
     state->as<ompl::base::CompoundState>()->as<ompl::base::TimeStateSpace::StateType>(3)->position = GetTMax();
   }
 }

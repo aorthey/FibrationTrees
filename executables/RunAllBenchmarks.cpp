@@ -4,7 +4,7 @@
 #include "input/FibrationTreesBenchmakerExecuter.hpp"
 
 std::vector<std::string> GetBenchmarks() {
-  return GetFilesRecursively(GetDataFolder() + "benchmarks");
+  return GetFilesRecursively(GetDataFolder() + "benchmarks/03/");
 }
 
 int main() {

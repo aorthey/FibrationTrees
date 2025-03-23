@@ -114,15 +114,15 @@ namespace std {
   }
 };
 
-float Distance(const StateXd& lhs, const StateXd& rhs) {
+double Distance(const StateXd& lhs, const StateXd& rhs) {
   return (lhs.configuration - rhs.configuration).norm();
 }
 
-float Distance(const State3d& lhs, const State3d& rhs) {
+double Distance(const State3d& lhs, const State3d& rhs) {
   return (lhs - rhs).norm();
 }
 
-float GetMinimumReachableTime(const StateXd& s1, const StateXd& s2, double vMax) {
+double GetMinimumReachableTime(const StateXd& s1, const StateXd& s2, double vMax) {
   return Distance(s1, s2) / vMax;
 }
 
@@ -145,10 +145,10 @@ StateXd operator + (const StateXd& lhs, const StateXd& rhs) {
 StateXd operator - (const StateXd& lhs, const StateXd& rhs) {
   return MakeState(lhs.configuration - rhs.configuration);
 }
-StateXd operator * (const float& value, const StateXd& state) {
+StateXd operator * (const double& value, const StateXd& state) {
   return MakeState(value * state.configuration);
 }
-StateXd operator * (const StateXd& state, const float& value) {
+StateXd operator * (const StateXd& state, const double& value) {
   return value * state;
 }
 

@@ -5,7 +5,7 @@ scenarios:
     name: MultiRobotVerticalWall
     filename: scenarios/03_taskspace/02_MultiRobotVerticalWall.yaml
     run_count: 10
-    timeout: 180
+    timeout: 3600
     planners: [FibrationRrt, RRTtask]
 
 ompl_benchmark_plotter:

@@ -4,10 +4,12 @@
 
 #include "yaml/MakeFromYamlHelpers.hpp"
 #include "yaml/MakeRobotFromYaml.hpp"
+#include "robots/TimeBasedMobileKukaRobotTaskSpace.hpp"
 
 #include "DartHelper.hpp"
 #include "OmplHelper.hpp"
 #include "FilePath.hpp"
+#include "Common.hpp"
 
 std::vector<dart::dynamics::SkeletonPtr> MakeObstaclesFromYamlFilename(const std::string& filename) {
   YAML::Node config = YAML::LoadFile(filename);
@@ -84,6 +86,8 @@ MakeDynamicObstaclesFromYamlFilename(const std::string& filename,
 
   std::vector<std::pair<RobotPtr, ompl::base::PathPtr>> dynamic_obstacles;
   const auto yaml_obstacles = config["obstacles"];
+
+  double max_time = -1.0;
   for(const auto& obstacle : yaml_obstacles) {
     std::string name = obstacle.second["name"].as<std::string>();
     std::string type = obstacle.second["type"].as<std::string>();
@@ -113,6 +117,21 @@ MakeDynamicObstaclesFromYamlFilename(const std::string& filename,
     state1.time = obstacle.second["time_start"].as<double>();
     auto state2 = MakeState(config2);
     state2.time = obstacle.second["time_goal"].as<double>();
+
+    if(max_time < 0.0) {
+      max_time = state2.time;
+    } else {
+      if(std::abs(max_time - state2.time) > Epsilon) {
+        throw std::runtime_error("Obstacle paths all require the same end time, but times differ: " +
+            std::to_string(max_time) + " vs " + std::to_string(state2.time));
+
+      }
+      if(std::abs(max_time - kDefaultTMax) > Epsilon) {
+        throw std::runtime_error("Obstacle paths all require the same end time as the robot, but times differ: " +
+            std::to_string(max_time) + " vs " + std::to_string(kDefaultTMax));
+
+      }
+    }
 
     auto si = robot->GetSpaceInformation();
     auto start = si->allocState();

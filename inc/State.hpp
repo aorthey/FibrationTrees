@@ -10,7 +10,7 @@ typedef Eigen::VectorXd TangentVector;
 
 struct StateXd {
   Eigen::VectorXd configuration;
-  float time{0.0f};
+  double time{0.0f};
 
   Eigen::VectorXd::Scalar& operator[](std::size_t idx);
   const Eigen::VectorXd::Scalar& operator[](std::size_t idx) const;
@@ -46,13 +46,13 @@ std::ostream& operator << (std::ostream& os, const StateXd& state);
 std::ostream& operator << (std::ostream& os, const State3d& state);
 std::ostream& operator << (std::ostream& os, const Eigen::Vector3f& state);
 
-float Distance(const State3d& lhs, const State3d& rhs);
-float Distance(const StateXd& lhs, const StateXd& rhs);
+double Distance(const State3d& lhs, const State3d& rhs);
+double Distance(const StateXd& lhs, const StateXd& rhs);
 bool IsReachableInTime(const StateXd& s1, const StateXd& s2, double vMax);
-float GetMinimumReachableTime(const StateXd& s1, const StateXd& s2, double vMax);
+double GetMinimumReachableTime(const StateXd& s1, const StateXd& s2, double vMax);
 
 StateXd operator + (const StateXd& lhs, const TangentVector& rhs);
 StateXd operator + (const StateXd& lhs, const StateXd& rhs);
 StateXd operator - (const StateXd& lhs, const StateXd& rhs);
-StateXd operator * (const float& value, const StateXd& state);
-StateXd operator * (const StateXd& state, const float& value);
+StateXd operator * (const double& value, const StateXd& state);
+StateXd operator * (const StateXd& state, const double& value);

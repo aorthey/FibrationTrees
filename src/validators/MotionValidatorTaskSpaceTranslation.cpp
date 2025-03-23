@@ -18,16 +18,20 @@ MotionValidatorTaskSpaceTranslation::~MotionValidatorTaskSpaceTranslation() {
   si_->freeState(lastValidState_);
 }
 
-bool MotionValidatorTaskSpaceTranslation::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
-  OMPL_ERROR("NYI. Please use propagateMotion.");
-  throw std::domain_error("You are not allowed to use checkMotion");
-  return TaskSpaceMotionValidator::checkMotion(s1, s2);
+//bool MotionValidatorTaskSpaceTranslation::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
+bool MotionValidatorTaskSpaceTranslation::checkMotion(const ompl::base::State *, const ompl::base::State *) const {
+  // OMPL_ERROR("NYI. Please use propagateMotion.");
+  // throw std::domain_error("You are not allowed to use checkMotion");
+  //return TaskSpaceMotionValidator::checkMotion(s1, s2);
+  return true;
 }
 
-bool MotionValidatorTaskSpaceTranslation::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const {
-  OMPL_ERROR("NYI. Please use propagateMotion.");
-  throw std::domain_error("You are not allowed to use checkMotion");
-  return TaskSpaceMotionValidator::checkMotion(s1, s2, lastValid);
+//bool MotionValidatorTaskSpaceTranslation::checkMotion(const ompl::base::State *s1, const ompl::base::State *s2, std::pair<ompl::base::State *, double> &lastValid) const {
+bool MotionValidatorTaskSpaceTranslation::checkMotion(const ompl::base::State *, const ompl::base::State *, std::pair<ompl::base::State *, double> &) const {
+  // OMPL_ERROR("NYI. Please use propagateMotion.");
+  // throw std::domain_error("You are not allowed to use checkMotion");
+  //return TaskSpaceMotionValidator::checkMotion(s1, s2, lastValid);
+  return true;
 }
 
 std::vector<ompl::base::State*> MotionValidatorTaskSpaceTranslation::propagateMotion(const ompl::base::State *s1, const ompl::base::State *s2) const {
