@@ -29,12 +29,18 @@ robots:
 
   Robot1:
     name: MobileKukaRobotTaskSpace
+    tcp_lower_limits: [-1.5, -0.02, 0.48]
+    tcp_upper_limits: [+1.5, +0.02, 0.52]
 
   Robot2:
     name: MobileKukaRobotTaskSpace
+    tcp_lower_limits: [-0.02, -1.5, 0.48]
+    tcp_upper_limits: [+0.02, +1.5, 0.52]
 
   Robot3:
     name: MobileKukaRobotTaskSpace
+    tcp_lower_limits: [-1.5, -1.5, 0.48]
+    tcp_upper_limits: [+1.5, +1.5, 0.52]
 
   Robot4:
     name: SphereRobot

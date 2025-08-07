@@ -75,7 +75,7 @@ MakeFactoredSpaceInformationFromYamlFilename(const std::string& filename, const 
   auto root_robot = MakeRootRobotFromYamlFilename(filename, world, obstacles, child_robots);
 
   for(const auto& dynamic_obstacle : dynamic_obstacles) {
-    OMPL_INFORM("Add dynamical obstacle: %s", dynamic_obstacle.first->GetName());
+    OMPL_INFORM("Add dynamical obstacle: %s", dynamic_obstacle.first->GetName().c_str());
     root_robot->AddDynamicalObstacle(dynamic_obstacle);
   }
 

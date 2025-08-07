@@ -4,6 +4,7 @@
 #include <ompl/multilevel/datastructures/projections/FiberedSubspaceProjection.h>
 #include <ompl/multilevel/datastructures/projections/RNSO2ToRNProjection.h>
 #include <ompl/multilevel/datastructures/projections/SE2RNToR2Projection.h>
+#include <ompl/multilevel/datastructures/projections/SE2RNTimeToR2TimeProjection.h>
 #include <ompl/multilevel/datastructures/projections/SE2RNToSE2Projection.h>
 #include <ompl/multilevel/datastructures/projections/RNToRMProjection.h>
 #include <ompl/multilevel/datastructures/projections/R3R2SO2ToR3Projection.h>
@@ -59,6 +60,8 @@ ompl::multilevel::ProjectionPtr MakeProjectionFromNode(const YAML::Node& node, c
 
   } else if(name == "Projection_SE2RN_R2") {
     return std::make_shared<ompl::multilevel::SE2RNToR2Projection>(parent->getStateSpace(), child->getStateSpace());
+  } else if(name == "Projection_SE2RNTime_R2Time") {
+    return std::make_shared<ompl::multilevel::SE2RNTimeToR2TimeProjection>(parent->getStateSpace(), child->getStateSpace());
   } else if(name == "Projection_SE2RN_SE2") {
     return std::make_shared<ompl::multilevel::SE2RNToSE2Projection>(parent->getStateSpace(), child->getStateSpace());
   } else if(name == "Projection_RN_RM") {

@@ -11,10 +11,8 @@ bool FibrationTreesSolverArguments::Setup(const int argc, const char* argv[]) {
       ("help,h", "Show help message")
       ("dry,d", "Dry run: Load everything, but do not plan or visualize")
       ("command-line-mode,c", "Run program in non-GUI mode by only printing to terminal.")
-      // ("planning,p", po::value<std::string>()->implicit_value("FibrationRrt")->zero_tokens(), 
-      //   "Plan a path. Optional: Specify a planner from [FibrationRrt, RrtTask, RRT, RRTConnect, LBTRRT, BITstar, BFMT]")
       ("planning,p", po::value<std::string>()->implicit_value("FibrationRrt"),
-        "Plan a path. Optional: Specify a planner from [FibrationRrt, RrtTask, RRT, RRTConnect, LBTRRT, BITstar, BFMT]")
+        "Plan a path. Optional: Specify a planner from [FibrationRrt, RRTtask, RRT, RRTConnect, LBTRRT, BITstar, BFMT]")
       ("timeout,t", po::value<double>()->default_value(10.0), "Timeout for planning in seconds")
       ("filename", po::value<std::string>()->required(), "Set filename")
   ;

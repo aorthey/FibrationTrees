@@ -94,7 +94,7 @@ ompl::base::ProblemDefinitionPtr MakeProblemDefinitionFromYamlFilename(
       //Maybe visualize
       if(robot_node.second["visualize"]) {
         auto visualize = robot_node.second["visualize"].as<bool>();
-        if(visualize) {
+        if(visualize && start_eigen.configuration.size() > 2) {
           world->addSimpleFrame(createCylinderFrame(start_eigen.configuration, State3d(0.0, M_PI*0.5, 0.0), 0.01, 0.001, State4d(0.1, 0.5, 0.1, 0.5)));
         }
       }

@@ -21,6 +21,7 @@
 #include "robots/MobileKukaRobotTaskSpace.hpp"
 #include "robots/TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints.hpp"
 #include "robots/TimeBasedMobileKukaRobotTaskSpace.hpp"
+#include "robots/TimeBasedMobileKukaBase.hpp"
 #include "validators/MotionValidatorTaskSpaceMultiRobot.hpp"
 
 RobotPtr MakeAnyRobotFromNode(const YAML::Node& node,
@@ -131,6 +132,14 @@ RobotPtr MakeAtomicRobotFromNode(const YAML::Node& node,
     }
     if(node["max_time"]) {
       std::static_pointer_cast<TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints>(robot)->SetTMax(node["max_time"].as<double>());
+    }
+  } else if(name == "TimeBasedMobileKukaBase") {
+    robot = MakeRobot<TimeBasedMobileKukaBase>(world, obstacles);
+    if(node["max_velocity"]) {
+      std::static_pointer_cast<TimeBasedMobileKukaBase>(robot)->SetVMax(node["max_velocity"].as<double>());
+    }
+    if(node["max_time"]) {
+      std::static_pointer_cast<TimeBasedMobileKukaBase>(robot)->SetTMax(node["max_time"].as<double>());
     }
 
   } else if(name == "MobileCar") {

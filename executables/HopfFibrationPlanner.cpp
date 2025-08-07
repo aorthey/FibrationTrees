@@ -21,7 +21,8 @@ using namespace ompl::base;
 using namespace ompl::geometric;
 
 const unsigned int kNumSamplesPerFiber = 50;
-const size_t kMaximumIterations = 10000;
+const size_t kMaximumIterations = 50;
+const float kLocalRange = 0.5;
 
 
 template <typename T>
@@ -124,6 +125,8 @@ YAML::Node ToYaml(const EigenSearchTree<T>& tree) {
   }
   if(tree.goal.has_value()) {
     node["goal"] = ToYaml(tree.goal.value());
+  } else {
+    node["goal"] = ToYaml(tree.start.value());
   }
   for(const auto& edge : tree.edges) {
     node["edges"].push_back(ToYaml(edge.first, edge.second));
@@ -176,7 +179,7 @@ YAML::Node S3EdgeToYaml(const std::shared_ptr<HopfFibrationProjection>& hopf_fib
   return node;
 }
 
-YAML::Node S2EdgeToYaml(const std::shared_ptr<HopfFibrationProjection>& hopf_fibration, const ompl::base::State* s1, const ompl::base::State* s2) {
+std::vector<YAML::Node> S2EdgeToYaml(const std::shared_ptr<HopfFibrationProjection>& hopf_fibration, const ompl::base::State* s1, const ompl::base::State* s2) {
   auto bundle_space = hopf_fibration->getBundle();
   auto base_space = hopf_fibration->getBase();
   auto fiber_space = hopf_fibration->getFiberSpace();
@@ -187,20 +190,21 @@ YAML::Node S2EdgeToYaml(const std::shared_ptr<HopfFibrationProjection>& hopf_fib
   auto baseState = base_space->allocState();
   auto fiberState = fiber_space->allocState();
 
-  YAML::Node node;
-  if (nd > 1)
-  {
-    for (int i = 0; i <= nd; i++)
-    {
+  std::vector<YAML::Node> nodes;
+
+  static int fiber_counter = 0;
+
+  if (nd > 1) {
+    for (int i = 0; i <= nd; i++) {
       base_space->interpolate(s1, s2, (double)i / (double)nd, baseState);
 
-      static int fiber_counter = 0;
       const auto name = "fiber" + std::to_string(fiber_counter++);
-      for(unsigned int j = 0; j < kNumSamplesPerFiber; j++) {
-        auto value = (double(j)/double(kNumSamplesPerFiber)) * 2.0 * M_PI - M_PI;
+      YAML::Node fiber_node;
+      for (unsigned int j = 0; j < kNumSamplesPerFiber; j++) {
+        auto value = (double(j) / double(kNumSamplesPerFiber)) * 2.0 * M_PI - M_PI;
         fiberState->as<ompl::base::SO2StateSpace::StateType>()->value = value;
 
-        if(!fiber_space->satisfiesBounds(fiberState)) {
+        if (!fiber_space->satisfiesBounds(fiberState)) {
           OMPL_ERROR("Invalid bounds");
           fiber_space->printState(fiberState);
           throw "InvalidBounds";
@@ -208,8 +212,9 @@ YAML::Node S2EdgeToYaml(const std::shared_ptr<HopfFibrationProjection>& hopf_fib
         hopf_fibration->lift(baseState, fiberState, bundleState);
 
         auto v = hopf_fibration->toVector(bundleState);
-        node[name]["states"].push_back(ToYaml(v));
+        fiber_node["states"].push_back(ToYaml(v));
       }
+      nodes.push_back(fiber_node);
     }
   }
 
@@ -217,7 +222,7 @@ YAML::Node S2EdgeToYaml(const std::shared_ptr<HopfFibrationProjection>& hopf_fib
   base_space->freeState(baseState);
   bundle_space->freeState(bundleState);
 
-  return node;
+  return nodes;
 }
 
 int main()
@@ -228,7 +233,37 @@ int main()
   auto factor = std::make_shared<ompl::multilevel::FactoredSpaceInformation>(total_space);
   auto child = std::make_shared<ompl::multilevel::FactoredSpaceInformation>(base_space);
 
-  child->setStateValidityChecker(std::make_shared<ompl::base::AllValidStateValidityChecker>(child));
+  // Add custom state validity checker for the sphere space
+  // child->setStateValidityChecker(
+  //   [](const ompl::base::State* state) -> bool {
+  //     const auto* sphere_state = state->as<ompl::base::SphereStateSpace::StateType>();
+  //     double theta = sphere_state->getTheta();
+  //     double phi = sphere_state->getPhi();
+      
+  //     // Create 16 equally distributed spherical obstacles
+  //     const int num_obstacles = 8;
+  //     const double obstacle_radius = 0.1; // Size of each obstacle
+      
+  //     // Calculate positions of obstacles
+  //     for (int i = 0; i < num_obstacles; i++) {
+  //       // Calculate theta and phi for this obstacle
+  //       double obs_theta = (2.0 * M_PI * i) / num_obstacles;
+  //       double obs_phi = (M_PI * (i % 4)) / 4.0; // Distribute in 4 layers
+        
+  //       // Calculate spherical distance between current state and obstacle center
+  //       double dtheta = std::abs(theta - obs_theta);
+  //       if (dtheta > M_PI) dtheta = 2.0 * M_PI - dtheta;
+  //       double dphi = std::abs(phi - obs_phi);
+        
+  //       // Check if point is inside obstacle
+  //       if (std::sqrt(dtheta * dtheta + dphi * dphi) < obstacle_radius) {
+  //         return false;
+  //       }
+  //     }
+      
+  //     return true;
+  //   }
+  // );
 
   auto hopf_fibration = std::make_shared<HopfFibrationProjection>(factor, child);
   factor->addChild(child, hopf_fibration);
@@ -242,9 +277,11 @@ int main()
   auto goal = total_space->allocState();
   auto sphere_goal = child->allocState();
 
-  sphere_start->as<SphereStateSpace::StateType>()->setThetaPhi(-2, 0.5*M_PI);
+  // sphere_start->as<SphereStateSpace::StateType>()->setThetaPhi(-2, 0.5*M_PI);
+  // sphere_goal->as<SphereStateSpace::StateType>()->setThetaPhi(+2, 0.4*M_PI);
+  sphere_start->as<SphereStateSpace::StateType>()->setThetaPhi(-0, 0.7*M_PI);
+  sphere_goal->as<SphereStateSpace::StateType>()->setThetaPhi(+3, 0.3*M_PI);
   hopf_fibration->lift(sphere_start, start);
-  sphere_goal->as<SphereStateSpace::StateType>()->setThetaPhi(+2, 0.4*M_PI);
   hopf_fibration->lift(sphere_goal, goal);
 
   ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(factor);
@@ -253,14 +290,20 @@ int main()
   auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
   planner->setProblemDefinition(pdef);
   planner->setup();
+  planner->setSeed(0);
 
-  planner->setLocalRange(factor->getName(), 0.5);
-  planner->setLocalGoalBias(factor->getName(), 0.2);
+  planner->setLocalRange(factor->getName(), kLocalRange);
+  planner->setLocalGoalBias(factor->getName(), 0.0);
   planner->setSmoothIntermediateSolutions(false);
+  planner->setLocalPathRestrictionSamplingBias(factor->getName(), 1.0);
+  planner->setLocalPathRestrictionSurroundingSamplingBias(factor->getName(), 0.0);
+  planner->setLocalSamplingPerturbationBias(factor->getName(), 0.0);
+  planner->setDisableSectionSearch();
 
   //Only move towards goal, then sample exclusively on path
-  planner->setLocalRange(child->getName(), 1.0);
-  planner->setLocalGoalBias(child->getName(), 1.0);
+  planner->setLocalRange(child->getName(), 0.5);
+  //planner->setLocalGoalBias(child->getName(), 0.0);
+  planner->setLocalGoalBias(child->getName(), 0.2);
   planner->setLocalPathRestrictionSamplingBias(child->getName(), 1.0);
   planner->setLocalPathRestrictionSurroundingSamplingBias(child->getName(), 0.0);
   planner->setLocalSamplingPerturbationBias(child->getName(), 0.0);
@@ -336,10 +379,16 @@ int main()
 
   const auto sphere_path = planner->getProblemDefinition(child->getName())->getSolutionPath()->as<ompl::geometric::PathGeometric>();
   auto states = sphere_path->getStates();
+  static int fiber_counter = 0;
   for(unsigned int i = 1; i < states.size(); i++) {
     auto s1 = states.at(i-1);
     auto s2 = states.at(i);
-    node["fibers"].push_back(S2EdgeToYaml(hopf_fibration, s1, s2));
+    auto nodes = S2EdgeToYaml(hopf_fibration, s1, s2);
+    for(const auto& fiber_node : nodes) {
+      YAML::Node named_fiber;
+      named_fiber["fiber" + std::to_string(fiber_counter++)] = fiber_node;
+      node["fibers"].push_back(named_fiber);
+    }
   }
   // for(unsigned int i = 0; i < N_vertices; i++) {
   //   for(unsigned int j = 0; j < N_vertices; j++) {

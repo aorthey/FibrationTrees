@@ -8,14 +8,40 @@
 #include "KinematicsSolver.hpp"
 #include "spaces/TaskSpaceMobileTimeBased.hpp"
 #include "spaces/TaskSpace.hpp"
+#include "samplers/TaskSpaceSampler.hpp"
 #include "Common.hpp"
 
 TimeBasedMobileKukaRobotTaskSpace::TimeBasedMobileKukaRobotTaskSpace(float vMax, float tMax) :
   vMax_(vMax), tMax_(tMax) {}
 
+dart::dynamics::SkeletonPtr TimeBasedMobileKukaRobotTaskSpace::MakeSkeleton(const YAML::Node& node) {
+  if(node["tcp_lower_limits"]) {
+    const auto lower_limits = node["tcp_lower_limits"].as<std::vector<double>>();
+    if(lower_limits.size() != 3) {
+      throw std::domain_error("Tcp limits size must be 3 (x, y, z)");
+    }
+    if(!node["tcp_upper_limits"]) {
+      throw std::domain_error("Tcp limits requires both lower and upper limits (missing upper limits)");
+    }
+    const auto upper_limits = node["tcp_upper_limits"].as<std::vector<double>>();
+    if(upper_limits.size() != 3) {
+      throw std::domain_error("Tcp limits size must be 3 (x, y, z)");
+    }
+    tcp_limits_ = std::make_pair(MakeState3d(lower_limits), MakeState3d(upper_limits));
+  }
+  return MobileKukaRobotTaskSpace::MakeSkeleton(node);
+}
+
 ompl::multilevel::FactoredSpaceInformationPtr TimeBasedMobileKukaRobotTaskSpace::MakeSpaceInformation(const RobotPtr& robot) {
   ompl::base::StateSpacePtr space_time(new TaskSpaceMobileTimeBased(robot, vMax_, tMax_));
-  return std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space_time);
+
+  auto factor = std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space_time);
+  if(tcp_limits_.has_value()) {
+    const auto task_space_limits = std::make_pair(tcp_limits_.value().first, tcp_limits_.value().second);
+    factor->getStateSpace()->setStateSamplerAllocator(
+          std::bind(&allocateTaskSpaceSampler, robot, task_space_limits));
+  }
+  return factor;
 }
 
 float TimeBasedMobileKukaRobotTaskSpace::GetVMax() const {

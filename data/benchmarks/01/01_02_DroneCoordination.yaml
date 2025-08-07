@@ -1,4 +1,4 @@
-name: DroneCoordination
+name: 02_DroneCoordination
 
 scenarios:
   Scenario1:
@@ -23,4 +23,4 @@ scenarios:
     planners: [FibrationRrt-Prioritization]
 
 ompl_benchmark_plotter:
-  options: ["--only-success-graph", "--title-name DroneCoordination"]
+  options: ["--only-success-graph", "--legend-separate-file", "--title-name DroneCoordination"]

@@ -11,6 +11,7 @@ class TimeBasedMobileKukaRobotTaskSpace : public MobileKukaRobotTaskSpace {
     TimeBasedMobileKukaRobotTaskSpace(float vMax, float tMax);
 
     void SetSpaceInformationFromRobot(const RobotPtr& robot, const dart::simulation::WorldPtr& world, const std::vector<dart::dynamics::SkeletonPtr>& obstacles);
+    dart::dynamics::SkeletonPtr MakeSkeleton(const YAML::Node& node) override;
 
     ompl::multilevel::FactoredSpaceInformationPtr MakeSpaceInformation(const RobotPtr& robot) override;
     ompl::base::MotionValidatorPtr MakeMotionValidator(const ompl::multilevel::FactoredSpaceInformationPtr& factor, const RobotPtr& robot) override;
@@ -28,5 +29,7 @@ class TimeBasedMobileKukaRobotTaskSpace : public MobileKukaRobotTaskSpace {
   private:
     float vMax_{kDefaultVMax};
     float tMax_{kDefaultTMax};
+
+    std::optional<std::pair<State3d, State3d>> tcp_limits_{std::nullopt};
 };
 

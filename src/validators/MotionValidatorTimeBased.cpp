@@ -52,19 +52,6 @@ std::vector<ompl::base::State*> MotionValidatorTimeBased::propagateMotion(const 
   if(!IsReachableInTime(from_vector, to_vector, vMax_)) {
     return result;
   }
-  //auto deltaTime = to_vector.time - from_vector.time;
-  //if(deltaTime <= 0) {
-  //  std::cout << "[Rejected]: Negative time:" << deltaTime << std::endl;
-  //  //Cannot propagate backwards in time
-  //  return result;
-  //}
-
-  //auto deltaSpace = Distance(from_vector, to_vector);
-  //if (deltaSpace / vMax_ > deltaTime + Epsilon) {
-  //  //Cannot physically reach goal
-  //  std::cout << "[Rejected]: Not enough time:" << deltaTime << " > " << deltaSpace / vMax_ << std::endl;
-  //  return result;
-  //}
 
   auto configs = kinematics_solver_->solve_edge_ik_with_config(from_vector, to_vector);
   if(configs.empty()) {
@@ -78,11 +65,9 @@ std::vector<ompl::base::State*> MotionValidatorTimeBased::propagateMotion(const 
   //Check validities
   ////////////////////////////////////////////////////////////////////////////////
   auto last_config = from_vector;
-  //std::cout << "Edge IK found " << configs.size() << " states." << std::endl;
   for(const auto& config : configs) {
     robot_->EigenToState(config, tmpState_);
     if(!si_->isValid(tmpState_)) {
-      //std::cout << "Invalid state" << std::endl;
       return result;
     }
     //Do not add too many states, only every X spaced

@@ -1,8 +1,5 @@
 EXEC=/home/`whoami`/git/ompl_benchmark_plotter/ompl_benchmark_plotter.py
-#python3 ${EXEC} ../log/Scenario1.db --min-time 0.0001 --max-time 10 --show --title "Scenario 1 MultiDisks"
-#python3 ${EXEC} ../log/Scenario2.db --min-time 1 --min-cost 1.2 --show --title "Scenario 2 Vertical Maze"
-python3 ${EXEC} ../log/Scenario2.db
-#python3 ${EXEC} ../log/Scenario3.db --min-time 1 --show --title "Scenario 3 Multi-Robot Vertical Maze"
-#python3 ${EXEC} ../log/Scenario4.db --min-time 10 --min-cost 10 --show --title "Scenario 4 Mobile Manipulators"
-#python3 ${EXEC} ../log/Scenario5.db --min-time 10 --show --title "Scenario 5 UAVs"
-#python3 ${EXEC} ../log/Scenario6.db --show --title "Scenario 6 Time-Based Planning"
+#python3 ${EXEC} ../data/logs/VerticalMaze.db --only-success-graph --min-time 0.1 --max-time 720 --show --title "Vertical Maze"
+#python3 ${EXEC} ../data/logs/MultiRobotVerticalWall.db --only-success-graph --min-time 1 --max-time 3600 --show --title "Multi Robot Vertical Maze"
+python3 ${EXEC} ../data/logs/MobileManipulators.db --only-success-graph --min-time 1 --max-time 1800 --show --title "Mobile Manipulators"
+#python3 ${EXEC} ../data/logs/PathVelocityDecomposition.db --only-success-graph --min-time 1 --max-time 720 --show --title "Path Velocity Decomposition"

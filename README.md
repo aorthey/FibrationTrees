@@ -47,11 +47,10 @@ Maybe when pressing Fn/Strg/Alt/Super ?
 Required
 - [x] Parallel fibration requires a different selection method. I.e. when one
   factor is not yet solved, it should be given precedence.
-- [ ] Save and Load Active View
-- [ ] Terminate immediately on invalid goal
 - [ ] Make a unit test for parallel section search
 - [ ] Make unit test for motion validation on Reedssheppcars
 - [ ] Print output of benchmark to png file 
+- [ ] Ensure TASK-RRT takes task-space constraints into account
 
 Optional
 - [ ] Rename FactorTrees branch ompl to Fibrationtrees 

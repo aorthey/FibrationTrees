@@ -47,6 +47,7 @@ float TimeBasedSphereRobot::StateToTime(const ompl::base::State* state) const {
 void TimeBasedSphereRobot::TimeToState(const float time, ompl::base::State* state) const {
   state->as<ompl::base::CompoundState>()->as<ompl::base::TimeStateSpace::StateType>(1)->position = time;
 }
+
 StateXd TimeBasedSphereRobot::StateToEigen(const ompl::base::State* state) const {
   auto N = GetDimension();
   Eigen::VectorXd v(N-1);

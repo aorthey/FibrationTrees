@@ -6,7 +6,8 @@
 #include <ompl/multilevel/datastructures/TaskSpaceMotionValidator.h>
 #include "projections/HopfFibrationProjection.hpp"
 
-const auto kEdgeEpsilon = 0.05;
+//const auto kEdgeEpsilon = 0.05;
+const auto kEdgeEpsilon = 0.001;
 const auto kStereographicDistanceThreshold = 0.2;
 
 class HopfFibrationMotionValidator : public ompl::multilevel::TaskSpaceMotionValidator
