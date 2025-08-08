@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -6,6 +8,7 @@
 
 std::string ToString(const std::vector<std::string>& input);
 std::string ToString(const std::vector<RobotPtr>& input);
+std::string ToString(const Eigen::MatrixXd& mat);
 
 template<typename T>
 std::string ToString(const std::vector<T>& input);
@@ -20,4 +23,3 @@ std::string ToString(const std::vector<T>& input) {
   }
   return output;
 }
-

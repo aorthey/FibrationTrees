@@ -116,9 +116,8 @@ RobotPtr MakeAtomicRobotFromNode(const YAML::Node& node,
     robot = MakeRobot<MobileKukaRobot>(world, obstacles, node);
   } else if(name == "MobileKukaBase") {
     robot = MakeRobot<MobileKukaBase>(world, obstacles, node);
-
   } else if(name == "TimeBasedMobileKukaRobotTaskSpace") {
-    robot = MakeRobot<TimeBasedMobileKukaRobotTaskSpace>(world, obstacles);
+    robot = MakeRobot<TimeBasedMobileKukaRobotTaskSpace>(world, obstacles, node);
     if(node["max_velocity"]) {
       std::static_pointer_cast<TimeBasedMobileKukaRobotTaskSpace>(robot)->SetVMax(node["max_velocity"].as<double>());
     }
@@ -126,15 +125,16 @@ RobotPtr MakeAtomicRobotFromNode(const YAML::Node& node,
       std::static_pointer_cast<TimeBasedMobileKukaRobotTaskSpace>(robot)->SetTMax(node["max_time"].as<double>());
     }
   } else if(name == "TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints") {
-    robot = MakeRobot<TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints>(world, obstacles);
+    robot = MakeRobot<TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints>(world, obstacles, node);
     if(node["max_velocity"]) {
       std::static_pointer_cast<TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints>(robot)->SetVMax(node["max_velocity"].as<double>());
     }
     if(node["max_time"]) {
       std::static_pointer_cast<TimeBasedMobileKukaRobotTaskSpaceWithDynamicalConstraints>(robot)->SetTMax(node["max_time"].as<double>());
     }
+
   } else if(name == "TimeBasedMobileKukaBase") {
-    robot = MakeRobot<TimeBasedMobileKukaBase>(world, obstacles);
+    robot = MakeRobot<TimeBasedMobileKukaBase>(world, obstacles, node);
     if(node["max_velocity"]) {
       std::static_pointer_cast<TimeBasedMobileKukaBase>(robot)->SetVMax(node["max_velocity"].as<double>());
     }
@@ -166,7 +166,6 @@ RobotPtr MakeAtomicRobotFromNode(const YAML::Node& node,
     OMPL_ERROR("No robot with name %s available.", name.c_str());
     throw std::out_of_range("No robot with name");
   }
-
   if(node["translation"]) {
     auto translation = node["translation"].as<std::vector<double>>();
     Eigen::Isometry3d transform(Eigen::Isometry3d::Identity());

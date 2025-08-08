@@ -85,3 +85,11 @@ Task-space
 - [x]  [x]  [ ]  MultiRobot-VerticalWall [Needs a solution < 720s! -> Large variation, but seems fine]
 - [x]  [x]  [ ]  MobileManipulators
 - [x]  [x]  [ ]  PathVelocityDecomposition
+
+
+
+# TODO
+
+[ ] Fix RRT for PathVelocityDecomposition
+[ ] Adjust planners which are fair in comparison
+[ ] Ensure MR-hard is solvable

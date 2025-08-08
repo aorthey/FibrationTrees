@@ -10,6 +10,7 @@
 #include "spaces/TaskSpace.hpp"
 #include "samplers/TaskSpaceSampler.hpp"
 #include "Common.hpp"
+#include "ToString.hpp"
 
 TimeBasedMobileKukaRobotTaskSpace::TimeBasedMobileKukaRobotTaskSpace(float vMax, float tMax) :
   vMax_(vMax), tMax_(tMax) {}
@@ -28,6 +29,9 @@ dart::dynamics::SkeletonPtr TimeBasedMobileKukaRobotTaskSpace::MakeSkeleton(cons
       throw std::domain_error("Tcp limits size must be 3 (x, y, z)");
     }
     tcp_limits_ = std::make_pair(MakeState3d(lower_limits), MakeState3d(upper_limits));
+    OMPL_INFORM("Setting tcp limits for time based task space: [%s, %s]", 
+        ToString(tcp_limits_.value().first).c_str(),
+        ToString(tcp_limits_.value().second).c_str());
   }
   return MobileKukaRobotTaskSpace::MakeSkeleton(node);
 }
@@ -37,6 +41,9 @@ ompl::multilevel::FactoredSpaceInformationPtr TimeBasedMobileKukaRobotTaskSpace:
 
   auto factor = std::make_shared<ompl::multilevel::FactoredSpaceInformation>(space_time);
   if(tcp_limits_.has_value()) {
+    OMPL_INFORM("Setting tcp limits for time based task space: [%s, %s]", 
+        ToString(tcp_limits_.value().first).c_str(),
+        ToString(tcp_limits_.value().second).c_str());
     const auto task_space_limits = std::make_pair(tcp_limits_.value().first, tcp_limits_.value().second);
     factor->getStateSpace()->setStateSamplerAllocator(
           std::bind(&allocateTaskSpaceSampler, robot, task_space_limits));

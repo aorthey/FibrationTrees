@@ -20,3 +20,16 @@ std::string ToString(const std::vector<RobotPtr>& input) {
   }
   return ToString(names);
 }
+
+std::string ToString(const Eigen::MatrixXd& mat) {
+    std::stringstream ss;
+    ss << "(";
+    for (int i = 0; i < mat.size(); ++i) {
+        ss << mat(i);
+        if (i < mat.size() - 1) {
+            ss << ", ";
+        }
+    }
+    ss << ")";
+    return ss.str();
+}

@@ -6,7 +6,7 @@ scenarios:
     filename: scenarios/02_multirobots_hard/04_ReedsSheppCars_None.yaml
     run_count: 10
     timeout: 3600
-    planners: [RRTConnect, LBTRRT, RRT, BFMT]
+    planners: [RRT, EST, LBTRRT, FMT]
 
   Scenario2:
     name: ReedsSheppCars
