@@ -12,7 +12,9 @@
 #include "robots/DiskRobot.hpp"
 #include "robots/CubeRobot.hpp"
 #include "robots/SphereRobot.hpp"
+#include "robots/LiftTruckRobot.hpp"
 #include "robots/MobileCar.hpp"
+#include "robots/MobileCarForklift.hpp"
 #include "robots/MobileCarDisk.hpp"
 #include "robots/RobotFactory.hpp"
 #include "robots/ZeppelinRobot.hpp"
@@ -142,8 +144,14 @@ RobotPtr MakeAtomicRobotFromNode(const YAML::Node& node,
       std::static_pointer_cast<TimeBasedMobileKukaBase>(robot)->SetTMax(node["max_time"].as<double>());
     }
 
+  } else if(name == "LiftTruckRobot") {
+    robot = MakeRobot<LiftTruckRobot>(world, obstacles, node);
+
   } else if(name == "MobileCar") {
     robot = MakeRobot<MobileCar>(world, obstacles, node);
+
+  } else if(name == "MobileCarForklift") {
+    robot = MakeRobot<MobileCarForklift>(world, obstacles, node);
 
   } else if(name == "MobileCarDisk") {
     robot = MakeRobot<MobileCar>(world, obstacles, node);

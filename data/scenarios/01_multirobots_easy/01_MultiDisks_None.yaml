@@ -9,14 +9,14 @@ obstacles:
     name: Floor
     type: floor
     height: -0.15
-    color: [0.99, 0.99, 0.99, 1.0]
+    color: [0.9, 0.9, 0.9, 1.0]
     width: 20.0
 
   Obstacle1:
     name: Cylinder
     type: cylinder
     position: [0.0, 0.0, 2.5]
-    color: [0.8, 0.4, 0.4, 1.0]
+    color: [0.9, 0.9, 0.9, 1.0]
     size: [0.5, 5.0]
 
 robots:
@@ -30,7 +30,7 @@ robots:
     name: DiskRobot
     lower_limits: [-10.0, -10.0]
     upper_limits: [+10.0, +10.0]
-    color: [0.3, 0.3, 0.3, 1.0]
+    color: [0.7, 0.9, 0.7, 1.0]
     smooth_path: True
     hide: False
 
@@ -38,7 +38,7 @@ robots:
     name: DiskRobot
     lower_limits: [-10.0, -10.0]
     upper_limits: [+10.0, +10.0]
-    color: [0.3, 0.3, 0.3, 1.0]
+    color: [0.7, 0.9, 0.7, 1.0]
     smooth_path: True
     hide: False
 
@@ -46,7 +46,7 @@ robots:
     name: DiskRobot
     lower_limits: [-10.0, -10.0]
     upper_limits: [+10.0, +10.0]
-    color: [0.3, 0.3, 0.3, 1.0]
+    color: [0.7, 0.9, 0.7, 1.0]
     smooth_path: True
     hide: False
 
@@ -54,7 +54,7 @@ robots:
     name: DiskRobot
     lower_limits: [-10.0, -10.0]
     upper_limits: [+10.0, +10.0]
-    color: [0.3, 0.3, 0.3, 1.0]
+    color: [0.7, 0.9, 0.7, 1.0]
     smooth_path: True
     hide: False
 
@@ -62,7 +62,7 @@ robots:
     name: DiskRobot
     lower_limits: [-10.0, -10.0]
     upper_limits: [+10.0, +10.0]
-    color: [0.3, 0.3, 0.3, 1.0]
+    color: [0.7, 0.9, 0.7, 1.0]
     smooth_path: True
     hide: False
 
@@ -70,7 +70,7 @@ robots:
     name: DiskRobot
     lower_limits: [-10.0, -10.0]
     upper_limits: [+10.0, +10.0]
-    color: [0.3, 0.3, 0.3, 1.0]
+    color: [0.7, 0.9, 0.7, 1.0]
     smooth_path: True
     hide: False
 
@@ -78,7 +78,7 @@ robots:
     name: DiskRobot
     lower_limits: [-10.0, -10.0]
     upper_limits: [+10.0, +10.0]
-    color: [0.3, 0.3, 0.3, 1.0]
+    color: [0.7, 0.9, 0.7, 1.0]
     smooth_path: True
     hide: False
 
@@ -86,7 +86,7 @@ robots:
     name: DiskRobot
     lower_limits: [-10.0, -10.0]
     upper_limits: [+10.0, +10.0]
-    color: [0.3, 0.3, 0.3, 1.0]
+    color: [0.7, 0.9, 0.7, 1.0]
     smooth_path: True
     hide: False
 

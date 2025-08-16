@@ -2,6 +2,7 @@
 #include "robots/Drone.hpp"
 #include "robots/DiskRobot.hpp"
 #include "robots/CubeRobot.hpp"
+#include "robots/LiftTruckRobot.hpp"
 #include "robots/SphereRobot.hpp"
 #include "robots/KukaRobot.hpp"
 #include "robots/KukaRobotTaskSpace.hpp"
@@ -9,6 +10,7 @@
 #include "robots/MobileKukaRobot.hpp"
 #include "robots/MobileKukaRobotTaskSpace.hpp"
 #include "robots/MobileCar.hpp"
+#include "robots/MobileCarForklift.hpp"
 #include "robots/MobileCarDisk.hpp"
 #include "robots/SphereRobot.hpp"
 #include "robots/TimeBasedMobileKukaRobotTaskSpace.hpp"
@@ -27,9 +29,11 @@ using RobotTypes = ::testing::Types<
     DiskRobot,
     SphereRobot, 
     CubeRobot,
+    LiftTruckRobot,
     KukaRobot, 
     KukaRobotTaskSpace, 
     MobileCar, 
+    MobileCarForklift,
     MobileCarDisk, 
     MobileKukaBase,
     MobileKukaRobot, 

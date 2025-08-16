@@ -2,15 +2,15 @@ name: Drones
 
 world:
   gravity: [0, 0, 0]
-  coordinate_frame: True
+  coordinate_frame: False
 
 obstacles:
 
   Obstacle1:
     name: Hut
     type: urdf
-    filename: objects/hut_05.urdf
-    position: [0.0, 0.0, -1.0]
+    filename: objects/pipe.urdf
+    position: [0.0, 0.0, 0.0]
 
 robots:
   Robot1:
@@ -181,204 +181,209 @@ robots:
 
   RobotA:
     name: Drone
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
     smooth_path: False
   RobotAi:
     name: SphereRobot
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
-    radius: 0.2
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    radius: 0.1
     smooth_path: True
     hide: True
 
   RobotB:
     name: Drone
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
     smooth_path: False
   RobotBi:
     name: SphereRobot
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
-    radius: 0.2
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    radius: 0.1
     smooth_path: True
     hide: True
 
   RobotC:
     name: Drone
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
     smooth_path: False
   RobotCi:
     name: SphereRobot
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
-    radius: 0.2
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    radius: 0.1
     smooth_path: True
     hide: True
 
   RobotD:
     name: Drone
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
     smooth_path: False
   RobotDi:
     name: SphereRobot
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
-    radius: 0.2
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    radius: 0.1
     smooth_path: True
     hide: True
 
   RobotE:
     name: Drone
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
     smooth_path: False
   RobotEi:
     name: SphereRobot
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
-    radius: 0.2
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    radius: 0.1
     smooth_path: True
     hide: True
 
   RobotF:
     name: Drone
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
     smooth_path: False
   RobotFi:
     name: SphereRobot
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
-    radius: 0.2
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    radius: 0.1
     smooth_path: True
     hide: True
 
   RobotG:
     name: Drone
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
     smooth_path: False
   RobotGi:
     name: SphereRobot
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
-    radius: 0.2
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    radius: 0.1
     smooth_path: True
     hide: True
 
   RobotH:
     name: Drone
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
     smooth_path: False
   RobotHi:
     name: SphereRobot
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
-    radius: 0.2
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    radius: 0.1
     smooth_path: True
     hide: True
 
   RobotJ:
     name: Drone
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
     smooth_path: False
   RobotJi:
     name: SphereRobot
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
-    radius: 0.2
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    radius: 0.1
     smooth_path: True
     hide: True
 
   RobotK:
     name: Drone
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
     smooth_path: False
   RobotKi:
     name: SphereRobot
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
-    radius: 0.2
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    radius: 0.1
     smooth_path: True
     hide: True
 
   RobotL:
     name: Drone
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
     smooth_path: False
   RobotLi:
     name: SphereRobot
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
-    radius: 0.2
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    radius: 0.1
     smooth_path: True
     hide: True
+
   RobotM:
     name: Drone
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
     smooth_path: False
   RobotMi:
     name: SphereRobot
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
-    radius: 0.2
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    radius: 0.1
     smooth_path: True
     hide: True
+
   RobotN:
     name: Drone
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
     smooth_path: False
   RobotNi:
     name: SphereRobot
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
-    radius: 0.2
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    radius: 0.1
     smooth_path: True
     hide: True
+
   RobotO:
     name: Drone
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
     smooth_path: False
   RobotOi:
     name: SphereRobot
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
-    radius: 0.2
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    radius: 0.1
     smooth_path: True
     hide: True
+
   RobotP:
     name: Drone
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
     smooth_path: False
   RobotPi:
     name: SphereRobot
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
-    radius: 0.2
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    radius: 0.1
     smooth_path: True
     hide: True
+
   RobotQ:
     name: Drone
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
     smooth_path: False
   RobotQi:
     name: SphereRobot
-    lower_limits: [-10.0, -10.0, -10.0]
-    upper_limits: [+10.0, +10.0, +10.0]
-    radius: 0.2
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    radius: 0.1
     smooth_path: True
     hide: True
 
@@ -496,44 +501,39 @@ projections:
 problem:
   start:
     type: joint
-    config: [+1.0, +1.0, 0.0, 0.0, 0.0, 0.0,
-             +1.0, +0.5, 0.0, 0.0, 0.0, 0.0,
-             +1.0, -0.0, 0.0, 0.0, 0.0, 0.0,
-             +1.0, -0.5, 0.0, 0.0, 0.0, 0.0,
-             +1.0, -1.0, 0.0, 0.0, 0.0, 0.0,
-             0.0, +1.0, 0.0, 0.0, 0.0, 0.0,
-             0.0, +0.5, 0.0, 0.0, 0.0, 0.0,
-             0.0, +0.0, 0.0, 0.0, 0.0, 0.0,
-             0.0, -0.5, 0.0, 0.0, 0.0, 0.0,
-             0.0, -1.0, 0.0, 0.0, 0.0, 0.0,
-             +2.0, +1.0, 0.0, 0.0, 0.0, 0.0,
-             +2.0, +0.5, 0.0, 0.0, 0.0, 0.0,
-             +2.0, +0.0, 0.0, 0.0, 0.0, 0.0,
-             +2.0, -0.5, 0.0, 0.0, 0.0, 0.0,
-             +2.0, -1.0, 0.0, 0.0, 0.0, 0.0,
-             +2.0, -1.5, 0.0, 0.0, 0.0, 0.0]
+    config: [+0.500, +0.000, +0.000, +0.000, +0.000, +0.000,
+             +0.000, +0.500, +0.000, +0.000, +0.000, +0.000,
+             -0.500, +0.000, +0.000, +0.000, +0.000, +0.000,
+             -0.000, -0.500, +0.000, +0.000, +0.000, +0.000,
+             +1.200, +0.000, +0.000, +0.000, +0.000, +0.000,
+             +0.371, +1.141, +0.000, +0.000, +0.000, +0.000,
+             -0.971, +0.705, +0.000, +0.000, +0.000, +0.000,
+             -0.971, -0.705, +0.000, +0.000, +0.000, +0.000,
+             +0.371, -1.141, +0.000, +0.000, +0.000, +0.000,
+             +1.900, +0.000, +0.000, +0.000, +0.000, +0.000,
+             +1.185, +1.485, +0.000, +0.000, +0.000, +0.000,
+             -0.423, +1.852, +0.000, +0.000, +0.000, +0.000,
+             -1.712, +0.824, +0.000, +0.000, +0.000, +0.000,
+             -1.712, -0.824, +0.000, +0.000, +0.000, +0.000,
+             -0.423, -1.852, +0.000, +0.000, +0.000, +0.000,
+             +1.185, -1.485, +0.000, +0.000, +0.000, +0.000]
 
   goal:
     type: joint
-    threshold: 0.5
-    config: [+1.0, +1.0, +4.0, 0.0, 0.0, 0.0,
-             +1.0, +0.5, +4.0, 0.0, 0.0, 0.0,
-             +1.0, -0.0, +4.0, 0.0, 0.0, 0.0,
-             +1.0, -0.5, +4.0, 0.0, 0.0, 0.0,
-             +1.0, -1.0, +4.0, 0.0, 0.0, 0.0,
-             0.0, +1.0, +4.0, 0.0, 0.0, 0.0,
-             0.0, +0.5, +4.0, 0.0, 0.0, 0.0,
-             0.0, +0.0, +4.0, 0.0, 0.0, 0.0,
-             0.0, -0.5, +4.0, 0.0, 0.0, 0.0,
-             0.0, -1.0, +4.0, 0.0, 0.0, 0.0,
-             -1.0, +1.0, +4.5, 0.0, 0.0, 0.0,
-             -1.0, +0.5, +4.5, 0.0, 0.0, 0.0,
-             -1.0, +0.0, +4.5, 0.0, 0.0, 0.0,
-             -1.0, -0.5, +4.5, 0.0, 0.0, 0.0,
-             -1.0, -1.0, +4.5, 0.0, 0.0, 0.0,
-             -1.0, -1.5, +4.5, 0.0, 0.0, 0.0]
-
-planner_settings:
-  FibrationRrt:
-    use_section_search: False
-    selector_function_type: "last_level"
+    threshold: 2.0
+    config: [+0.500, +0.000, +10.000, +0.000, +0.000, +0.000,
+             +0.000, +0.500, +10.000, +0.000, +0.000, +0.000,
+             -0.500, +0.000, +10.000, +0.000, +0.000, +0.000,
+             -0.000, -0.500, +10.000, +0.000, +0.000, +0.000,
+             +1.200, +0.000, +10.000, +0.000, +0.000, +0.000,
+             +0.371, +1.141, +10.000, +0.000, +0.000, +0.000,
+             -0.971, +0.705, +10.000, +0.000, +0.000, +0.000,
+             -0.971, -0.705, +10.000, +0.000, +0.000, +0.000,
+             +0.371, -1.141, +10.000, +0.000, +0.000, +0.000,
+             +1.900, +0.000, +10.000, +0.000, +0.000, +0.000,
+             +1.185, +1.485, +10.000, +0.000, +0.000, +0.000,
+             -0.423, +1.852, +10.000, +0.000, +0.000, +0.000,
+             -1.712, +0.824, +10.000, +0.000, +0.000, +0.000,
+             -1.712, -0.824, +10.000, +0.000, +0.000, +0.000,
+             -0.423, -1.852, +10.000, +0.000, +0.000, +0.000,
+             +1.185, -1.485, +10.000, +0.000, +0.000, +0.000]

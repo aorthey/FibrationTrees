@@ -5,21 +5,21 @@ scenarios:
     name: MultiDisks
     filename: scenarios/01_multirobots_easy/01_MultiDisks_None.yaml
     run_count: 10
-    timeout: 300
+    timeout: 600
     planners: [RRT, EST, LBTRRT, FMT]
 
   Scenario2:
     name: MultiDisks
     filename: scenarios/01_multirobots_easy/01_MultiDisks_Decomposition.yaml
     run_count: 10
-    timeout: 300
+    timeout: 600
     planners: [FibrationRrt-Decomposition]
 
   Scenario3:
     name: MultiDisks
     filename: scenarios/01_multirobots_easy/01_MultiDisks_Prioritization.yaml
     run_count: 10
-    timeout: 300
+    timeout: 600
     planners: [FibrationRrt-Prioritization]
 
 ompl_benchmark_plotter:

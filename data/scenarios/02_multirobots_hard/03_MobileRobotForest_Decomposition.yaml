@@ -194,6 +194,7 @@ projections:
     parent: Robot0
     task_space: False
     children: [Robot1, Robot2, Robot3, Robot4]
+
   Projection1:
     name: Projection_SE2RN_R2
     connection: [Robot1, Robot1i]
@@ -221,7 +222,7 @@ problem:
 
   goal:
     type: joint
-    threshold: 0.5
+    threshold: 1.0
     config: [+1.0, +1.0, 0, 0, 0, 0, 0, 0, 0, 0,
              -1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0,
              +1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0,

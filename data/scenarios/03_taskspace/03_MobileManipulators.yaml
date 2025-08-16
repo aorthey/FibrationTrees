@@ -31,16 +31,19 @@ robots:
     name: MobileKukaRobotTaskSpace
     tcp_lower_limits: [-1.5, -0.02, 0.48]
     tcp_upper_limits: [+1.5, +0.02, 0.52]
+    color: [0.7, 0.9, 0.7, 1.0]
 
   Robot2:
     name: MobileKukaRobotTaskSpace
     tcp_lower_limits: [-0.02, -1.5, 0.48]
     tcp_upper_limits: [+0.02, +1.5, 0.52]
+    color: [0.7, 0.9, 0.7, 1.0]
 
   Robot3:
     name: MobileKukaRobotTaskSpace
     tcp_lower_limits: [-1.5, -1.5, 0.48]
     tcp_upper_limits: [+1.5, +1.5, 0.52]
+    color: [0.7, 0.9, 0.7, 1.0]
 
   Robot4:
     name: SphereRobot

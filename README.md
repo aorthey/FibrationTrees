@@ -36,14 +36,6 @@ Maybe when pressing Fn/Strg/Alt/Super ?
 
 #  TODO
 
-- [x] Ensure that multi robots can be loaded in arbitrary order
-- [x] Add [x]DiskRobot, [x]SphereRobot, [x]CubeRobot to RobotLoaderTest
-- [x] Add options to robot factory by using YAML::Node
-- [x] Fix workflow to execute tests on github
-- [x] Add CubeRobot DvP scenario
-- [x] Fix bug on XR3R2SO2 XR3
-- [x] Add MobileManip DvP scenario
-
 Required
 - [x] Parallel fibration requires a different selection method. I.e. when one
   factor is not yet solved, it should be given precedence.
@@ -53,43 +45,8 @@ Required
 - [ ] Ensure TASK-RRT takes task-space constraints into account
 
 Optional
-- [ ] Rename FactorTrees branch ompl to Fibrationtrees 
 - [ ] Ensure that Section Solver is first checking straight line before doing
   side steps along a fiber
 - [ ] Multi robot collision checker init in MakeCollisionChecker
 - [ ] Ensure that projections are sorted first before applied
 - [ ] Check why task space projection takes a long time per iteration on 03multi
-
-# Scenarios
-
-MultiRobot-Easy
- DONE PLAN BENCH
-- [x]  [x]  [ ]  MultiDisks
-- [x]  [x]  [ ]  Drones
-- [x]  [x]  [ ]  MobileNavigation [Needs to find solutions < 720s!]
-- [x]  [x]  [ ]  ReedsSheppCars
-
-What could affect the runtime of fibrations ?
--- Size of robots could affect it
--- Distance to goal
-
-
-Multirobot-hard
-- [x]  [x]  [ ]  CubeRobots  [Different sizes]
-- [ ]  [ ]  [ ]  Drones with Different Sizes
-- [ ]  [ ]  [ ]  Mobile Manips in Cubic Forest?
-- [ ]  [ ]  [ ]  ReedsSheppCars Complex
-
-Task-space
-- [x]  [x]  [ ]  Vertical-Maze
-- [x]  [x]  [ ]  MultiRobot-VerticalWall [Needs a solution < 720s! -> Large variation, but seems fine]
-- [x]  [x]  [ ]  MobileManipulators
-- [x]  [x]  [ ]  PathVelocityDecomposition
-
-
-
-# TODO
-
-[ ] Fix RRT for PathVelocityDecomposition
-[ ] Adjust planners which are fair in comparison
-[ ] Ensure MR-hard is solvable

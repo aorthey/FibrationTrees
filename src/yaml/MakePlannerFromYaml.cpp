@@ -5,6 +5,7 @@
 #include <ompl/multilevel/planners/RRTtask.h>
 #include <ompl/geometric/planners/rrt/RRTConnect.h>
 #include <ompl/geometric/planners/rrt/RRT.h>
+#include <ompl/geometric/planners/est/EST.h>
 #include <ompl/geometric/planners/rrt/LBTRRT.h>
 #include <ompl/geometric/planners/informedtrees/BITstar.h>
 #include <ompl/geometric/planners/fmt/FMT.h>
@@ -99,6 +100,8 @@ ompl::base::PlannerPtr MakePlannerFromYaml(const YAML::Node& node, const std::st
     planner = std::make_shared<ompl::multilevel::RRTtask>(factor);
   } else if(planner_name == "RRT") {
     planner = std::make_shared<ompl::geometric::RRT>(factor);
+  } else if(planner_name == "EST") {
+    planner = std::make_shared<ompl::geometric::EST>(factor);
   } else if(planner_name == "RRTConnect") {
     planner = std::make_shared<ompl::geometric::RRTConnect>(factor);
   } else if(planner_name == "LBTRRT") {
@@ -107,6 +110,8 @@ ompl::base::PlannerPtr MakePlannerFromYaml(const YAML::Node& node, const std::st
     planner = std::make_shared<ompl::geometric::BITstar>(factor);
   } else if(planner_name == "BFMT") {
     planner = std::make_shared<ompl::geometric::BFMT>(factor);
+  } else if(planner_name == "FMT") {
+    planner = std::make_shared<ompl::geometric::FMT>(factor);
   } else  {
     throw std::runtime_error("Unknown planner name:" + planner_name);
   }

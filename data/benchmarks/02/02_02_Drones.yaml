@@ -1,25 +1,25 @@
-name: Drones
+name: DronesInPipe
 
 scenarios:
   Scenario1:
     name: Drones
     filename: scenarios/02_multirobots_hard/02_Drones_None.yaml
-    run_count: 10
-    timeout: 3600
+    run_count: 3
+    timeout: 1800
     planners: [RRT, EST, LBTRRT, FMT]
 
   Scenario2:
     name: Drones
     filename: scenarios/02_multirobots_hard/02_Drones_Decomposition.yaml
-    run_count: 10
-    timeout: 3600
+    run_count: 3
+    timeout: 1800
     planners: [FibrationRrt-Decomposition]
 
   Scenario3:
     name: Drones
     filename: scenarios/02_multirobots_hard/02_Drones_Prioritization.yaml
-    run_count: 10
-    timeout: 3600
+    run_count: 3
+    timeout: 1800
     planners: [FibrationRrt-Prioritization]
 
 ompl_benchmark_plotter:

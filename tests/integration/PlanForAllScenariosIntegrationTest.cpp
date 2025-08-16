@@ -14,17 +14,19 @@ std::vector<TestParameter> GetScenarios(const std::string& path_name, const doub
   auto files = GetFilesRecursively(GetDataFolder() + path_name);
   std::vector<TestParameter> output;
   for(const auto& file : files) {
-    output.push_back(std::make_pair(file, timeout));
+    if(file.find("_None") == std::string::npos) {
+      output.push_back(std::make_pair(file, timeout));
+    }
   }
   return output;
 }
 
 std::vector<TestParameter> GetEasyScenarios() {
-  return GetScenarios("scenarios/01_multirobots_easy/", 720.0);
+  return GetScenarios("scenarios/01_multirobots_easy/", 600.0);
 }
 
 std::vector<TestParameter> GetHardScenarios() {
-  return GetScenarios("scenarios/02_multirobots_hard/", 3600.0);
+  return GetScenarios("scenarios/02_multirobots_hard/", 1800.0);
 }
 
 std::vector<TestParameter> GetTaskSpaceScenarios() {

@@ -1,0 +1,152 @@
+name: Warehouse
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: False
+
+obstacles:
+
+  Obstacle1:
+    name: Warehouse
+    type: urdf
+    filename: objects/warehouse.urdf
+    position: [0.0, 0.0, -0.27]
+    color: [0.9, 0.2, 0.9, 1.0]
+
+robots:
+  Robot0:
+    name: MultiRobot
+    robots: [Robot1, RobotL3]
+    root: True
+    smooth_path: False
+    hide: False
+
+  Robot1:
+    name: MultiRobot
+    robots: [Robot2, RobotL2]
+    smooth_path: True
+    hide: False
+  Robot2:
+    name: MultiRobot
+    robots: [Robot3, RobotL1]
+    smooth_path: True
+    hide: False
+  Robot3:
+    name: MultiRobot
+    robots: [Robot4, RobotF2]
+    smooth_path: True
+    hide: False
+  Robot4:
+    name: MultiRobot
+    robots: [RobotK1, RobotF1]
+    smooth_path: True
+    hide: False
+
+  RobotK1:
+    name: MobileKukaRobot
+    color: [0.7, 0.9, 0.7, 1.0]
+    lower_limits: [-3.0, -7.0]
+    upper_limits: [+3.0, +7.0]
+    smooth_path: True
+    hide: False
+  RobotK1i:
+    name: MobileKukaBase
+    color: [0.7, 0.9, 0.7, 1.0]
+    lower_limits: [-3.0, -7.0]
+    upper_limits: [+3.0, +7.0]
+    smooth_path: True
+    hide: True
+
+  RobotF1:
+    name: MobileCarForklift
+    color: [0.7, 0.9, 0.7, 1.0]
+    lower_limits: [-3.0, -7.0]
+    upper_limits: [+3.0, +7.0]
+    smooth_path: True
+    hide: False
+  RobotF2:
+    name: MobileCarForklift
+    color: [0.7, 0.9, 0.7, 1.0]
+    lower_limits: [-3.0, -7.0]
+    upper_limits: [+3.0, +7.0]
+    smooth_path: True
+    hide: False
+
+  RobotL1:
+    name: LiftTruckRobot
+    color: [0.7, 0.9, 0.7, 1.0]
+    lower_limits: [-3.0, -7.0]
+    upper_limits: [+3.0, +7.0]
+    smooth_path: True
+    hide: False
+
+  RobotL2:
+    name: LiftTruckRobot
+    color: [0.7, 0.9, 0.7, 1.0]
+    lower_limits: [-3.0, -7.0]
+    upper_limits: [+3.0, +7.0]
+    smooth_path: True
+    hide: False
+
+  RobotL3:
+    name: LiftTruckRobot
+    color: [0.7, 0.9, 0.7, 1.0]
+    lower_limits: [-3.0, -7.0]
+    upper_limits: [+3.0, +7.0]
+    smooth_path: True
+    hide: False
+
+projections:
+
+  Projection1:
+    name: ProjectionMultiRobot
+    parent: Robot0
+    children: [Robot1]
+  Projection2:
+    name: ProjectionMultiRobot
+    parent: Robot1
+    children: [Robot2]
+  Projection3:
+    name: ProjectionMultiRobot
+    parent: Robot2
+    children: [Robot3]
+  Projection4:
+    name: ProjectionMultiRobot
+    parent: Robot3
+    children: [Robot4]
+  Projection5:
+    name: ProjectionMultiRobot
+    parent: Robot4
+    children: [RobotK1]
+  Projection6:
+    name: Projection_SE2RN_R2
+    connection: [RobotK1, RobotK1i]
+    task_space: False
+
+problem:
+  start:
+    type: joint
+    config: [
+      -0, -5.000, +0.000, +0.000, +0.000, +0.000, 0, 0, 0, 0,
+      ##########################################################
+      1, 0.35, 3.14,
+      -0.5, -2, 1.2,
+      ##########################################################
+      -2.7, +2, 0,
+      -0.8, 4, 0,
+      2.9, 3, 0
+            ]
+
+  goal:
+    type: joint
+    threshold: 1.0
+    config: [
+      -2, +6.000, +0.000, +0.000, +0.000, +0.000, 0, 0, 0, 0,
+      ##########################################################
+      -2, -6, 1.57,
+      0.7, +5, 1.57,
+      ##########################################################
+      -2.7, -6.2, 0,
+      +2.8, -6.8, 0,
+      0, -6, 0
+            ]

@@ -1,0 +1,26 @@
+name: Warehouse
+
+scenarios:
+  Scenario1:
+    name: Warehouse
+    filename: scenarios/02_multirobots_hard/04_Warehouse_None.yaml
+    run_count: 3
+    timeout: 1800
+    planners: [RRT, EST, LBTRRT, FMT]
+
+  Scenario2:
+    name: Warehouse
+    filename: scenarios/02_multirobots_hard/04_Warehouse_Decomposition.yaml
+    run_count: 3
+    timeout: 1800
+    planners: [FibrationRrt-Decomposition]
+
+  Scenario3:
+    name: Warehouse
+    filename: scenarios/02_multirobots_hard/04_Warehouse_Prioritization.yaml
+    run_count: 3
+    timeout: 1800
+    planners: [FibrationRrt-Prioritization]
+
+ompl_benchmark_plotter:
+  options: ["--only-success-graph", "--title-name Warehouse"]

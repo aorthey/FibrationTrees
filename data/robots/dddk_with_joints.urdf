@@ -13,7 +13,7 @@
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <material name="blue">
-        <color rgba=".3 .3 .9 1"/>
+        <color rgba=".7 .9 .7 1"/>
       </material>
     </visual>
     <collision>
@@ -22,7 +22,7 @@
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <material name="blue">
-        <color rgba=".3 .3 .9 1"/>
+        <color rgba=".7 .9 .7 1"/>
       </material>
     </collision>
   </link>

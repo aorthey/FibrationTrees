@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+<robot name="forklift">
+  <link name="world"/>
+  <link name="empty_link_x"/>
+  <link name="empty_link_y"/>
+
+  <link name="chassi">
+   <visual>
+     <origin rpy="1.57 0 1.57" xyz="0 0 -0.09"/>
+     <geometry>
+        <mesh scale="0.25 0.25 0.25" filename="meshes/forklift.obj"/>
+     </geometry>
+      <material name="grey">
+        <color rgba="0.5 0.5 0.5 0.5"/>
+      </material>
+   </visual>
+   <collision>
+     <origin rpy="1.57 0 1.57" xyz="0 0 -0.09"/>
+     <geometry>
+        <mesh scale="0.25 0.25 0.25" filename="meshes/forklift.obj"/>
+     </geometry>
+      <material name="grey">
+        <color rgba="0.5 0.5 0.5 0.5"/>
+      </material>
+   </collision>
+  </link>
+
+  <joint name="joint_translation_x" type="prismatic">
+    <origin xyz="-0.0 -0.0 0.0" rpy="0 0 3.14"/>
+    <axis xyz="1 0 0"/>
+    <parent link="world"/>
+    <child link="empty_link_x"/>
+    <limit effort="1" lower="-5.0" upper="5.0" velocity="1"/>
+  </joint>
+  <joint name="joint_translation_y" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <parent link="empty_link_x"/>
+    <child link="empty_link_y"/>
+    <limit effort="1" lower="-5.0" upper="5.0" velocity="1"/>
+  </joint>
+  <joint name="joint_rotation_yaw" type="continuous">
+    <origin xyz="0 0 0.05" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="empty_link_y"/>
+    <child link="chassi"/>
+  </joint>
+
+</robot>

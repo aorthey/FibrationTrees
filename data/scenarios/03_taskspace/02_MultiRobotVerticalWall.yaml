@@ -11,6 +11,7 @@ robots:
     smooth_path: False
     show_path: True
     task_space: True
+    color: [0.7, 0.9, 0.7, 1.0]
     root: True
 
   Robot1:
@@ -19,6 +20,7 @@ robots:
     show_path: True
     task_space: True
     translation: [0, -0.15, 0]
+    color: [0.7, 0.9, 0.7, 1.0]
 
   Robot1Tcp:
     name: SphereRobot
@@ -32,6 +34,7 @@ robots:
     name: KukaRobotTaskSpace
     smooth_path: False
     show_path: True
+    color: [0.7, 0.9, 0.7, 1.0]
     translation: [0, 0.15, 0]
 
   Robot2Tcp:

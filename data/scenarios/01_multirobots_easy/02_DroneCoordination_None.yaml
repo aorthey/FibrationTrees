@@ -48,20 +48,28 @@ robots:
 
   Robot1:
     name: ZeppelinRobot
+    color: [0.7, 0.9, 0.7, 1.0]
   Robot2:
     name: ZeppelinRobot
+    color: [0.7, 0.9, 0.7, 1.0]
   Robot3:
     name: ZeppelinRobot
+    color: [0.7, 0.9, 0.7, 1.0]
   Robot4:
     name: ZeppelinRobot
+    color: [0.7, 0.9, 0.7, 1.0]
   Robot5:
     name: ZeppelinRobot
+    color: [0.7, 0.9, 0.7, 1.0]
   Robot6:
     name: ZeppelinRobot
+    color: [0.7, 0.9, 0.7, 1.0]
   Robot7:
     name: ZeppelinRobot
+    color: [0.7, 0.9, 0.7, 1.0]
   Robot8:
     name: ZeppelinRobot
+    color: [0.7, 0.9, 0.7, 1.0]
 
 problem:
   start:

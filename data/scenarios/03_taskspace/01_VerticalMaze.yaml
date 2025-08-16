@@ -8,6 +8,7 @@ robots:
   Robot1:
     name: KukaRobotTaskSpace
     hide: False
+    color: [0.7, 0.9, 0.7, 1.0]
     root: True
 
   Robot2:

@@ -1,0 +1,116 @@
+name: Warehouse
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: False
+
+obstacles:
+
+  Obstacle1:
+    name: Warehouse
+    type: urdf
+    filename: objects/warehouse.urdf
+    position: [0.0, 0.0, -0.27]
+    color: [0.9, 0.2, 0.9, 1.0]
+
+robots:
+  Robot0:
+    name: MultiRobot
+    robots: [RobotK1, RobotF1, RobotF2, RobotL1, RobotL2, RobotL3]
+    root: True
+    smooth_path: True
+    hide: False
+
+  RobotK1:
+    name: MobileKukaRobot
+    color: [0.7, 0.9, 0.7, 1.0]
+    lower_limits: [-3.0, -7.0]
+    upper_limits: [+3.0, +7.0]
+    smooth_path: True
+    hide: False
+  RobotK1i:
+    name: MobileKukaBase
+    color: [0.7, 0.9, 0.7, 1.0]
+    lower_limits: [-3.0, -7.0]
+    upper_limits: [+3.0, +7.0]
+    smooth_path: True
+    hide: True
+
+  RobotF1:
+    name: MobileCarForklift
+    color: [0.7, 0.9, 0.7, 1.0]
+    lower_limits: [-3.0, -7.0]
+    upper_limits: [+3.0, +7.0]
+    smooth_path: True
+    hide: False
+  RobotF2:
+    name: MobileCarForklift
+    color: [0.7, 0.9, 0.7, 1.0]
+    lower_limits: [-3.0, -7.0]
+    upper_limits: [+3.0, +7.0]
+    smooth_path: True
+    hide: False
+
+  RobotL1:
+    name: LiftTruckRobot
+    color: [0.7, 0.9, 0.7, 1.0]
+    lower_limits: [-3.0, -7.0]
+    upper_limits: [+3.0, +7.0]
+    smooth_path: True
+    hide: False
+
+  RobotL2:
+    name: LiftTruckRobot
+    color: [0.7, 0.9, 0.7, 1.0]
+    lower_limits: [-3.0, -7.0]
+    upper_limits: [+3.0, +7.0]
+    smooth_path: True
+    hide: False
+
+  RobotL3:
+    name: LiftTruckRobot
+    color: [0.7, 0.9, 0.7, 1.0]
+    lower_limits: [-3.0, -7.0]
+    upper_limits: [+3.0, +7.0]
+    smooth_path: True
+    hide: False
+
+projections:
+
+  Projection0:
+    name: ProjectionMultiRobot
+    parent: Robot0
+    children: [RobotK1, RobotF1, RobotF2, RobotL1, RobotL2, RobotL3]
+
+  Projection1:
+    name: Projection_SE2RN_R2
+    connection: [RobotK1, RobotK1i]
+    task_space: False
+
+problem:
+  start:
+    type: joint
+    config: [
+      -0, -5.000, +0.000, +0.000, +0.000, +0.000, 0, 0, 0, 0,
+      ##########################################################
+      1, 0.35, 3.14,
+      -0.5, -2, 1.2,
+      ##########################################################
+      -2.7, +2, 0,
+      -0.8, 4, 0,
+      2.9, 3, 0
+            ]
+
+  goal:
+    type: joint
+    threshold: 1.0
+    config: [
+      -2, +6.000, +0.000, +0.000, +0.000, +0.000, 0, 0, 0, 0,
+      ##########################################################
+      -2, -6, 1.57,
+      0.7, +5, 1.57,
+      ##########################################################
+      -2.7, -6.2, 0,
+      +2.8, -6.8, 0,
+      0, -6, 0
+            ]
