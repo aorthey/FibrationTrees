@@ -20,14 +20,21 @@ scenarios:
     filename: scenarios/02_multirobots_hard/01_CubeRobots_PrioritizationLargeToSmall.yaml
     run_count: 3
     timeout: 1800
-    planners: [FibrationRrt-PrioritizationLargeToSmall]
+    planners: [FibrationRrt-Prioritization]
 
-  Scenario4:
-    name: CubeRobots
-    filename: scenarios/02_multirobots_hard/01_CubeRobots_PrioritizationSmallToLarge.yaml
-    run_count: 3
-    timeout: 1800
-    planners: [FibrationRrt-PrioritizationSmallToLarge]
+  # Scenario3:
+  #   name: CubeRobots
+  #   filename: scenarios/02_multirobots_hard/01_CubeRobots_PrioritizationLargeToSmall.yaml
+  #   run_count: 3
+  #   timeout: 1800
+  #   planners: [FibrationRrt-PrioritizationLargeToSmall]
+
+  # Scenario4:
+  #   name: CubeRobots
+  #   filename: scenarios/02_multirobots_hard/01_CubeRobots_PrioritizationSmallToLarge.yaml
+  #   run_count: 3
+  #   timeout: 1800
+  #   planners: [FibrationRrt-PrioritizationSmallToLarge]
 
 ompl_benchmark_plotter:
   options: ["--only-success-graph", "--title-name CubeRobots"]

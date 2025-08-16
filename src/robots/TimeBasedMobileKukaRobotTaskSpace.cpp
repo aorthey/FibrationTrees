@@ -15,26 +15,6 @@
 TimeBasedMobileKukaRobotTaskSpace::TimeBasedMobileKukaRobotTaskSpace(float vMax, float tMax) :
   vMax_(vMax), tMax_(tMax) {}
 
-dart::dynamics::SkeletonPtr TimeBasedMobileKukaRobotTaskSpace::MakeSkeleton(const YAML::Node& node) {
-  if(node["tcp_lower_limits"]) {
-    const auto lower_limits = node["tcp_lower_limits"].as<std::vector<double>>();
-    if(lower_limits.size() != 3) {
-      throw std::domain_error("Tcp limits size must be 3 (x, y, z)");
-    }
-    if(!node["tcp_upper_limits"]) {
-      throw std::domain_error("Tcp limits requires both lower and upper limits (missing upper limits)");
-    }
-    const auto upper_limits = node["tcp_upper_limits"].as<std::vector<double>>();
-    if(upper_limits.size() != 3) {
-      throw std::domain_error("Tcp limits size must be 3 (x, y, z)");
-    }
-    tcp_limits_ = std::make_pair(MakeState3d(lower_limits), MakeState3d(upper_limits));
-    OMPL_INFORM("Setting tcp limits for time based task space: [%s, %s]", 
-        ToString(tcp_limits_.value().first).c_str(),
-        ToString(tcp_limits_.value().second).c_str());
-  }
-  return MobileKukaRobotTaskSpace::MakeSkeleton(node);
-}
 
 ompl::multilevel::FactoredSpaceInformationPtr TimeBasedMobileKukaRobotTaskSpace::MakeSpaceInformation(const RobotPtr& robot) {
   ompl::base::StateSpacePtr space_time(new TaskSpaceMobileTimeBased(robot, vMax_, tMax_));

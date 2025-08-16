@@ -1,0 +1,60 @@
+name: Vertical_Maze
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: False
+
+robots:
+  Robot1:
+    name: KukaRobotTaskSpace
+    hide: False
+    color: [0.7, 0.9, 0.7, 1.0]
+    tcp_lower_limits: [0.39, -0.5, 0]
+    tcp_upper_limits: [0.43, +0.5, 2]
+    task_space: True
+    root: True
+
+  Robot2:
+    name: SphereRobot
+    lower_limits: [0.39, -0.5, 0]
+    upper_limits: [0.43, +0.5, 2]
+    smooth_path: True
+    show_path: True
+    hide: True
+
+obstacles:
+  Obstacle1:
+    name: Maze
+    type: urdf
+    filename: objects/maze.urdf
+    position: [0.55, 0.1, 0.85]
+
+  Obstacle2:
+    name: Floor
+    type: floor
+
+  Obstacle3:
+    name: Box
+    type: box
+    position: [0.5, 0.0, 0.75]
+    size: [0.15, 2.0, 1.5]
+
+projections:
+
+  Projection1:
+    name: ProjectionTaskSpace
+    connection: [Robot1, Robot2]
+
+problem:
+  start:
+    type: task
+    Robot2: 
+      config: [0.4, 0.35, 0.95]
+      visualize: True
+
+  goal:
+    type: task
+    threshold: 0.025
+    Robot2:
+      config: [0.4, -0.25, 0.95]
+      visualize: True
