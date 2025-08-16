@@ -4,21 +4,21 @@ scenarios:
   Scenario1:
     name: DronesInPipe
     filename: scenarios/02_multirobots_hard/02_Drones_None.yaml
-    run_count: 3
+    run_count: 10
     timeout: 1800
     planners: [RRT, EST, LBTRRT, FMT]
 
   Scenario2:
     name: DronesInPipe
     filename: scenarios/02_multirobots_hard/02_Drones_Decomposition.yaml
-    run_count: 3
+    run_count: 10
     timeout: 1800
     planners: [FibrationRrt-Decomposition]
 
   Scenario3:
     name: DronesInPipe
     filename: scenarios/02_multirobots_hard/02_Drones_Prioritization.yaml
-    run_count: 3
+    run_count: 10
     timeout: 1800
     planners: [FibrationRrt-Prioritization]
 

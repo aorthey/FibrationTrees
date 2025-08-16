@@ -100,34 +100,38 @@ int FibrationTreesBenchmakerExecuter(const int argc, const char* argv[]) {
     auto goal = pdef->getGoal();
     auto benchmark_result = RunBenchmark(scenario_name, factor, start, goal, timeout, run_count, planners);
 
-    auto output_filename = MakeOutputFilename(filename);
-    SaveBenchmarkToDatabase(output_filename, benchmark_result);
-    output_filenames.push_back(output_filename);
-    OMPL_INFORM("Saved benchmark to file logs/%s.db", output_filename.c_str());
-  }
-
-  std::string string_filename = "";
-  for(const auto& output_filename : output_filenames) {
-    string_filename += GetDataFolder() + "logs/" + output_filename + ".log ";
-  }
-  
-  auto db_filename = GetDataFolder() + "logs/" + benchmark_name + ".db";
-  OMPL_INFORM("To DB: %s", string_filename.c_str());
-  auto cmd_log_to_db = "python3 " + GetMainFolder() + "scripts/ompl_benchmark_statistics.py "+string_filename+" -d "+db_filename;
-  system(cmd_log_to_db.c_str());
-
-  if(root_node["ompl_benchmark_plotter"]) {
-    auto plotter = root_node["ompl_benchmark_plotter"];
-
-    std::string option_str = "";
-    if (plotter["options"]) {
-      for (const auto& option : plotter["options"]) {
-        option_str += option.as<std::string>() + " ";
-      }
-      std::cout << "Option: " << option_str << std::endl;
+    if(!program_options.HasValue("dry")) {
+      auto output_filename = MakeOutputFilename(filename);
+      SaveBenchmarkToDatabase(output_filename, benchmark_result);
+      output_filenames.push_back(output_filename);
+      OMPL_INFORM("Saved benchmark to file logs/%s.db", output_filename.c_str());
     }
-    auto cmd_plot_db = "python3 " + GetMainFolder() + "../ompl_benchmark_plotter/ompl_benchmark_plotter.py "+option_str+" "+db_filename;
-    system(cmd_plot_db.c_str());
+  }
+
+  if(!program_options.HasValue("dry")) {
+    std::string string_filename = "";
+    for(const auto& output_filename : output_filenames) {
+      string_filename += GetDataFolder() + "logs/" + output_filename + ".log ";
+    }
+    
+    auto db_filename = GetDataFolder() + "logs/" + benchmark_name + ".db";
+    OMPL_INFORM("To DB: %s", string_filename.c_str());
+    auto cmd_log_to_db = "python3 " + GetMainFolder() + "scripts/ompl_benchmark_statistics.py "+string_filename+" -d "+db_filename;
+    system(cmd_log_to_db.c_str());
+
+    if(root_node["ompl_benchmark_plotter"]) {
+      auto plotter = root_node["ompl_benchmark_plotter"];
+
+      std::string option_str = "";
+      if (plotter["options"]) {
+        for (const auto& option : plotter["options"]) {
+          option_str += option.as<std::string>() + " ";
+        }
+        std::cout << "Option: " << option_str << std::endl;
+      }
+      auto cmd_plot_db = "python3 " + GetMainFolder() + "../ompl_benchmark_plotter/ompl_benchmark_plotter.py "+option_str+" "+db_filename;
+      system(cmd_plot_db.c_str());
+    }
   }
 
 

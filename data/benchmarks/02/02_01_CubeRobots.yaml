@@ -4,21 +4,21 @@ scenarios:
   Scenario1:
     name: CubeRobots
     filename: scenarios/02_multirobots_hard/01_CubeRobots_None.yaml
-    run_count: 3
+    run_count: 10
     timeout: 1800
     planners: [RRT, EST, LBTRRT, FMT]
 
   Scenario2:
     name: CubeRobots
     filename: scenarios/02_multirobots_hard/01_CubeRobots_Decomposition.yaml
-    run_count: 3
+    run_count: 10
     timeout: 1800
     planners: [FibrationRrt-Decomposition]
 
   Scenario3:
     name: CubeRobots
     filename: scenarios/02_multirobots_hard/01_CubeRobots_PrioritizationLargeToSmall.yaml
-    run_count: 3
+    run_count: 10
     timeout: 1800
     planners: [FibrationRrt-Prioritization]
 

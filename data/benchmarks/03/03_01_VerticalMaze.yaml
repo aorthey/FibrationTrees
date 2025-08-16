@@ -1,19 +1,13 @@
 name: VerticalMaze
 
 scenarios:
-  Scenario1:
-    name: VerticalMaze
-    filename: scenarios/03_taskspace/01_VerticalMaze_None.yaml
-    run_count: 10
-    timeout: 720
-    planners: [RRTtask]
 
-  Scenario2:
+  Scenario1:
     name: VerticalMaze
     filename: scenarios/03_taskspace/01_VerticalMaze.yaml
     run_count: 10
     timeout: 720
-    planners: [FibrationRrt]
+    planners: [FibrationRrt, RRTtask]
 
 ompl_benchmark_plotter:
   options: ["--only-success-graph", "--title-name VerticalMaze"]

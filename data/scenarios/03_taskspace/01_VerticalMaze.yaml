@@ -9,6 +9,9 @@ robots:
     name: KukaRobotTaskSpace
     hide: False
     color: [0.7, 0.9, 0.7, 1.0]
+    tcp_lower_limits: [0.39, -0.5, 0]
+    tcp_upper_limits: [0.43, +0.5, 2]
+    task_space: True
     root: True
 
   Robot2:

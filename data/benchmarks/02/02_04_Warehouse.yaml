@@ -4,21 +4,21 @@ scenarios:
   Scenario1:
     name: Warehouse
     filename: scenarios/02_multirobots_hard/04_Warehouse_None.yaml
-    run_count: 3
+    run_count: 10
     timeout: 1800
     planners: [RRT, EST, LBTRRT, FMT]
 
   Scenario2:
     name: Warehouse
     filename: scenarios/02_multirobots_hard/04_Warehouse_Decomposition.yaml
-    run_count: 3
+    run_count: 10
     timeout: 1800
     planners: [FibrationRrt-Decomposition]
 
   Scenario3:
     name: Warehouse
     filename: scenarios/02_multirobots_hard/04_Warehouse_Prioritization.yaml
-    run_count: 3
+    run_count: 10
     timeout: 1800
     planners: [FibrationRrt-Prioritization]
 
