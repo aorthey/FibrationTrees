@@ -20,7 +20,7 @@ std::vector<std::string> GetBenchmarks() {
   // auto f2 = GetFilesRecursively(GetDataFolder() + "benchmarks/02/");
   // auto f3 = GetFilesRecursively(GetDataFolder() + "benchmarks/03/");
   // return combine_vectors(f1, f2, f3);
-  return GetFilesRecursively(GetDataFolder() + "benchmarks/03/");
+  return GetFilesRecursively(GetDataFolder() + "benchmarks/01/");
 }
 
 int main() {
