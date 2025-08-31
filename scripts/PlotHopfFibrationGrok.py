@@ -11,7 +11,8 @@ import re
 
 n_points = 64
 
-edge_width = 0.015
+#edge_width = 0.015
+edge_width = 0.5
 
 # --- Smoothness parameter for edge interpolation ---
 segment_smooth_stride = 10  # Increase for smoother, decrease for more accurate (1 = all points)
@@ -28,7 +29,7 @@ def parse_arguments():
     parser.add_argument(
         "--fiber_width",
         type=float,
-        default=0.001,
+        default=0.05,
         help="Width of the fibers (default: 0.001)"
     )
     parser.add_argument(
@@ -140,19 +141,20 @@ def parse_dat_file(file_path):
         print("Parsed data top-level keys:", list(data.keys()))
         print("Trees keys:", list(data.get('trees', {}).keys()))
 
-        if data['trees']['so3_tree']['goal']:
-            goal = data['trees']['so3_tree']['goal']
-        else:
-            goal = None
-        # Extract so3_tree
-        so3_tree = {
-            'start': data['trees']['so3_tree']['start'],
-            'goal': goal,
-            'edges': [
-                {'source': edge['source'], 'target': edge['target']}
-                for edge in data['trees']['so3_tree']['edges']
-            ]
-        }
+        if data['trees']['so3_tree']:
+          if data['trees']['so3_tree']['goal']:
+              goal = data['trees']['so3_tree']['goal']
+          else:
+              goal = None
+          # Extract so3_tree
+          so3_tree = {
+              'start': data['trees']['so3_tree']['start'],
+              'goal': goal,
+              'edges': [
+                  {'source': edge['source'], 'target': edge['target']}
+                  for edge in data['trees']['so3_tree']['edges']
+              ]
+          }
 
         # Extract fibers from 'fibers' list
         fibers = {}
@@ -634,8 +636,8 @@ def visualize_hopf_fibration(file_path):
             all_points[f"fiber_{fiber_name}_{j}"] = np.array(pt)
 
     # Create single spanning surface
-    if fibers:
-        create_spanning_surface(fibers, num_fibers, width=args.fiber_width * 2, alpha=args.alpha)
+    #if fibers:
+        #create_spanning_surface(fibers, num_fibers, width=args.fiber_width * 2, alpha=args.alpha)
 
     # Setup camera to view the entire structure
     camera = setup_camera(all_points, args)

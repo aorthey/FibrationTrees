@@ -52,6 +52,7 @@ kColorSpherePoint = [0,1,0]
 kColorSphereStartPoint = [0,1,0]
 kColorSphereGoalPoint = [1,0,0]
 kColorHopfEdge = [0,0,0,0.5]
+kColorSpherePath = [0.2,0.8,0.2,0.7]
 
 kColorSphereLines = [0.8,0.8,0.8,0.7]
 kColorSphere = [1,1,1,0.05]
@@ -131,19 +132,22 @@ class Sphere:
 
   def DrawEdge(self, points, color, zorder=1):
     N = points.shape[0]
-    t = np.arange(N)  # simple assumption that data was sampled in regular steps
-    x = points[:,0]
-    y = points[:,1]
-    z = points[:,2]
-    print(x,y,z)
-    fitx = np.polyfit(t, x, 3)
-    fity = np.polyfit(t, y, 3)
-    fitz = np.polyfit(t, z, 3)
-    xx = np.polyval(fitx, t)
-    yy = np.polyval(fity, t)
-    zz = np.polyval(fitz, t)
+    print("Draw {} points".format(N))
     for i in np.arange(N-1):
-      ax.plot3D(xx[i:i+2], yy[i:i+2], zz[i:i+2], lw=line_width, color=get_sequential_color(i, N))
+      self.DrawLine(points[i], points[i+1], color, zorder)
+    # t = np.arange(N)  # simple assumption that data was sampled in regular steps
+    # x = points[:,0]
+    # y = points[:,1]
+    # z = points[:,2]
+    # print(x,y,z)
+    # fitx = np.polyfit(t, x, 3)
+    # fity = np.polyfit(t, y, 3)
+    # fitz = np.polyfit(t, z, 3)
+    # xx = np.polyval(fitx, t)
+    # yy = np.polyval(fity, t)
+    # zz = np.polyval(fitz, t)
+    # for i in np.arange(N-1):
+    #   self.ax.plot3D(xx[i:i+2], yy[i:i+2], zz[i:i+2], lw=kLineWidthSpherePath, color=get_sequential_color(i, N))
 
   def GenerateSamples(self, theta, phi):
     return SphericalToCartesian(self.radius, theta, phi)
@@ -194,19 +198,19 @@ class SO3StereographicProjection:
 
   def DrawEdge(self, points, color, zorder=1):
     #print(points)
-    #DrawEdgeFromPoints(self.ax, points, kMarkerSize, kLineWidth, color, zorder)
-    t = np.arange(points.shape[0])  # simple assumption that data was sampled in regular steps
-    x = points[:,0]
-    y = points[:,1]
-    z = points[:,2]
-    self.ax.scatter3D(x[0], y[0], z[0], s=kMarkerSize, color=color, zorder=zorder)
-    fitx = np.polyfit(t, x, 3)
-    fity = np.polyfit(t, y, 3)
-    fitz = np.polyfit(t, z, 3)
-    xx = np.polyval(fitx, t)
-    yy = np.polyval(fity, t)
-    zz = np.polyval(fitz, t)
-    self.ax.plot3D(xx, yy, zz, lw=3, color=color, zorder=zorder)
+    DrawEdgeFromPoints(self.ax, points, kMarkerSize, kLineWidth, color, zorder)
+    # t = np.arange(points.shape[0])  # simple assumption that data was sampled in regular steps
+    # x = points[:,0]
+    # y = points[:,1]
+    # z = points[:,2]
+    # self.ax.scatter3D(x[0], y[0], z[0], s=kMarkerSize, color=color, zorder=zorder)
+    # fitx = np.polyfit(t, x, 3)
+    # fity = np.polyfit(t, y, 3)
+    # fitz = np.polyfit(t, z, 3)
+    # xx = np.polyval(fitx, t)
+    # yy = np.polyval(fity, t)
+    # zz = np.polyval(fitz, t)
+    # self.ax.plot3D(xx, yy, zz, lw=3, color=color, zorder=zorder)
 
 def DrawSphereFromYaml(yaml_node):
   fig = plt.figure(dpi=kDPI)
@@ -241,6 +245,7 @@ def DrawSphereFromYaml(yaml_node):
   #   p2_old = p2
 
   points = []
+  print("number of edges: {}".format(len(edges)))
   for edge in edges:
     v1 = edge["source"]
     v2 = edge["target"]
@@ -250,19 +255,19 @@ def DrawSphereFromYaml(yaml_node):
       points.append(p1)
       points.append(p2)
     else:
-      d = np.linalg.norm(np.array(points[-1]) - p1)
-      if d <= 1e-3:
-        points.append(p1)
-        points.append(p2)
-      else:
-        # points = np.concatenate(points, axis=0).reshape((-1,3))
-        # sphere.DrawEdge(points, color=kColorHopfEdge, zorder=5);
-        points = []
-        points.append(p1)
-        points.append(p2)
+      # d = np.linalg.norm(np.array(points[-1]) - p1)
+      # if d <= 1e-3:
+      #   points.append(p1)
+      #   points.append(p2)
+      # else:
+      points = np.concatenate(points, axis=0).reshape((-1,3))
+      sphere.DrawEdge(points, color=kColorSpherePath, zorder=5);
+      points = []
+      points.append(p1)
+      points.append(p2)
 
-  points = np.concatenate(points, axis=0).reshape((-1,3))
-  sphere.DrawEdge(points, color=kColorMapFiber, zorder=5);
+  #points = np.concatenate(points, axis=0).reshape((-1,3))
+  #sphere.DrawEdge(points, color=kColorMapFiber, zorder=5);
 
   ax.set_aspect('auto')
   fig.tight_layout()
@@ -363,5 +368,5 @@ if __name__ == "__main__":
 
   with open(filename, 'r') as file:
     yaml_node = yaml.safe_load(file)
-    #DrawSphereFromYaml(yaml_node)
-    DrawHopfFibrationFromYaml(yaml_node)
+    DrawSphereFromYaml(yaml_node)
+    #DrawHopfFibrationFromYaml(yaml_node)

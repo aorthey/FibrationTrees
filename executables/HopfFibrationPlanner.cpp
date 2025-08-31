@@ -20,10 +20,9 @@
 using namespace ompl::base;
 using namespace ompl::geometric;
 
-const unsigned int kNumSamplesPerFiber = 50;
-const size_t kMaximumIterations = 50;
-const float kLocalRange = 0.5;
-
+const unsigned int kNumSamplesPerFiber = 100;
+const size_t kMaximumIterations = 300;
+const float kLocalRange = 10.0;
 
 template <typename T>
 struct EigenSearchTree {
@@ -225,6 +224,131 @@ std::vector<YAML::Node> S2EdgeToYaml(const std::shared_ptr<HopfFibrationProjecti
   return nodes;
 }
 
+ompl::base::StateSamplerPtr allocateHopfSphereSampler(const ompl::base::StateSpacePtr& space) {
+
+  //Note: Theta is the azimuthal angle [-pi,+pi] (longitude, going around the equator), 
+  //      and phi is the polar angle [0, +pi] (latitude)
+  class HopfSphereSampler : public ompl::base::StateSampler {
+    public:
+      HopfSphereSampler() = delete;
+      HopfSphereSampler(const ompl::base::StateSpacePtr& space): ompl::base::StateSampler(space.get()) {}
+      void sampleUniform(ompl::base::State *state) override {
+        static size_t counter = 0;
+        const double theta = _thetaphi.at(counter).first;
+        const double phi = _thetaphi.at(counter).second;
+        counter++;
+        if (counter >= _thetaphi.size()) {
+          counter = _thetaphi.size() - 1;
+        }
+        state->as<ompl::base::SphereStateSpace::StateType>()->setThetaPhi(theta, phi);
+        if(!space_->satisfiesBounds(state)) {
+          OMPL_ERROR("Invalid bounds");
+          space_->printState(state);
+          throw "InvalidBounds";
+        }
+
+      }
+      void sampleUniformNear(ompl::base::State*, const ompl::base::State *, double) override {
+        throw "NYI";
+      }
+      void sampleGaussian(ompl::base::State*, const ompl::base::State*, double) override {
+        throw "NYI";
+      }
+    private:
+  // sphere_start->as<SphereStateSpace::StateType>()->setThetaPhi(-0.9*M_PI, 0.1*M_PI);
+  // sphere_goal->as<SphereStateSpace::StateType>()->setThetaPhi(+0.9*M_PI, 0.9*M_PI);
+
+      //Vertical slices
+  // sphere_start->as<SphereStateSpace::StateType>()->setThetaPhi(-0.8*M_PI, 0.5*M_PI);
+  // sphere_goal->as<SphereStateSpace::StateType>()->setThetaPhi(+0.3*M_PI, 0.5*M_PI);
+      std::vector<std::pair<double, double>> _thetaphi = {
+          //################################################################################
+          {-0.8*M_PI, +0.5*M_PI},
+          {-0.7*M_PI, +0.5*M_PI},
+          {-0.6*M_PI, +0.5*M_PI},
+          {-0.5*M_PI, +0.5*M_PI},
+          {-0.4*M_PI, +0.5*M_PI},
+          {-0.3*M_PI, +0.5*M_PI},
+          {-0.2*M_PI, +0.5*M_PI},
+          {-0.1*M_PI, +0.5*M_PI},
+          {-0.0*M_PI, +0.5*M_PI},
+          {+0.1*M_PI, +0.5*M_PI},
+          {+0.2*M_PI, +0.5*M_PI},
+          {+0.3*M_PI, +0.5*M_PI},
+          {+0.4*M_PI, +0.5*M_PI},
+          {+0.5*M_PI, +0.5*M_PI},
+          {+0.6*M_PI, +0.5*M_PI},
+          {+0.7*M_PI, +0.5*M_PI},
+          {+0.8*M_PI, +0.5*M_PI},
+          {+0.9*M_PI, +0.5*M_PI},
+          ////################################################################################
+          // {+0.5*M_PI, +0.2*M_PI},
+          // {+0.5*M_PI, +0.3*M_PI},
+          // {+0.5*M_PI, +0.4*M_PI},
+          // {+0.5*M_PI, +0.5*M_PI},
+          // {+0.5*M_PI, +0.6*M_PI},
+          // {+0.5*M_PI, +0.7*M_PI},
+          // {+0.5*M_PI, +0.8*M_PI},
+          // {+0.5*M_PI, +0.9*M_PI},
+          ////################################################################################
+          //{+0.9*M_PI, 0.6*M_PI},
+          //{+0.7*M_PI, 0.6*M_PI},
+          //{+0.5*M_PI, 0.6*M_PI},
+          //{+0.3*M_PI, 0.6*M_PI},
+          //{+0.1*M_PI, 0.6*M_PI},
+          //{+0.1*M_PI, 0.6*M_PI},
+          //{-0.0*M_PI, 0.6*M_PI},
+          //{-0.1*M_PI, 0.6*M_PI},
+          //{-0.2*M_PI, 0.6*M_PI},
+          //{-0.3*M_PI, 0.6*M_PI},
+          //{-0.4*M_PI, 0.6*M_PI},
+      };
+
+      //Horizontal slices
+      //std::vector<std::pair<double, double>> _thetaphi = {
+      //    {-0.9*M_PI, 0.3*M_PI},
+      //    {-0.7*M_PI, 0.3*M_PI},
+      //    {-0.5*M_PI, 0.3*M_PI},
+      //    {-0.3*M_PI, 0.3*M_PI},
+      //    {-0.1*M_PI, 0.3*M_PI},
+      //    {+0.1*M_PI, 0.3*M_PI},
+      //    {+0.3*M_PI, 0.3*M_PI},
+      //    {+0.5*M_PI, 0.3*M_PI},
+      //    {+0.7*M_PI, 0.3*M_PI},
+      //    {+0.9*M_PI, 0.3*M_PI},
+      //    //################################################################################
+      //    {+0.9*M_PI, 0.4*M_PI},
+      //    {+0.9*M_PI, 0.5*M_PI},
+      //    //################################################################################
+      //    {+0.9*M_PI, 0.6*M_PI},
+      //    {+0.7*M_PI, 0.6*M_PI},
+      //    {+0.5*M_PI, 0.6*M_PI},
+      //    {+0.3*M_PI, 0.6*M_PI},
+      //    {+0.1*M_PI, 0.6*M_PI},
+      //    {-0.1*M_PI, 0.6*M_PI},
+      //    {-0.3*M_PI, 0.6*M_PI},
+      //    {-0.5*M_PI, 0.6*M_PI},
+      //    {-0.6*M_PI, 0.6*M_PI},
+      //    {-0.7*M_PI, 0.6*M_PI},
+      //    {-0.8*M_PI, 0.6*M_PI},
+      //    {-0.9*M_PI, 0.6*M_PI},
+      //    //################################################################################
+      //    // {-0.9*M_PI, 0.9*M_PI},
+      //    // {-0.7*M_PI, 0.9*M_PI},
+      //    // {-0.5*M_PI, 0.9*M_PI},
+      //    // {-0.3*M_PI, 0.9*M_PI},
+      //    // {-0.1*M_PI, 0.9*M_PI},
+      //    // {+0.1*M_PI, 0.9*M_PI},
+      //    // {+0.3*M_PI, 0.9*M_PI},
+      //    // {+0.5*M_PI, 0.9*M_PI},
+      //    // {+0.7*M_PI, 0.9*M_PI},
+      //    // {+0.9*M_PI, 0.9*M_PI}
+      //};
+  };
+  return std::make_shared<HopfSphereSampler>(space);
+}
+
+
 int main()
 {
   auto total_space = std::make_shared<ompl::base::SO3StateSpace>();
@@ -232,6 +356,11 @@ int main()
 
   auto factor = std::make_shared<ompl::multilevel::FactoredSpaceInformation>(total_space);
   auto child = std::make_shared<ompl::multilevel::FactoredSpaceInformation>(base_space);
+
+  //Set custom sampling sequence for sphere
+  child->getStateSpace()->setStateSamplerAllocator(
+      std::bind(&allocateHopfSphereSampler, base_space));
+
 
   // Add custom state validity checker for the sphere space
   // child->setStateValidityChecker(
@@ -277,15 +406,22 @@ int main()
   auto goal = total_space->allocState();
   auto sphere_goal = child->allocState();
 
-  // sphere_start->as<SphereStateSpace::StateType>()->setThetaPhi(-2, 0.5*M_PI);
-  // sphere_goal->as<SphereStateSpace::StateType>()->setThetaPhi(+2, 0.4*M_PI);
-  sphere_start->as<SphereStateSpace::StateType>()->setThetaPhi(-0, 0.7*M_PI);
-  sphere_goal->as<SphereStateSpace::StateType>()->setThetaPhi(+3, 0.3*M_PI);
+  // sphere_start->as<SphereStateSpace::StateType>()->setThetaPhi(-0.9*M_PI, 0.3*M_PI);
+  // sphere_goal->as<SphereStateSpace::StateType>()->setThetaPhi(+0.9*M_PI, 0.9*M_PI);
+
+  // Horizontal Slices
+  // sphere_start->as<SphereStateSpace::StateType>()->setThetaPhi(-0.9*M_PI, 0.3*M_PI);
+  // sphere_goal->as<SphereStateSpace::StateType>()->setThetaPhi(-0.9*M_PI, 0.6*M_PI);
+
+  // Vertical Slices
+  //sphere_goal->as<SphereStateSpace::StateType>()->setThetaPhi(+0.3*M_PI, 0.5*M_PI);
+  sphere_start->as<SphereStateSpace::StateType>()->setThetaPhi(-0.8*M_PI, +0.5*M_PI);
+  sphere_goal->as<SphereStateSpace::StateType>()->setThetaPhi( +0.9*M_PI, +0.5*M_PI);
   hopf_fibration->lift(sphere_start, start);
   hopf_fibration->lift(sphere_goal, goal);
 
   ompl::base::ProblemDefinitionPtr pdef = std::make_shared<ompl::base::ProblemDefinition>(factor);
-  pdef->setStartAndGoalStates(start, goal);
+  pdef->setStartAndGoalStates(start, goal, 0.05);
 
   auto planner = std::make_shared<ompl::multilevel::FibrationRRT>(factor);
   planner->setProblemDefinition(pdef);
@@ -293,17 +429,15 @@ int main()
   planner->setSeed(0);
 
   planner->setLocalRange(factor->getName(), kLocalRange);
-  planner->setLocalGoalBias(factor->getName(), 0.0);
+  planner->setLocalGoalBias(factor->getName(), 0.5);
   planner->setSmoothIntermediateSolutions(false);
   planner->setLocalPathRestrictionSamplingBias(factor->getName(), 1.0);
-  planner->setLocalPathRestrictionSurroundingSamplingBias(factor->getName(), 0.0);
-  planner->setLocalSamplingPerturbationBias(factor->getName(), 0.0);
+  planner->setLocalPathRestrictionSurroundingSamplingBias(factor->getName(), 0.01);
+  planner->setLocalSamplingPerturbationBias(factor->getName(), 0.01);
   planner->setDisableSectionSearch();
 
-  //Only move towards goal, then sample exclusively on path
-  planner->setLocalRange(child->getName(), 0.5);
-  //planner->setLocalGoalBias(child->getName(), 0.0);
-  planner->setLocalGoalBias(child->getName(), 0.2);
+  planner->setLocalRange(child->getName(), 100.0);
+  planner->setLocalGoalBias(child->getName(), 0.0);
   planner->setLocalPathRestrictionSamplingBias(child->getName(), 1.0);
   planner->setLocalPathRestrictionSurroundingSamplingBias(child->getName(), 0.0);
   planner->setLocalSamplingPerturbationBias(child->getName(), 0.0);
