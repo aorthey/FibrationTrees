@@ -19,9 +19,9 @@ OPTIONS="--remove-ylabel --no-title --show --linewidth 20 --only-success-graph -
 
 #python3 ${EXEC} ../data/logs/DronesInPipe.db --legend-separate-file --label-fontsize 60 --fontsize 70 --only-success-graph --min-time 5 --max-time 1800 --show  --no-title --linewidth 12 --remove-ylabel --output-file 02_DronesInPipe.pdf
 
-python3 ${EXEC} ../data/logs/MobileRobotForest.db --legend-separate-file --label-fontsize 60 --fontsize 70 --only-success-graph --min-time 50 --max-time 1800 --show  --no-title --linewidth 12 --remove-ylabel --output-file 03_MobileRobotForest.pdf
+#python3 ${EXEC} ../data/logs/MobileRobotForest.db --legend-separate-file --label-fontsize 60 --fontsize 70 --only-success-graph --min-time 50 --max-time 1800 --show  --no-title --linewidth 12 --remove-ylabel --output-file 03_MobileRobotForest.pdf
 
-#python3 ${EXEC} ../data/logs/Warehouse.db --legend-separate-file --label-fontsize 60 --fontsize 70 --only-success-graph --min-time 5 --max-time 1800 --show  --no-title --linewidth 12 --remove-ylabel --output-file 04_Warehouse.pdf
+python3 ${EXEC} ../data/logs/Warehouse.db --legend-separate-file --label-fontsize 60 --fontsize 70 --only-success-graph --min-time 5 --max-time 1800 --show  --no-title --linewidth 12 --remove-ylabel --output-file 04_Warehouse.pdf
 ###############################################################################
 ###### 03 Task Space Constraints
 ###############################################################################
