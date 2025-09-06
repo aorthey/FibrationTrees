@@ -16,25 +16,18 @@ obstacles:
 robots:
   Robot0:
     name: MultiRobot
-    robots: [RobotK1, RobotF1, RobotF2, RobotL1, RobotL2, RobotL3]
+    robots: [RobotF1, RobotF2, RobotL1, RobotL2, RobotL3]
     root: True
     smooth_path: True
     hide: False
 
-  RobotK1:
-    name: MobileKukaRobot
-    color: [0.7, 0.9, 0.7, 1.0]
-    lower_limits: [-3.0, -7.0]
-    upper_limits: [+3.0, +7.0]
-    smooth_path: True
-    hide: False
-  RobotK1i:
-    name: MobileKukaBase
-    color: [0.7, 0.9, 0.7, 1.0]
-    lower_limits: [-3.0, -7.0]
-    upper_limits: [+3.0, +7.0]
-    smooth_path: True
-    hide: True
+  # RobotK1:
+  #   name: MobileKukaRobot
+  #   color: [0.7, 0.9, 0.7, 1.0]
+  #   lower_limits: [-3.0, -7.0]
+  #   upper_limits: [+3.0, +7.0]
+  #   smooth_path: True
+  #   hide: False
 
   RobotF1:
     name: MobileCarForklift
@@ -80,18 +73,18 @@ projections:
   Projection0:
     name: ProjectionMultiRobot
     parent: Robot0
-    children: [RobotK1, RobotF1, RobotF2, RobotL1, RobotL2, RobotL3]
+    children: [RobotF1, RobotF2, RobotL1, RobotL2, RobotL3]
 
-  Projection1:
-    name: Projection_SE2RN_R2
-    connection: [RobotK1, RobotK1i]
-    task_space: False
+  # Projection1:
+  #   name: Projection_SE2RN_R2
+  #   connection: [RobotK1, RobotK1i]
+  #   task_space: False
 
 problem:
   start:
     type: joint
     config: [
-      -0, -5.000, +0.000, +0.000, +0.000, +0.000, 0, 0, 0, 0,
+      #-0, -5.000, +0.000, +0.000, +0.000, +0.000, 0, 0, 0, 0,
       ##########################################################
       1, 0.35, 3.14,
       -0.5, -2, 1.2,
@@ -105,7 +98,7 @@ problem:
     type: joint
     threshold: 1.0
     config: [
-      -2, +6.000, +0.000, +0.000, +0.000, +0.000, 0, 0, 0, 0,
+      #-2, +6.000, +0.000, +0.000, +0.000, +0.000, 0, 0, 0, 0,
       ##########################################################
       -2, -6, 1.57,
       0.7, +5, 1.57,

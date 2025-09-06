@@ -22,7 +22,7 @@ OPTIONS="--remove-ylabel --no-title --linewidth 20 --only-success-graph --label-
 #python3 ${EXEC} ../data/logs/01_MultiDisks.db ${OPTIONS} --min-time 0.5 --max-time 600
 #python3 ${EXEC} ../data/logs/02_DroneCoordination.db ${OPTIONS} --min-time 0.5 --max-time 600
 #python3 ${EXEC} ../data/logs/03_MobileNavigation.db ${OPTIONS} --min-time 1.5 --max-time 600
-python3 ${EXEC} ../data/logs/04_ReedsSheppSimple.db ${OPTIONS} --min-time 0.01 --max-time 500
+#python3 ${EXEC} ../data/logs/04_ReedsSheppSimple.db ${OPTIONS} --min-time 1.5 --max-time 600
 
 ###############################################################################
 ###### 02 Hard Multi Robot
@@ -31,7 +31,7 @@ python3 ${EXEC} ../data/logs/04_ReedsSheppSimple.db ${OPTIONS} --min-time 0.01 -
 #python3 ${EXEC} ../data/logs/01_CubeRobots.db ${OPTIONS} --min-time 0.5 --max-time 900
 #python3 ${EXEC} ../data/logs/02_DronesInPipe.db ${OPTIONS} --min-time 1.5 --max-time 900
 #python3 ${EXEC} ../data/logs/03_MobileRobotForest.db ${OPTIONS} --min-time 1.5 --max-time 1800
-#python3 ${EXEC} ../data/logs/04_Warehouse.db ${OPTIONS} --min-time 1.5 --max-time 3600
+python3 ${EXEC} ../data/logs/Warehouse.db ${OPTIONS} --min-time 1.5 --max-time 3600
 
 ###############################################################################
 ###### 03 Task Space Constraints
