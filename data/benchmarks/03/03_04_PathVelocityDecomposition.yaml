@@ -5,7 +5,7 @@ scenarios:
     name: PathVelocityDecomposition
     filename: scenarios/03_taskspace/04_PathVelocityDecomposition.yaml
     run_count: 10
-    timeout: 720
+    timeout: 1800
     planners: [FibrationRrt, RRTtask]
 
 ompl_benchmark_plotter:
