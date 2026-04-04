@@ -11,6 +11,7 @@
 #include <ompl/geometric/planners/fmt/FMT.h>
 #include <ompl/geometric/planners/fmt/BFMT.h>
 #include <ompl/multilevel/planners/FibrationRRT.h>
+#include <ompl/multilevelqrrt/planners/qrrt/QRRT.h>
 
 bool HasParameter(const YAML::Node& node, const ompl::base::PlannerPtr& planner, const std::string& planner_name, const std::string& parameter_name) {
   if(!node["planner_settings"]) {
@@ -36,7 +37,13 @@ void SetParameter(const YAML::Node& node, const ompl::base::PlannerPtr& planner,
   auto pnode = node["planner_settings"][planner_name];
   auto parameter_value = pnode[parameter_name].as<double>();
   planner->params().setParam(parameter_name, std::to_string(parameter_value));
-  OMPL_INFORM("Setting planner parameter %s to %f", parameter_name.c_str(), parameter_value);
+  std::string value_in_planner;
+  if(!planner->params().getParam(parameter_name, value_in_planner))
+  {
+    auto msg = "Could not set parameter " + parameter_name + " to " + value_in_planner + " in planner " + planner_name;
+    throw std::runtime_error(msg);
+  }
+  OMPL_INFORM("Setting planner parameter %s to %f", parameter_name.c_str(), std::stof(value_in_planner));
 }
 
 ompl::base::PlannerPtr MakePlannerFromYaml(const std::string& filename, const std::string& planner_name, 
@@ -96,10 +103,32 @@ ompl::base::PlannerPtr MakePlannerFromYaml(const YAML::Node& node, const std::st
       }
     }
 
+
+  } else if(planner_name == "QRRT") {
+    //const ompl::multilevel::FactoredSpaceInformationPtr& factor, const std::unordered_map<std::string, RobotPtr>& child_robots) {
+    //        class FactoredSpaceInformation : public base::SpaceInformation, public std::enable_shared_from_this<FactoredSpaceInformation>
+
+
+    auto factors = factor->getAllFactors();
+
+    std::vector<ompl::base::SpaceInformationPtr> subfactors;
+    for(const auto& subfactor : factors) {
+      OMPL_INFORM("Factor %s", subfactor->getName().c_str());
+
+      if(subfactor->hasChildren() && subfactor->getTotalNumChildren() != 1) {
+        auto msg = "Factor " + subfactor->getName() + " has " + 
+            std::to_string(subfactor->getTotalNumChildren()) + " children, but QRRT only allows prioritizations (with 1 child per factor).";
+        throw std::runtime_error(msg);
+      }
+      subfactors.push_back(subfactor);
+    }
+    std::reverse(subfactors.begin(), subfactors.end());
+    planner = std::make_shared<ompl::multilevelqrrt::QRRT>(subfactors);
   } else if(planner_name == "RRTtask") {
     planner = std::make_shared<ompl::multilevel::RRTtask>(factor);
   } else if(planner_name == "RRT") {
     planner = std::make_shared<ompl::geometric::RRT>(factor);
+    SetParameter(node, planner, planner_name, "goal_bias");
   } else if(planner_name == "EST") {
     planner = std::make_shared<ompl::geometric::EST>(factor);
   } else if(planner_name == "RRTConnect") {

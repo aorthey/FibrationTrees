@@ -1,0 +1,13 @@
+name: 03_DisksInTee
+
+scenarios:
+  Scenario1:
+    name: DisksInTee
+    filename: scenarios/00_disks/03_DisksInTee.yaml
+    run_count: 10
+    timeout: 600
+    planners: [RRT, FibrationRrt]
+
+ompl_benchmark_plotter:
+  options: ["--only-success-graph", "--legend-separate-file", "--title-name DisksInTee"]
+

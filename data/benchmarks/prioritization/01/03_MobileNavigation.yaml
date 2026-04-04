@@ -1,0 +1,13 @@
+name: 03_MobileNavigationPrioritization
+
+scenarios:
+  Scenario1:
+    name: MobileNavigationPrioritization
+    filename: scenarios/01_multirobots_easy/03_MobileNavigation_Prioritization.yaml
+    run_count: 10
+    timeout: 600
+    planners: [QRRT, FibrationRrt-Prioritization]
+
+ompl_benchmark_plotter:
+  options: ["--only-success-graph", "--legend-separate-file", "--title-name MobileNavigationPrioritization"]
+

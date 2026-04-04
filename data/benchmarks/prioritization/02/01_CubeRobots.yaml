@@ -1,0 +1,12 @@
+name: CubeRobots
+
+scenarios:
+  Scenario1:
+    name: CubeRobots
+    filename: scenarios/02_multirobots_hard/01_CubeRobots_PrioritizationLargeToSmall.yaml
+    run_count: 10
+    timeout: 1800
+    planners: [QRRT, FibrationRrt-Prioritization]
+
+ompl_benchmark_plotter:
+  options: ["--only-success-graph", "--title-name CubeRobots"]

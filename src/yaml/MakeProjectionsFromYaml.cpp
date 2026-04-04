@@ -161,6 +161,4 @@ void MakeProjectionsFromYamlFilename(const std::string& filename, const dart::si
       throw std::out_of_range("Unknown projection type.");
     }
   }
-
-
 }

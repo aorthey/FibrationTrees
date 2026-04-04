@@ -1,0 +1,99 @@
+name: DisksInTee
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: True
+
+obstacles:
+
+  Obstacle0:
+    name: Floor
+    type: floor
+    height: -0.15
+    color: [0.9, 0.9, 0.9, 1.0]
+    width: 20.0
+  Obstacle1:
+    name: BottomWall
+    type: box
+    position: [0.0, -6.25, 1.25]
+    color: [0.35, 0.35, 0.35, 1.0]
+    size: [23.0, 0.6, 2.5]
+  Obstacle2:
+    name: LowerCeilingLeft
+    type: box
+    position: [-6.8, -3.8, 1.25]
+    color: [0.35, 0.35, 0.35, 1.0]
+    size: [9.0, 0.6, 2.5]
+  Obstacle3:
+    name: LowerCeilingRight
+    type: box
+    position: [6.8, -3.8, 1.25]
+    color: [0.35, 0.35, 0.35, 1.0]
+    size: [9.0, 0.6, 2.5]
+  Obstacle4:
+    name: VerticalLeft
+    type: box
+    position: [-2.05, 1.9, 1.25]
+    color: [0.35, 0.35, 0.35, 1.0]
+    size: [0.6, 12.0, 2.5]
+  Obstacle5:
+    name: VerticalRight
+    type: box
+    position: [2.05, 1.9, 1.25]
+    color: [0.35, 0.35, 0.35, 1.0]
+    size: [0.6, 12.0, 2.5]
+  Obstacle6:
+    name: StemTop
+    type: box
+    position: [0.0, 7.3, 1.25]
+    color: [0.35, 0.35, 0.35, 1.0]
+    size: [5.2, 0.6, 2.5]
+  Obstacle7:
+    name: LeftEnd
+    type: box
+    position: [-11.5, -5.1, 1.25]
+    color: [0.35, 0.35, 0.35, 1.0]
+    size: [0.6, 3.5, 2.5]
+  Obstacle8:
+    name: RightEnd
+    type: box
+    position: [11.5, -5.1, 1.25]
+    color: [0.35, 0.35, 0.35, 1.0]
+    size: [0.6, 3.5, 2.5]
+
+robots:
+  Robot0:
+    name: MultiRobot
+    robots: [Robot1, Robot2]
+    root: True
+    smooth_path: False
+  Robot1:
+    name: DiskRobot
+    lower_limits: [-10.0, -6.0]
+    upper_limits: [+10.0, +10.0]
+    color: [0.7, 0.9, 0.7, 1.0]
+    radius: 0.6
+    hide: False
+  Robot2:
+    name: DiskRobot
+    lower_limits: [-10.0, -6.0]
+    upper_limits: [+10.0, +10.0]
+    color: [0.9, 0.7, 0.7, 1.0]
+    radius: 0.6
+    hide: False
+
+problem:
+  start:
+    type: joint
+    config: [-3, -5.0, -6, -5.0]
+  goal:
+    type: joint
+    config: [+3, -5.0, +6, -5.0]
+
+planner_settings:
+  RRT:
+    range: 1.0
+    goal_bias: 0.1
+  FibrationRrt:
+    range: 1.0
+    goal_bias: 0.1

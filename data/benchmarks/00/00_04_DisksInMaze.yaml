@@ -1,0 +1,14 @@
+name: 04_DisksInMaze
+
+scenarios:
+  Scenario1:
+    name: DisksInMaze
+    filename: scenarios/00_disks/04_DisksInMaze.yaml
+    run_count: 10
+    timeout: 600
+    planners: [RRT, FibrationRrt]
+
+ompl_benchmark_plotter:
+  options: ["--only-success-graph", "--legend-separate-file", "--title-name DisksInMaze"]
+
+

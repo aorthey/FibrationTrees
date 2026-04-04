@@ -1,0 +1,51 @@
+name: DisksInTee
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: True
+
+obstacles:
+
+  Obstacle5:
+    name: Maze
+    type: urdf
+    filename: objects/maze_horizontal.urdf
+    position: [0.55, 0.1, 0.85]
+
+robots:
+  Robot0:
+    name: MultiRobot
+    robots: [Robot1, Robot2]
+    root: True
+    smooth_path: False
+  Robot1:
+    name: DiskRobot
+    lower_limits: [-12.0, -12.0]
+    upper_limits: [+12.0, +12.0]
+    color: [0.7, 0.9, 0.7, 1.0]
+    radius: 0.8
+    hide: False
+  Robot2:
+    name: DiskRobot
+    lower_limits: [-12.0, -12.0]
+    upper_limits: [+12.0, +12.0]
+    color: [0.9, 0.7, 0.7, 1.0]
+    radius: 0.8
+    hide: False
+
+problem:
+  start:
+    type: joint
+    config: [-11.0, -2.0, +3.0, -11.0]
+  goal:
+    type: joint
+    visualize: True
+    config: [+3.0, -11.0, -11.0, -2.0]
+
+planner_settings:
+  RRT:
+    range: 0.1
+    goal_bias: 0.1
+  FibrationRrt:
+    range: 0.1
+    goal_bias: 0.1

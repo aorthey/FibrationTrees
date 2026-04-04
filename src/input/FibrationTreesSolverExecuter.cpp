@@ -71,7 +71,9 @@ int FibrationTreesSolverExecuter(const int argc, const char* argv[]) {
   auto time_end = time_clock::now();
   auto duration = std::chrono::duration_cast<seconds>(time_end - time_start);
 
-  if(status) {
+  auto solved = (status == ompl::base::PlannerStatus::EXACT_SOLUTION);
+
+  if(solved) {
     OMPL_INFORM("\n%s\nSolved planning problem with %s in %ds.\n%s\n", std::string(80, '*').c_str(), 
         input_planner_name.c_str(), duration.count(), std::string(80, '*').c_str());
   } else {

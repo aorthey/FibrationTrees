@@ -1,0 +1,12 @@
+name: 02_DroneCoordinationPrioritization
+
+scenarios:
+  Scenario1:
+    name: DroneCoordinationPrioritization
+    filename: scenarios/01_multirobots_easy/02_DroneCoordination_Prioritization.yaml
+    run_count: 10
+    timeout: 600
+    planners: [QRRT, FibrationRrt-Prioritization]
+
+ompl_benchmark_plotter:
+  options: ["--only-success-graph", "--legend-separate-file", "--title-name DroneCoordinationPrioritization"]
