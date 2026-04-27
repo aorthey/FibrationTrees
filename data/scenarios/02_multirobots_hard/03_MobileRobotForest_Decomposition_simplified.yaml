@@ -1,0 +1,192 @@
+name: MobileRobotNagivation
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: True
+
+obstacles:
+  Obstacle0:
+    name: Floor
+    type: floor
+    height: -0.255
+    color: [0.99, 0.99, 0.99, 1.0]
+    width: 5.0
+  Obstacle1:
+    name: Box
+    type: box
+    position: [0.0, 0.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle2:
+    name: Box
+    type: box
+    position: [-1.0, 0.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle3:
+    name: Box
+    type: box
+    position: [+1.0, 0.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle4:
+    name: Box
+    type: box
+    position: [0.0, 1.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle5:
+    name: Box
+    type: box
+    position: [0.0, -1.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle6:
+    name: Box
+    type: box
+    position: [-1.0, -2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle7:
+    name: Box
+    type: box
+    position: [-0.0, -2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle8:
+    name: Box
+    type: box
+    position: [+1.0, -2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle9:
+    name: Box
+    type: box
+    position: [-1.0, +2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle10:
+    name: Box
+    type: box
+    position: [-0.0, +2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle11:
+    name: Box
+    type: box
+    position: [+1.0, +2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle12:
+    name: Box
+    type: box
+    position: [+2.0, +1.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle13:
+    name: Box
+    type: box
+    position: [+2.0, +0.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle14:
+    name: Box
+    type: box
+    position: [+2.0, -1.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle13:
+    name: Box
+    type: box
+    position: [+2.0, +2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle14:
+    name: Box
+    type: box
+    position: [+2.0, -2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle12:
+    name: Box
+    type: box
+    position: [-2.0, +1.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle13:
+    name: Box
+    type: box
+    position: [-2.0, +0.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle14:
+    name: Box
+    type: box
+    position: [-2.0, -1.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle13:
+    name: Box
+    type: box
+    position: [-2.0, +2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+  Obstacle14:
+    name: Box
+    type: box
+    position: [-2.0, -2.0, 0.75]
+    color: [0.25, 0.25, 0.6, 1.0]
+    size: [0.25, 0.25, 2.0]
+
+robots:
+  Robot0:
+    name: MultiRobot
+    robots: [Robot1, Robot2, Robot3, Robot4]
+    root: True
+    smooth_path: True
+
+  Robot1:
+    name: MobileKukaRobot
+    color: [0.7, 0.5, 0.5, 1.0]
+    smooth_path: False
+    hide: False
+  Robot2:
+    name: MobileKukaRobot
+    color: [0.5, 0.5, 0.7, 1.0]
+    smooth_path: False
+    hide: False
+  Robot3:
+    name: MobileKukaRobot
+    color: [0.5, 0.7, 0.5, 1.0]
+    smooth_path: False
+    hide: False
+  Robot4:
+    name: MobileKukaRobot
+    color: [0.7, 0.7, 0.5, 1.0]
+    smooth_path: False
+    hide: False
+
+projections:
+
+  Projection0:
+    name: ProjectionMultiRobot
+    parent: Robot0
+    task_space: False
+    children: [Robot1, Robot2, Robot3, Robot4]
+
+problem:
+  start:
+    type: joint
+    config: [-1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             +1.0, +1.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             -1.0, +1.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             +1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+  goal:
+    type: joint
+    threshold: 1.0
+    config: [+1.0, +1.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             -1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             +1.0, -1.0, 0, 0, 0, 0, 0, 0, 0, 0,
+             -1.0, +1.0, 0, 0, 0, 0, 0, 0, 0, 0]
+

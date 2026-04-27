@@ -1,0 +1,12 @@
+name: 02_DronesInPipe_DecompositionSimplified
+
+scenarios:
+  Scenario1:
+    name: DronesInPipeDecompositionSimplified
+    filename: scenarios/02_multirobots_hard/02_Drones_Decomposition_simplified.yaml
+    run_count: 3
+    timeout: 10
+    planners: [DiscreteRRT-1]
+
+ompl_benchmark_plotter:
+  options: ["--only-success-graph", "--title-name DronesInPipeDecomposition"]

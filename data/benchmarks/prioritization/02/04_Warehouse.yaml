@@ -1,0 +1,12 @@
+name: 04_Warehouse_Prioritization
+
+scenarios:
+  Scenario1:
+    name: WarehousePrioritization
+    filename: scenarios/02_multirobots_hard/04_Warehouse_Prioritization.yaml
+    run_count: 10
+    timeout: 3600
+    planners: [QRRT, FibrationRrt-Prioritization]
+
+ompl_benchmark_plotter:
+  options: ["--only-success-graph", "--title-name WarehousePrioritization"]

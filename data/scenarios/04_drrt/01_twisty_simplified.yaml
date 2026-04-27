@@ -1,0 +1,35 @@
+name: TwistyCool
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: True
+
+robots:
+  Robot1:
+    name: SE3Robot
+    urdf_filename: robots/Twistycool_robot.urdf
+    lower_limits: [-2, -2, -0]
+    upper_limits: [+2, +2, +4]
+    color: [0.0, 0.0, 1.0, 1.0]
+    smooth_path: True
+    show_path: True
+    root: True
+
+obstacles:
+  Obstacle1:
+    name: Twisty
+    type: urdf
+    filename: objects/Twistycool_env.urdf
+    position: [0.55, 0.1, 0.85]
+
+problem:
+  start:
+    type: joint
+    config: [+1.2, -1.5, +1.5, 1.57, 1.57, 0.00]
+    visualize: True
+
+  goal:
+    type: joint
+    threshold: 0.025
+    config: [-1.2, +1.5, +3.0, 1.57, 1.57, 0.00]
+    visualize: False

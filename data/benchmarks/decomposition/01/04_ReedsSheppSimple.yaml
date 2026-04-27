@@ -1,0 +1,12 @@
+name: 04_ReedsSheppSimple_Decomposition
+
+scenarios:
+  Scenario1:
+    name: ReedsSheppSimple_Decomposition
+    filename: scenarios/01_multirobots_easy/04_ReedsSheppSimple_Decomposition.yaml
+    run_count: 10
+    timeout: 600
+    planners: [DiscreteRRT-1, DiscreteRRT-5, DiscreteRRT-10, DiscreteRRT-50, FibrationRrt-Decomposition]
+
+ompl_benchmark_plotter:
+  options: ["--only-success-graph", "--legend-separate-file", "--title-name ReedsSheppSimple_Decomposition"]

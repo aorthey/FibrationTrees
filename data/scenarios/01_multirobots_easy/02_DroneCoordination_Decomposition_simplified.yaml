@@ -1,0 +1,111 @@
+name: DroneCoordination
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: False
+
+obstacles:
+  Obstacle0:
+    name: Floor
+    type: floor
+    height: -0.25
+
+  Obstacle1:
+    name: Cylinder
+    type: cylinder
+    position: [-0.5, 0.0, 0.0]
+    size: [0.2, 1.5]
+
+  Obstacle2:
+    name: Cylinder
+    type: cylinder
+    position: [-0.0, 0.2, 0.0]
+    size: [0.15, 1.0]
+
+  Obstacle3:
+    name: Cylinder
+    type: cylinder
+    position: [-0.5, -0.3, 0.0]
+    size: [0.3, 1.5]
+
+  Obstacle4:
+    name: Cylinder
+    type: cylinder
+    position: [-1.0, 0.8, 0.0]
+    size: [0.05, 2.5]
+
+  Obstacle5:
+    name: Cylinder
+    type: cylinder
+    position: [-0.6, 1.2, 0.0]
+    size: [0.08, 0.8]
+
+robots:
+  Robot0:
+    name: MultiRobot
+    robots: [Robot1, Robot2, Robot3, Robot4, Robot5, Robot6, Robot7, Robot8]
+    root: True
+
+  Robot1:
+    name: ZeppelinRobot
+    lower_limits:  [-1.5, -1.5, -0.5]
+    upper_limits:  [+1.5, +1.5, +1.5]
+  Robot2:
+    name: ZeppelinRobot
+    lower_limits:  [-1.5, -1.5, -0.5]
+    upper_limits:  [+1.5, +1.5, +1.5]
+  Robot3:
+    name: ZeppelinRobot
+    lower_limits:  [-1.5, -1.5, -0.5]
+    upper_limits:  [+1.5, +1.5, +1.5]
+  Robot4:
+    name: ZeppelinRobot
+    lower_limits:  [-1.5, -1.5, -0.5]
+    upper_limits:  [+1.5, +1.5, +1.5]
+  Robot5:
+    name: ZeppelinRobot
+    lower_limits:  [-1.5, -1.5, -0.5]
+    upper_limits:  [+1.5, +1.5, +1.5]
+  Robot6:
+    name: ZeppelinRobot
+    lower_limits:  [-1.5, -1.5, -0.5]
+    upper_limits:  [+1.5, +1.5, +1.5]
+  Robot7:
+    name: ZeppelinRobot
+    lower_limits:  [-1.5, -1.5, -0.5]
+    upper_limits:  [+1.5, +1.5, +1.5]
+  Robot8:
+    name: ZeppelinRobot
+    lower_limits:  [-1.5, -1.5, -0.5]
+    upper_limits:  [+1.5, +1.5, +1.5]
+
+projections:
+
+  Projection0:
+    name: ProjectionMultiRobot
+    parent: Robot0
+    children: [Robot1, Robot2, Robot3, Robot4, Robot5, Robot6, Robot7, Robot8]
+
+problem:
+  start:
+    type: joint
+    config: [ +1.5, -1.0, 0.1, 0.0,
+              +1.5, -0.3, 0.1, 0.0,
+              +1.5, +0.3, 0.1, 0.0,
+              +1.5, +1.0, 0.1, 0.0,
+              +1.5, -1.0, 0.3, 0.0,
+              +1.5, -0.3, 0.3, 0.0,
+              +1.5, +0.3, 0.3, 0.0,
+              +1.5, +1.0, 0.3, 0.0]
+
+  goal:
+    type: joint
+    threshold: 0.5
+    config: [ -1.5, -1.0, 0.1, 0.0,
+              -1.5, -0.3, 0.1, 0.0,
+              -1.5, +0.3, 0.1, 0.0,
+              -1.5, +1.0, 0.1, 0.0,
+              -1.5, -1.0, 0.3, 0.0,
+              -1.5, -0.3, 0.3, 0.0,
+              -1.5, +0.3, 0.3, 0.0,
+              -1.5, +1.0, 0.3, 0.0]

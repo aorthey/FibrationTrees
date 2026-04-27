@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<robot name="maze">
+  <link name="root">
+    <visual>
+      <origin xyz="0 0 -1.5" rpy="1.57 0 0" />
+      <geometry>
+        <mesh filename="maze.stl" scale="4 4 4"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -1.5" rpy="1.57 0 0" />
+      <geometry>
+        <mesh filename="maze.stl" scale="4 4 4"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>

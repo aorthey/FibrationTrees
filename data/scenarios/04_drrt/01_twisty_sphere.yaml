@@ -1,0 +1,116 @@
+name: TwistyCool
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: True
+
+robots:
+  Robot0:
+    name: MultiRobot
+    robots: [Robot1, Robot2, Robot3, Robot4, Robot5, Robot6, Robot7, Robot8]
+    root: True
+    smooth_path: False
+
+  Robot1:
+    name: SphereRobot
+    urdf_filename: robots/Twistycool_robot.urdf
+    lower_limits: [-2, -2, -0]
+    upper_limits: [+2, +2, +4]
+    color: [0.0, 0.0, 1.0, 1.0]
+    smooth_path: False
+
+  Robot2:
+    name: SphereRobot
+    urdf_filename: robots/Twistycool_robot.urdf
+    lower_limits: [-2, -2, -0]
+    upper_limits: [+2, +2, +4]
+    color: [0.0, 1.0, 0.0, 1.0]
+    smooth_path: False
+
+  Robot3:
+    name: SphereRobot
+    urdf_filename: robots/Twistycool_robot.urdf
+    lower_limits: [-2, -2, -0]
+    upper_limits: [+2, +2, +4]
+    color: [1.0, 0.0, 0.0, 1.0]
+    smooth_path: False
+
+  Robot4:
+    name: SphereRobot
+    urdf_filename: robots/Twistycool_robot.urdf
+    lower_limits: [-2, -2, -0]
+    upper_limits: [+2, +2, +4]
+    color: [1.0, 0.0, 1.0, 1.0]
+    smooth_path: False
+
+  Robot5:
+    name: SphereRobot
+    urdf_filename: robots/Twistycool_robot.urdf
+    lower_limits: [-2, -2, -0]
+    upper_limits: [+2, +2, +4]
+    color: [0.0, 0.0, 1.0, 0.5]
+    smooth_path: False
+
+  Robot6: 
+    name: SphereRobot
+    urdf_filename: robots/Twistycool_robot.urdf
+    lower_limits: [-2, -2, -0]  
+    upper_limits: [+2, +2, +4]
+    color: [0.0, 1.0, 0.0, 0.5]
+    smooth_path: False
+  Robot7: 
+    name: SphereRobot
+    urdf_filename: robots/Twistycool_robot.urdf
+    lower_limits: [-2, -2, -0]  
+    upper_limits: [+2, +2, +4]
+    color: [1.0, 0.0, 0.0, 0.5]
+    smooth_path: False
+  Robot8: 
+    name: SphereRobot
+    urdf_filename: robots/Twistycool_robot.urdf
+    lower_limits: [-2, -2, -0]  
+    upper_limits: [+2, +2, +4]
+    color: [1.0, 0.0, 1.0, 0.5]
+    smooth_path: False
+
+obstacles:
+  Obstacle1:
+    name: Twisty
+    type: urdf
+    filename: objects/Twistycool_env.urdf
+    position: [0.55, 0.1, 0.85]
+
+projections:
+
+  Projection0:
+    name: ProjectionMultiRobot
+    parent: Robot0
+    task_space: False
+    children: [Robot1, Robot2, Robot3, Robot4, Robot5, Robot6, Robot7, Robot8]
+
+problem:
+  start:
+    type: joint
+    config: [
+      +1.2, -1.5, +1.5, #blue
+      -1.2, -1.5, +3.0, #green
+      -1.2, -0.5, +1.5, #red
+      +1.2, -0.5, +3.0, #magenta
+      -1.2, +1.5, +3.0, #blue
+      +1.6, +1.5, +1.5, #green
+      +0.0, +1.5, +3.0, #red
+      -1.0, +1.2, +1.5] #magenta
+
+  goal:
+    type: joint
+    threshold: 0.025
+    visualize: False
+    config: [
+      -1.2, +1.5, +3.0, #blue
+      +1.6, +1.5, +1.5, #green
+      +0.0, +1.5, +3.0, #red
+      -1.0, +1.2, +1.5, #magenta
+      +1.2, -1.5, +1.5, #blue
+      -1.2, -1.5, +3.0, #green
+      -1.2, -0.5, +1.5, #red
+      +1.2, -0.5, +3.0] #magenta

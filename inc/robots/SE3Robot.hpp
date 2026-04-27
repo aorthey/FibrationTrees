@@ -3,13 +3,18 @@
 #include "robots/Robot.hpp"
 #include "State.hpp"
 
-class SE2Robot : public Robot {
+class SE3Robot : public Robot {
   public:
-    SE2Robot() = default;
+    SE3Robot() = default;
+
+    dart::dynamics::SkeletonPtr MakeSkeleton(const YAML::Node& node) override;
     ompl::multilevel::FactoredSpaceInformationPtr MakeSpaceInformation(const RobotPtr& robot) override;
-    void SetLimits(const std::pair<State2d, State2d>& limits);
+    void SetLimits(const std::pair<State3d, State3d>& limits);
 
     StateXd StateToEigen(const ompl::base::State* state) const override;
     void EigenToState(const StateXd& v, ompl::base::State* state) const override;
+  private:
+    std::string urdf_filename_;
 };
+
 

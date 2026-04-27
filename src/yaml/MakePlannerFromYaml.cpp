@@ -12,6 +12,7 @@
 #include <ompl/geometric/planners/fmt/BFMT.h>
 #include <ompl/multilevel/planners/FibrationRRT.h>
 #include <ompl/multilevelqrrt/planners/qrrt/QRRT.h>
+#include "planners/DiscreteRRT.hpp"
 
 bool HasParameter(const YAML::Node& node, const ompl::base::PlannerPtr& planner, const std::string& planner_name, const std::string& parameter_name) {
   if(!node["planner_settings"]) {
@@ -50,6 +51,26 @@ ompl::base::PlannerPtr MakePlannerFromYaml(const std::string& filename, const st
     const ompl::multilevel::FactoredSpaceInformationPtr& factor, const std::unordered_map<std::string, RobotPtr>& child_robots) {
   YAML::Node node = YAML::LoadFile(filename);
   return MakePlannerFromYaml(node, planner_name, factor, child_robots);
+}
+
+int extract_discrete_rrt_timeout(const std::string& planner_name)
+{
+    if (!boost::starts_with(planner_name, "DiscreteRRT"))
+        return -1;
+
+    if (planner_name == "DiscreteRRT" || planner_name.length() == 11)
+        return -1;
+
+    if (planner_name[11] != '-')
+        return -1;
+
+    std::string suffix = planner_name.substr(12);
+    try {
+        return std::stoi(suffix);
+    }
+    catch (...) {
+        return -1;
+    }
 }
 
 ompl::base::PlannerPtr MakePlannerFromYaml(const YAML::Node& node, const std::string& planner_name, 
@@ -105,10 +126,6 @@ ompl::base::PlannerPtr MakePlannerFromYaml(const YAML::Node& node, const std::st
 
 
   } else if(planner_name == "QRRT") {
-    //const ompl::multilevel::FactoredSpaceInformationPtr& factor, const std::unordered_map<std::string, RobotPtr>& child_robots) {
-    //        class FactoredSpaceInformation : public base::SpaceInformation, public std::enable_shared_from_this<FactoredSpaceInformation>
-
-
     auto factors = factor->getAllFactors();
 
     std::vector<ompl::base::SpaceInformationPtr> subfactors;
@@ -124,6 +141,31 @@ ompl::base::PlannerPtr MakePlannerFromYaml(const YAML::Node& node, const std::st
     }
     std::reverse(subfactors.begin(), subfactors.end());
     planner = std::make_shared<ompl::multilevelqrrt::QRRT>(subfactors);
+  ////////////////////////////////////////////////////////////////////////////////
+  } else if(boost::starts_with(planner_name, "DiscreteRRT")) {
+    //auto factors = factor->getAllFactors();
+    auto children = factor->getChildren();
+
+    if(children.empty()) {
+        auto msg = "Factor " + factor->getName() + " has no children, but DiscreteRRT requires a decomposition.";
+        throw std::runtime_error(msg);
+    }
+    for(const auto& child : children) {
+      OMPL_INFORM("Factor %s", child->getName().c_str());
+
+      if(child->hasChildren()) {
+        auto msg = "Factor " + child->getName() + " has children, but DiscreteRRT only allows decompositions.";
+        throw std::runtime_error(msg);
+      }
+    }
+    planner = std::make_shared<ompl::geometric::DiscreteRRT>(factor);
+    planner->setName(planner_name);
+
+    auto dplanner = std::static_pointer_cast<ompl::geometric::DiscreteRRT>(planner);
+    double timeout = (double) extract_discrete_rrt_timeout(planner_name);
+    if (timeout >= 0) {
+      dplanner->setRoadmapBuildTime(timeout);
+    }
   } else if(planner_name == "RRTtask") {
     planner = std::make_shared<ompl::multilevel::RRTtask>(factor);
   } else if(planner_name == "RRT") {

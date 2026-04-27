@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<robot name="Twistycool">
+  <link name="root">
+    <visual>
+      <origin xyz="-3 -3 -0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="Twistycool_env2.dae" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-3 -3 -0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="Twistycool_env2.dae" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>
+

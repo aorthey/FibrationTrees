@@ -12,6 +12,7 @@
 #include "robots/DiskRobot.hpp"
 #include "robots/CubeRobot.hpp"
 #include "robots/SphereRobot.hpp"
+#include "robots/SE3Robot.hpp"
 #include "robots/LiftTruckRobot.hpp"
 #include "robots/MobileCar.hpp"
 #include "robots/MobileCarForklift.hpp"
@@ -167,6 +168,9 @@ RobotPtr MakeAtomicRobotFromNode(const YAML::Node& node,
 
   } else if(name == "SphereRobot") {
     robot = MakeRobot<SphereRobot>(world, obstacles, node);
+
+  } else if(name == "SE3Robot") {
+    robot = MakeRobot<SE3Robot>(world, obstacles, node);
 
   } else if(name == "Drone") {
     robot = MakeRobot<Drone>(world, obstacles, node);

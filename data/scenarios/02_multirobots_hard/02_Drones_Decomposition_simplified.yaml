@@ -1,0 +1,165 @@
+name: Drones
+
+world:
+  gravity: [0, 0, 0]
+  coordinate_frame: False
+
+obstacles:
+
+  Obstacle1:
+    name: Hut
+    type: urdf
+    filename: objects/pipe.urdf
+    position: [0.0, 0.0, 0.0]
+
+robots:
+
+  RobotAll:
+    name: MultiRobot
+    robots: [RobotA, RobotB, RobotC, RobotD, RobotE, RobotF, RobotG, RobotH, RobotJ, RobotK, RobotL, RobotM, RobotN, RobotO, RobotP, RobotQ]
+    root: True
+    smooth_path: True
+
+  RobotA:
+    name: Drone
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    smooth_path: False
+
+  RobotB:
+    name: Drone
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    smooth_path: False
+
+  RobotC:
+    name: Drone
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    smooth_path: False
+
+  RobotD:
+    name: Drone
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    smooth_path: False
+
+  RobotE:
+    name: Drone
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    smooth_path: False
+
+  RobotF:
+    name: Drone
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    smooth_path: False
+
+  RobotG:
+    name: Drone
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    smooth_path: False
+
+  RobotH:
+    name: Drone
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    smooth_path: False
+
+  RobotJ:
+    name: Drone
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    smooth_path: False
+
+  RobotK:
+    name: Drone
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    smooth_path: False
+
+  RobotL:
+    name: Drone
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    smooth_path: False
+
+  RobotM:
+    name: Drone
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    smooth_path: False
+
+  RobotN:
+    name: Drone
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    smooth_path: False
+
+  RobotO:
+    name: Drone
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    smooth_path: False
+
+  RobotP:
+    name: Drone
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    smooth_path: False
+
+  RobotQ:
+    name: Drone
+    lower_limits: [-2.0, -2.0, -1.0]
+    upper_limits: [+2.0, +2.0, 11.0]
+    smooth_path: False
+
+projections:
+  Projection0:
+    name: ProjectionMultiRobot
+    parent: RobotAll
+    task_space: False
+    children: [RobotA, RobotB, RobotC, RobotD, RobotE, RobotF, RobotG, RobotH, RobotJ, RobotK, RobotL, RobotM, RobotN, RobotO, RobotP, RobotQ]
+
+problem:
+  start:
+    type: joint
+    config: [+0.500, +0.000, +0.000, +0.000, +0.000, +0.000,
+             +0.000, +0.500, +0.000, +0.000, +0.000, +0.000,
+             -0.500, +0.000, +0.000, +0.000, +0.000, +0.000,
+             -0.000, -0.500, +0.000, +0.000, +0.000, +0.000,
+             +1.200, +0.000, +0.000, +0.000, +0.000, +0.000,
+             +0.371, +1.141, +0.000, +0.000, +0.000, +0.000,
+             -0.971, +0.705, +0.000, +0.000, +0.000, +0.000,
+             -0.971, -0.705, +0.000, +0.000, +0.000, +0.000,
+             +0.371, -1.141, +0.000, +0.000, +0.000, +0.000,
+             +1.900, +0.000, +0.000, +0.000, +0.000, +0.000,
+             +1.185, +1.485, +0.000, +0.000, +0.000, +0.000,
+             -0.423, +1.852, +0.000, +0.000, +0.000, +0.000,
+             -1.712, +0.824, +0.000, +0.000, +0.000, +0.000,
+             -1.712, -0.824, +0.000, +0.000, +0.000, +0.000,
+             -0.423, -1.852, +0.000, +0.000, +0.000, +0.000,
+             +1.185, -1.485, +0.000, +0.000, +0.000, +0.000]
+
+  goal:
+    type: joint
+    threshold: 2.0
+    config: [+0.500, +0.000, +10.000, +0.000, +0.000, +0.000,
+             +0.000, +0.500, +10.000, +0.000, +0.000, +0.000,
+             -0.500, +0.000, +10.000, +0.000, +0.000, +0.000,
+             -0.000, -0.500, +10.000, +0.000, +0.000, +0.000,
+             +1.200, +0.000, +10.000, +0.000, +0.000, +0.000,
+             +0.371, +1.141, +10.000, +0.000, +0.000, +0.000,
+             -0.971, +0.705, +10.000, +0.000, +0.000, +0.000,
+             -0.971, -0.705, +10.000, +0.000, +0.000, +0.000,
+             +0.371, -1.141, +10.000, +0.000, +0.000, +0.000,
+             +1.900, +0.000, +10.000, +0.000, +0.000, +0.000,
+             +1.185, +1.485, +10.000, +0.000, +0.000, +0.000,
+             -0.423, +1.852, +10.000, +0.000, +0.000, +0.000,
+             -1.712, +0.824, +10.000, +0.000, +0.000, +0.000,
+             -1.712, -0.824, +10.000, +0.000, +0.000, +0.000,
+             -0.423, -1.852, +10.000, +0.000, +0.000, +0.000,
+             +1.185, -1.485, +10.000, +0.000, +0.000, +0.000]
+
