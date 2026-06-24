@@ -287,7 +287,7 @@ bool DiscreteRRT::buildSingleRobotRoadmaps(const base::PlannerTerminationConditi
             return false;
         }
 
-        OMPL_INFORM("Found single-robot solution on level %d/%d (Found %d vertices).", i + 1, num_robots_, vertices.size());
+        OMPL_INFORM("Found single-robot solution on level %d/%d (Found %d vertices).", i + 1, num_robots_, prm->milestoneCount());
 
         if(ptc) {
             return false;
